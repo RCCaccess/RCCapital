@@ -1,1138 +1,1130 @@
-{\rtf1\ansi\ansicpg1252\cocoartf2822
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\deftab560
-\pard\pardeftab560\slleading20\pardirnatural\partightenfactor0
+<!doctype html>
 
-\f0\fs26 \cf0 <!doctype html>\
-\
-<html lang="es">\
-<head>\
-  <meta charset="utf-8"/>\
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>\
-  <title>Reporte de Inversi\'f3n \'b7 MentoryCap</title>\
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>\
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>\
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>\
-  <style>\
-    :root \{\
-      --bg:       #0b0f14;\
-      --bg2:      #05070a;\
-      --surface:  rgba(255,255,255,.06);\
-      --surface2: rgba(255,255,255,.03);\
-      --border:   rgba(255,255,255,.10);\
-      --border2:  rgba(255,255,255,.16);\
-      --text:     #e8eef6;\
-      --muted:    #9fb0c3;\
-      --good:     #4ade80;\
-      --bad:      #f87171;\
-      --good-dim: rgba(74,222,128,.15);\
-      --bad-dim:  rgba(248,113,113,.12);\
-      --accent:   #60a5fa;\
-      --accent-dim: rgba(96,165,250,.12);\
-      --sans:     'Space Grotesk', ui-sans-serif, system-ui, sans-serif;\
-      --mono:     'JetBrains Mono', ui-monospace, monospace;\
-      --radius:   18px;\
-      --shadow:   0 12px 40px rgba(0,0,0,.45);\
-    \}\
-\
-```\
-*, *::before, *::after \{ box-sizing: border-box; margin: 0; padding: 0; \}\
-html \{ font-size: 16px; \}\
-\
-body \{\
-  font-family: var(--sans);\
-  background:\
-    radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,.07), transparent 60%),\
-    radial-gradient(900px 500px at 90% 10%,  rgba(96,165,250,.04), transparent 60%),\
-    linear-gradient(180deg, #05070a, var(--bg));\
-  color: var(--text);\
-  min-height: 100vh;\
-\}\
-\
-/* \uc0\u9472 \u9472  UPLOAD SCREEN \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472  */\
-#uploadScreen \{\
-  min-height: 100vh;\
-  display: flex;\
-  flex-direction: column;\
-  align-items: center;\
-  justify-content: center;\
-  padding: 40px 24px;\
-\}\
-\
-.upload-logo \{\
-  width: 60px; height: 60px;\
-  border-radius: 16px;\
-  background: radial-gradient(60px 60px at 25% 20%, rgba(255,255,255,.22), rgba(255,255,255,.05));\
-  border: 1px solid var(--border2);\
-  box-shadow: 0 10px 28px rgba(0,0,0,.3);\
-  display: grid; place-items: center;\
-  margin-bottom: 24px;\
-\}\
-\
-#uploadScreen h1 \{\
-  font-size: 26px;\
-  font-weight: 700;\
-  letter-spacing: -.3px;\
-  margin-bottom: 6px;\
-  text-align: center;\
-\}\
-#uploadScreen > p \{\
-  font-size: 14px;\
-  color: var(--muted);\
-  text-align: center;\
-  margin-bottom: 28px;\
-  line-height: 1.5;\
-\}\
-\
-.upload-box \{\
-  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));\
-  border: 1px solid var(--border);\
-  border-radius: var(--radius);\
-  box-shadow: var(--shadow);\
-  padding: 28px;\
-  width: 100%;\
-  max-width: 460px;\
-\}\
-\
-.upload-box label.field-label \{\
-  display: block;\
-  font-size: 11px;\
-  font-weight: 600;\
-  letter-spacing: .6px;\
-  text-transform: uppercase;\
-  color: var(--muted);\
-  margin-bottom: 8px;\
-\}\
-\
-.file-drop \{\
-  display: flex;\
-  align-items: center;\
-  justify-content: center;\
-  gap: 10px;\
-  width: 100%;\
-  padding: 16px;\
-  border: 1px dashed var(--border2);\
-  border-radius: 12px;\
-  background: rgba(0,0,0,.2);\
-  color: var(--muted);\
-  font-family: var(--sans);\
-  font-size: 13px;\
-  cursor: pointer;\
-  transition: border-color .2s, color .2s, background .2s;\
-\}\
-.file-drop:hover \{\
-  border-color: var(--accent);\
-  color: var(--accent);\
-  background: var(--accent-dim);\
-\}\
-input[type="file"] \{ display: none; \}\
-\
-.form-row \{ display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; \}\
-.form-group \{ flex: 1; min-width: 130px; \}\
-.form-group label \{\
-  display: block;\
-  font-size: 11px;\
-  font-weight: 600;\
-  letter-spacing: .5px;\
-  text-transform: uppercase;\
-  color: var(--muted);\
-  margin-bottom: 6px;\
-\}\
-.form-group select,\
-.form-group input[type="text"] \{\
-  width: 100%;\
-  padding: 10px 12px;\
-  border-radius: 10px;\
-  border: 1px solid var(--border);\
-  background: rgba(255,255,255,.06);\
-  color: var(--text);\
-  font-family: var(--sans);\
-  font-size: 13px;\
-  outline: none;\
-  transition: border-color .2s;\
-\}\
-.form-group select:focus,\
-.form-group input:focus \{ border-color: var(--accent); \}\
-.form-group select option \{ background: #111820; \}\
-\
-.btn-generate \{\
-  width: 100%;\
-  margin-top: 18px;\
-  padding: 14px;\
-  background: rgba(255,255,255,.12);\
-  border: 1px solid var(--border2);\
-  border-radius: 12px;\
-  color: var(--text);\
-  font-family: var(--sans);\
-  font-size: 14px;\
-  font-weight: 600;\
-  cursor: pointer;\
-  letter-spacing: .1px;\
-  transition: background .2s, border-color .2s;\
-\}\
-.btn-generate:hover \{ background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.28); \}\
-\
-.btn-sample \{\
-  width: 100%;\
-  margin-top: 10px;\
-  padding: 12px;\
-  background: transparent;\
-  border: 1px solid var(--border);\
-  border-radius: 12px;\
-  color: var(--muted);\
-  font-family: var(--sans);\
-  font-size: 13px;\
-  cursor: pointer;\
-  transition: color .2s, border-color .2s;\
-\}\
-.btn-sample:hover \{ color: var(--accent); border-color: rgba(96,165,250,.35); \}\
-\
-#errorMsg    \{ display:none; margin-top:10px; font-size:13px; color:var(--bad); text-align:center; \}\
-#uploadedName\{ display:none; margin-top:8px; font-size:12px; color:var(--good); text-align:center; font-family:var(--mono); \}\
-\
-/* \uc0\u9472 \u9472  ACTION BAR \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472  */\
-.action-bar \{\
-  position: sticky; top: 0; z-index: 50;\
-  backdrop-filter: blur(14px);\
-  background: rgba(5,7,10,.72);\
-  border-bottom: 1px solid var(--border);\
-  padding: 10px 24px;\
-  display: flex; justify-content: space-between; align-items: center;\
-  gap: 12px; flex-wrap: wrap;\
-\}\
-.ab-info \{ font-size: 13px; color: var(--muted); \}\
-.ab-info strong \{ color: var(--text); \}\
-.ab-actions \{ display: flex; gap: 8px; \}\
-.ab-btn \{\
-  font-family: var(--sans); font-size: 12px; font-weight: 600;\
-  padding: 8px 14px; border-radius: 999px; cursor: pointer;\
-  transition: all .15s; border: 1px solid var(--border);\
-  background: rgba(255,255,255,.06); color: var(--text);\
-\}\
-.ab-btn:hover \{ background: rgba(255,255,255,.12); border-color: var(--border2); \}\
-.ab-btn.primary \{\
-  background: rgba(255,255,255,.12); border-color: var(--border2);\
-\}\
-.ab-btn.primary:hover \{ background: rgba(255,255,255,.20); \}\
-\
-/* \uc0\u9472 \u9472  REPORT \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472  */\
-#reportScreen \{ display: none; \}\
-\
-.report-wrap \{\
-  max-width: 880px;\
-  margin: 0 auto;\
-  padding: 36px 24px 80px;\
-\}\
-\
-/* Header */\
-.report-header \{\
-  display: flex;\
-  justify-content: space-between;\
-  align-items: flex-start;\
-  gap: 16px;\
-  padding-bottom: 20px;\
-  border-bottom: 1px solid var(--border);\
-  margin-bottom: 28px;\
-  flex-wrap: wrap;\
-\}\
-.rh-eyebrow \{\
-  font-size: 10px; font-weight: 600;\
-  letter-spacing: 1.6px; text-transform: uppercase;\
-  color: var(--accent); margin-bottom: 6px;\
-\}\
-.rh-name \{\
-  font-size: 24px; font-weight: 700; letter-spacing: -.3px;\
-  line-height: 1.2;\
-\}\
-.rh-period \{\
-  font-size: 12px; color: var(--muted); margin-top: 5px; font-family: var(--mono);\
-\}\
-.rh-right \{ text-align: right; \}\
-.rh-logo \{\
-  width: 40px; height: 40px; border-radius: 10px;\
-  background: radial-gradient(40px 40px at 25% 20%, rgba(255,255,255,.2), rgba(255,255,255,.05));\
-  border: 1px solid var(--border); display: grid; place-items: center;\
-  margin-left: auto; margin-bottom: 8px;\
-\}\
-.rh-brand \{ font-size: 13px; font-weight: 600; \}\
-.rh-date  \{ font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; \}\
-\
-/* ROI Hero */\
-.roi-hero \{\
-  background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));\
-  border: 1px solid var(--border);\
-  border-radius: var(--radius);\
-  padding: 28px 30px;\
-  margin-bottom: 14px;\
-  box-shadow: var(--shadow);\
-  display: grid;\
-  grid-template-columns: 1fr auto;\
-  gap: 24px;\
-  align-items: center;\
-\}\
-@media (max-width:580px)\{ .roi-hero\{ grid-template-columns:1fr; \} \}\
-.hero-label \{\
-  font-size: 10px; font-weight: 600; letter-spacing: 1.2px;\
-  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;\
-\}\
-.hero-value \{\
-  font-size: 58px; font-weight: 700; letter-spacing: -3px; line-height: 1;\
-  font-family: var(--mono);\
-\}\
-.hero-value.pos \{ color: var(--good); \}\
-.hero-value.neg \{ color: var(--bad); \}\
-.hero-sub \{ font-size: 12px; color: var(--muted); margin-top: 10px; \}\
-\
-.hero-right \{ text-align: right; \}\
-.hero-equity-label \{\
-  font-size: 10px; text-transform: uppercase; letter-spacing: 1px;\
-  color: var(--muted); margin-bottom: 6px;\
-\}\
-.hero-equity \{\
-  font-size: 26px; font-weight: 700; font-family: var(--mono); letter-spacing: -.5px;\
-\}\
-.hero-deposit \{\
-  font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono);\
-\}\
-\
-/* KPI grid */\
-.kpi-row \{\
-  display: grid;\
-  grid-template-columns: repeat(4,1fr);\
-  gap: 10px;\
-  margin-bottom: 14px;\
-\}\
-@media (max-width:640px)\{ .kpi-row\{ grid-template-columns: repeat(2,1fr); \} \}\
-\
-.kpi-box \{\
-  background: rgba(0,0,0,.25);\
-  border: 1px solid var(--border);\
-  border-radius: 16px;\
-  padding: 14px 16px;\
-  min-height: 78px;\
-\}\
-.kb-label \{\
-  font-size: 10px; font-weight: 600; letter-spacing: .7px;\
-  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;\
-\}\
-.kb-value \{\
-  font-size: 17px; font-weight: 700; font-family: var(--mono); letter-spacing: -.3px;\
-\}\
-.kb-value.pos  \{ color: var(--good); \}\
-.kb-value.neg  \{ color: var(--bad); \}\
-.kb-value.blue \{ color: var(--accent); \}\
-.kb-sub \{ font-size: 11px; color: var(--muted); margin-top: 5px; font-family: var(--mono); \}\
-\
-/* Divider */\
-.divider \{ height: 1px; background: var(--border); margin: 22px 0; \}\
-\
-/* Section */\
-.section \{ margin-bottom: 24px; \}\
-.section-title \{\
-  font-size: 13px; font-weight: 600; letter-spacing: .1px;\
-  color: var(--text); margin-bottom: 12px;\
-  display: flex; justify-content: space-between; align-items: center;\
-  flex-wrap: wrap; gap: 8px;\
-  padding-bottom: 10px;\
-  border-bottom: 1px solid var(--border);\
-\}\
-\
-/* Range controls */\
-.range-ctrl \{ display: flex; gap: 6px; \}\
-.rc-btn \{\
-  font-family: var(--sans); font-size: 11px; font-weight: 600;\
-  padding: 5px 12px; border-radius: 999px;\
-  border: 1px solid var(--border); background: rgba(255,255,255,.05);\
-  color: var(--muted); cursor: pointer; transition: all .15s;\
-\}\
-.rc-btn:hover \{ border-color: var(--border2); color: var(--text); \}\
-.rc-btn.active \{ background: rgba(255,255,255,.13); border-color: var(--border2); color: var(--text); \}\
-\
-/* Chart */\
-.chart-box \{\
-  background: rgba(0,0,0,.22);\
-  border: 1px solid var(--border);\
-  border-radius: 16px;\
-  padding: 14px;\
-\}\
-canvas \{ display: block; width: 100% !important; \}\
-#chartEquity  \{ height: 270px; \}\
-#chartMonthly \{ height: 160px; \}\
-\
-/* Under stats */\
-.chart-stats \{\
-  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px;\
-\}\
-@media (max-width:580px)\{ .chart-stats\{ grid-template-columns: repeat(2,1fr); \} \}\
-.cst \{\
-  background: rgba(0,0,0,.18); border: 1px solid var(--border);\
-  border-radius: 10px; padding: 10px 12px;\
-\}\
-.cst .cst-label \{ font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; \}\
-.cst .cst-value \{ font-family: var(--mono); font-size: 13px; font-weight: 500; \}\
-.cst .cst-value.pos \{ color: var(--good); \}\
-.cst .cst-value.neg \{ color: var(--bad); \}\
-\
-/* Summary table */\
-.scroll-wrap \{\
-  border: 1px solid var(--border); border-radius: 14px;\
-  background: rgba(0,0,0,.18); overflow: auto; max-height: 340px;\
-\}\
-table \{ width: 100%; border-collapse: collapse; font-size: 12px; \}\
-th, td \{ padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; \}\
-th \{ color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .6px;\
-     text-transform: uppercase; background: rgba(255,255,255,.04); position: sticky; top: 0; \}\
-tr:last-child td \{ border-bottom: none; \}\
-tr:hover td \{ background: rgba(255,255,255,.02); \}\
-\
-/* Footer */\
-.report-footer \{\
-  margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border);\
-  display: flex; justify-content: space-between; align-items: center;\
-  flex-wrap: wrap; gap: 12px;\
-\}\
-.rf-disc \{ font-size: 11px; color: var(--muted); line-height: 1.6; \}\
-\
-/* Tooltip */\
-#tooltip \{\
-  position: fixed; z-index: 200; pointer-events: none;\
-  background: linear-gradient(180deg, rgba(20,28,40,.97), rgba(12,18,28,.97));\
-  border: 1px solid var(--border2); border-radius: 12px;\
-  padding: 10px 14px; box-shadow: 0 8px 28px rgba(0,0,0,.5);\
-  display: none; min-width: 150px;\
-\}\
-.tt-date \{ font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: var(--mono); \}\
-.tt-val  \{ font-size: 16px; font-weight: 600; font-family: var(--mono); \}\
-.tt-chg  \{ font-size: 11px; margin-top: 3px; font-family: var(--mono); \}\
-\
-/* Animations */\
-@keyframes fadeUp \{\
-  from \{ opacity:0; transform: translateY(14px); \}\
-  to   \{ opacity:1; transform: translateY(0); \}\
-\}\
-.fu  \{ animation: fadeUp .5s ease both; \}\
-.fu1 \{ animation-delay: .04s; \}\
-.fu2 \{ animation-delay: .10s; \}\
-.fu3 \{ animation-delay: .17s; \}\
-.fu4 \{ animation-delay: .24s; \}\
-.fu5 \{ animation-delay: .31s; \}\
-\
-/* \uc0\u9472 \u9472  PRINT \u9472 \u9472  */\
-@media print \{\
-  * \{ -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; \}\
-  html, body \{ background: #0b0f14 !important; color: #e8eef6 !important; \}\
-  .action-bar   \{ display: none !important; \}\
-  #uploadScreen \{ display: none !important; \}\
-  #reportScreen \{ display: block !important; \}\
-  .report-wrap  \{ padding: 20px !important; max-width: 100% !important; \}\
-  .scroll-wrap  \{ max-height: none !important; overflow: visible !important; \}\
-  .range-ctrl   \{ display: none !important; \}\
-  .roi-hero     \{ box-shadow: none !important; \}\
-  canvas        \{ break-inside: avoid; page-break-inside: avoid; \}\
-  .kpi-row, .section \{ break-inside: avoid; page-break-inside: avoid; \}\
-\}\
-\
-/* Clase que se agrega por JS justo antes de window.print() */\
-body.is-printing .action-bar   \{ display: none !important; \}\
-body.is-printing #uploadScreen \{ display: none !important; \}\
-body.is-printing #reportScreen \{ display: block !important; \}\
-body.is-printing .range-ctrl   \{ display: none !important; \}\
-body.is-printing .scroll-wrap  \{ max-height: none !important; overflow: visible !important; \}\
-```\
-\
-  </style>\
-</head>\
-<body>\
-\
-<!-- \uc0\u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552  UPLOAD SCREEN \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552  -->\
-\
-<div id="uploadScreen">\
-  <div class="upload-logo">\
-    <svg viewBox="0 0 120 120" width="30" height="30">\
-      <path d="M20 84V28h18l22 28 22-28h18v56H82V58L60 84 38 58v26H20z" fill="#e8eef6"/>\
-      <path d="M84 60c0-14 12-26 26-26v16c-5 0-10 4-10 10s5 10 10 10v16c-14 0-26-12-26-26z" fill="#60a5fa"/>\
-    </svg>\
-  </div>\
-  <h1>Reporte de Inversi\'f3n</h1>\
-  <p>Carga el historial de transacciones para generar<br/>el reporte personalizado de tu cliente.</p>\
-\
-  <div class="upload-box">\
-    <label class="field-label" for="fileInput">Archivo de transacciones</label>\
-    <label class="file-drop" for="fileInput">\
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">\
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>\
-      </svg>\
-      Seleccionar CSV o XLSX\
-    </label>\
-    <input id="fileInput" type="file" accept=".csv,.xlsx"/>\
-    <div id="uploadedName"></div>\
-\
-```\
-<div class="form-row">\
-  <div class="form-group">\
-    <label>Inversor</label>\
-    <select id="investorSelect">\
-      <option value="__none__">\'97 Carga un archivo primero \'97</option>\
-    </select>\
-  </div>\
-</div>\
-<div class="form-row">\
-  <div class="form-group">\
-    <label>Nombre para mostrar <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>\
-    <input type="text" id="displayName" placeholder="Ej: Mar\'eda Gonz\'e1lez"/>\
-  </div>\
-</div>\
-\
-<button class="btn-generate" id="btnGenerate">Generar Reporte \uc0\u8594 </button>\
-<button class="btn-sample"   id="btnSample">Ver con datos de ejemplo</button>\
-<div id="errorMsg"></div>\
-```\
-\
-  </div>\
-</div>\
-\
-<!-- \uc0\u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552  REPORT SCREEN \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552 \u9552  -->\
-\
-<div id="reportScreen">\
-\
-  <div class="action-bar">\
-    <div class="ab-info">\
-      <strong id="abName">\'97</strong>\
-      <span style="margin:0 6px;opacity:.3;">\'b7</span>\
-      Generado el <span id="abDate">\'97</span>\
-    </div>\
-    <div class="ab-actions">\
-      <button class="ab-btn" id="btnBack">\uc0\u8592  Volver</button>\
-      <button class="ab-btn primary" id="btnPrint">\uc0\u55357 \u56744  Imprimir / PDF</button>\
-    </div>\
-  </div>\
-\
-  <div class="report-wrap">\
-\
-```\
-<!-- Header -->\
-<div class="report-header fu">\
-  <div>\
-    <div class="rh-eyebrow">Estado de cuenta</div>\
-    <div class="rh-name" id="rhName">\'97</div>\
-    <div class="rh-period" id="rhPeriod">\'97</div>\
-  </div>\
-  <div class="rh-right">\
-    <div class="rh-logo">\
-      <svg viewBox="0 0 120 120" width="24" height="24">\
-        <path d="M20 84V28h18l22 28 22-28h18v56H82V58L60 84 38 58v26H20z" fill="#e8eef6"/>\
-        <path d="M84 60c0-14 12-26 26-26v16c-5 0-10 4-10 10s5 10 10 10v16c-14 0-26-12-26-26z" fill="#60a5fa"/>\
-      </svg>\
-    </div>\
-    <div class="rh-brand">MentoryCap</div>\
-    <div class="rh-date" id="rhDate">\'97</div>\
-  </div>\
-</div>\
-\
-<!-- Hero -->\
-<div class="roi-hero fu fu1">\
-  <div>\
-    <div class="hero-label">Rendimiento Total</div>\
-    <div class="hero-value" id="heroROI">\'97</div>\
-    <div class="hero-sub" id="heroSub">Desde el dep\'f3sito inicial</div>\
-  </div>\
-  <div class="hero-right">\
-    <div class="hero-equity-label">Valor de la cuenta</div>\
-    <div class="hero-equity" id="heroEquity">\'97</div>\
-    <div class="hero-deposit" id="heroDeposit">\'97</div>\
-  </div>\
-</div>\
-\
-<!-- KPIs -->\
-<div class="kpi-row fu fu2">\
-  <div class="kpi-box">\
-    <div class="kb-label">Profit neto</div>\
-    <div class="kb-value" id="kpiProfit">\'97</div>\
-    <div class="kb-sub">Ganancias acumuladas</div>\
-  </div>\
-  <div class="kpi-box">\
-    <div class="kb-label">D\'edas activo</div>\
-    <div class="kb-value blue" id="kpiDays">\'97</div>\
-    <div class="kb-sub" id="kpiDaysSub">\'97</div>\
-  </div>\
-  <div class="kpi-box">\
-    <div class="kb-label">Mejor mes</div>\
-    <div class="kb-value pos" id="kpiBestMonth">\'97</div>\
-    <div class="kb-sub" id="kpiBestMonthLbl">\'97</div>\
-  </div>\
-  <div class="kpi-box">\
-    <div class="kb-label">Meses positivos</div>\
-    <div class="kb-value" id="kpiPosMonths">\'97</div>\
-    <div class="kb-sub">De los meses operados</div>\
-  </div>\
-</div>\
-\
-<div class="divider"></div>\
-\
-<!-- Equity chart -->\
-<div class="section fu fu3">\
-  <div class="section-title">\
-    <span>Evoluci\'f3n del Capital</span>\
-    <div class="range-ctrl" id="rangeBar">\
-      <button class="rc-btn active" data-range="ALL">Todo</button>\
-      <button class="rc-btn" data-range="6M">6M</button>\
-      <button class="rc-btn" data-range="3M">3M</button>\
-      <button class="rc-btn" data-range="1M">1M</button>\
-    </div>\
-  </div>\
-  <div class="chart-box">\
-    <canvas id="chartEquity"></canvas>\
-  </div>\
-  <div class="chart-stats">\
-    <div class="cst"><div class="cst-label">Inicio per\'edodo</div><div class="cst-value" id="cstOpen">\'97</div></div>\
-    <div class="cst"><div class="cst-label">Valor actual</div><div class="cst-value" id="cstClose">\'97</div></div>\
-    <div class="cst"><div class="cst-label">M\'e1ximo</div><div class="cst-value pos" id="cstHigh">\'97</div></div>\
-    <div class="cst"><div class="cst-label">Variaci\'f3n</div><div class="cst-value" id="cstChg">\'97</div></div>\
-  </div>\
-</div>\
-\
-<!-- Monthly chart -->\
-<div class="section fu fu4">\
-  <div class="section-title">Resultado Mensual</div>\
-  <div class="chart-box">\
-    <canvas id="chartMonthly"></canvas>\
-  </div>\
-</div>\
-\
-<div class="divider"></div>\
-\
-<!-- Summary table -->\
-<div class="section fu fu5">\
-  <div class="section-title">Resumen por Per\'edodo</div>\
-  <div class="scroll-wrap">\
-    <table>\
-      <thead>\
-        <tr>\
-          <th>Mes</th>\
-          <th style="text-align:right">P&L del mes</th>\
-          <th style="text-align:right">Retorno %</th>\
-          <th style="text-align:right">Equity final</th>\
-        </tr>\
-      </thead>\
-      <tbody id="summaryBody"></tbody>\
-    </table>\
-  </div>\
-</div>\
-\
-<!-- Footer -->\
-<div class="report-footer">\
-  <div class="rf-disc">\
-    Este reporte es de car\'e1cter informativo y refleja el desempe\'f1o hist\'f3rico de la cuenta.<br/>\
-    Rendimientos pasados no garantizan resultados futuros. Generado el <span id="footerDate">\'97</span>.\
-  </div>\
-  <button class="ab-btn primary" id="btnPrint2">\uc0\u55357 \u56744  Guardar PDF</button>\
-</div>\
-```\
-\
-  </div><!-- /report-wrap -->\
-</div><!-- /reportScreen -->\
-\
-<div id="tooltip">\
-  <div class="tt-date" id="ttDate">\'97</div>\
-  <div class="tt-val"  id="ttVal">\'97</div>\
-  <div class="tt-chg"  id="ttChg">\'97</div>\
-</div>\
-\
-<script>\
-(() => \{\
-  const $ = id => document.getElementById(id);\
-  const pad2 = x => String(x).padStart(2,'0');\
-  const dayKey   = d => `$\{d.getFullYear()\}-$\{pad2(d.getMonth()+1)\}-$\{pad2(d.getDate())\}`;\
-  const monthKey = d => `$\{d.getFullYear()\}-$\{pad2(d.getMonth()+1)\}`;\
-  const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];\
-  const monthLabel = k => \{ const [y,m]=k.split('-'); return `$\{MONTH_NAMES[+m-1]\} $\{y\}`; \};\
-  const fmtUSD = n => (isFinite(n)?n:0).toLocaleString('en-US',\{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2\});\
-  const fmtPct = n => (isFinite(n)?n:0).toFixed(2)+'%';\
-  const fmtNum = n => (isFinite(n)?n:0).toLocaleString('en-US');\
-\
-  // \uc0\u9472 \u9472  PARSERS \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function parseDateAny(s)\{\
-    if(!s) return null; const str=String(s).trim();\
-    let d=new Date(str); if(!isNaN(d)) return d;\
-    const m=str.match(/^(\\d\{1,2\})[\\/\\-](\\d\{1,2\})[\\/\\-](\\d\{2,4\})(?:[T\\s](\\d\{1,2\}):(\\d\{2\})(?::(\\d\{2\}))?)?$/);\
-    if(m)\{ d=new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0)); return isNaN(d)?null:d; \}\
-    return null;\
-  \}\
-  function parseNum(v)\{ if(!v&&v!==0) return 0; let s=String(v).trim().replace(/[^\\d.,\\-+]/g,''); if(!s) return 0; const hC=s.includes(','),hD=s.includes('.'); if(hC&&hD) s=s.replace(/,/g,''); else if(hC&&!hD)\{const p=s.split(',');s=(p.length===2&&p[1].length<=2)?p[0]+'.'+p[1]:s.replace(/,/g,'');\} return +s||0; \}\
-  function detectSep(t)\{ const l=(t.split(/\\r?\\n/)[0]||''); return (l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':','; \}\
-  function smartSplit(line,sep)\{ const out=[]; let cur='',inQ=false; for(let i=0;i<line.length;i++)\{ const ch=line[i]; if(ch==='"')\{if(inQ&&line[i+1]==='"')\{cur+='"';i++;\}else inQ=!inQ;\}else if(ch===sep&&!inQ)\{out.push(cur);cur='';\}else cur+=ch;\} out.push(cur); return out.map(x=>x.trim().replace(/^"|"$/g,'')); \}\
-\
-  const INV_COLS = ['investorname','investor','inversor','user','usuario','account','name','cliente'];\
-  const isTrade   = r => /traderesult/i.test(r.reason);\
-  const isDeposit = r => /^deposit$/i.test(r.reason);\
-  const isFee     = r => /fee/i.test(r.reason);\
-\
-  function parseCSV(text)\{\
-    const sep=detectSep(text), lines=text.split(/\\r?\\n/).filter(l=>l.trim());\
-    if(lines.length<2) throw new Error('CSV vac\'edo.');\
-    const h=smartSplit(lines[0],sep).map(x=>x.toLowerCase().replace(/\\s+/g,''));\
-    const col=(...names)=>\{ for(const n of names)\{const i=h.indexOf(n);if(i>=0)return i;\} return -1; \};\
-    const iT=col('time','fecha','date','datetime'), iR=col('reason','tipo','type');\
-    const iA=col('amount','monto','importe'), iP=col('amountprofit','profit','pnl','ganancia');\
-    const iId=col('investmentid','investment_id','accountid');\
-    if(iT<0||iR<0) throw new Error('Se requieren columnas Time y Reason.');\
-    let iI=-1; for(const c of INV_COLS)\{const i=h.indexOf(c);if(i>=0)\{iI=i;break;\}\}\
-    const out=[];\
-    for(let i=1;i<lines.length;i++)\{\
-      const c=smartSplit(lines[i],sep); if(c.length<3) continue;\
-      const time=parseDateAny(c[iT]); if(!time) continue;\
-      out.push(\{time,reason:c[iR]||'',amount:iA>=0?parseNum(c[iA]):0,amountProfit:iP>=0?parseNum(c[iP]):0,investor:(iI>=0?(c[iI]||''):'(sin nombre)').trim(),investmentId:iId>=0?c[iId]||'':''\});\
-    \}\
-    if(!out.length) throw new Error('Sin filas con fechas v\'e1lidas.');\
-    return out.sort((a,b)=>a.time-b.time);\
-  \}\
-\
-  // XLSX offline\
-  function u16(b,o)\{return b[o]|(b[o+1]<<8);\}function u32(b,o)\{return(b[o]|(b[o+1]<<8)|(b[o+2]<<16)|(b[o+3]<<24))>>>0;\}\
-  function findEOCD(bytes)\{for(let i=bytes.length-22;i>=0&&i>bytes.length-70000;i--)if(bytes[i]===0x50&&bytes[i+1]===0x4b&&bytes[i+2]===0x05&&bytes[i+3]===0x06)return i;return -1;\}\
-  async function inflateRaw(u8)\{const ds=new DecompressionStream('deflate-raw');const s=new Blob([u8]).stream().pipeThrough(ds);return new Uint8Array(await new Response(s).arrayBuffer());\}\
-  async function unzipEntries(ab)\{const bytes=new Uint8Array(ab);const eocd=findEOCD(bytes);if(eocd<0)throw new Error('ZIP inv\'e1lido.');const cdSize=u32(bytes,eocd+12),cdOff=u32(bytes,eocd+16);const entries=[];let p=cdOff;while(p<cdOff+cdSize)\{if(u32(bytes,p)!==0x02014b50)break;const cm=u16(bytes,p+10),cs=u32(bytes,p+20),us=u32(bytes,p+24),fnLen=u16(bytes,p+28),exLen=u16(bytes,p+30),coLen=u16(bytes,p+32),lho=u32(bytes,p+42),fn=new TextDecoder().decode(bytes.slice(p+46,p+46+fnLen));entries.push(\{filename:fn,compMethod:cm,compSize:cs,uncompSize:us,localHeaderOffset:lho\});p+=46+fnLen+exLen+coLen;\}return\{bytes,entries\};\}\
-  async function extractFile(zip,name)\{const e=zip.entries.find(x=>x.filename===name);if(!e)return null;const b=zip.bytes;let p=e.localHeaderOffset;const fnLen=u16(b,p+26),exLen=u16(b,p+28),ds=p+30+fnLen+exLen,comp=b.slice(ds,ds+e.compSize);if(e.compMethod===0)return comp;if(e.compMethod===8)return await inflateRaw(comp);throw new Error('Compresi\'f3n no soportada.');\}\
-  function colIdx(c)\{let n=0;for(let i=0;i<c.length;i++)n=n*26+(c.charCodeAt(i)-64);return n-1;\}\
-  function cellRC(r)\{const m=String(r).match(/^([A-Z]+)(\\d+)$/);if(!m)return null;return\{r:parseInt(m[2],10)-1,c:colIdx(m[1])\};\}\
-  function parseSharedStrings(xml)\{const doc=new DOMParser().parseFromString(xml,'application/xml');return[...doc.getElementsByTagName('si')].map(n=>[...n.getElementsByTagName('t')].map(t=>t.textContent||'').join(''));\}\
-  function parseSheetAOA(xml,shared)\{const doc=new DOMParser().parseFromString(xml,'application/xml');const rows=[...doc.getElementsByTagName('row')];let mR=0,mC=0;const cells=[];for(const row of rows)\{for(const c of[...row.getElementsByTagName('c')])\{const r=c.getAttribute('r'),t=c.getAttribute('t')||'',vn=c.getElementsByTagName('v')[0];let val=vn?vn.textContent:'';if(t==='s')val=shared?.[parseInt(val||'0',10)]??'';else\{const num=Number(val);if(!isNaN(num)&&val!=='')val=num;\}const rc=cellRC(r);if(rc)\{cells.push(\{r:rc.r,c:rc.c,v:val\});if(rc.r>mR)mR=rc.r;if(rc.c>mC)mC=rc.c;\}\}\}const aoa=Array.from(\{length:mR+1\},()=>Array.from(\{length:mC+1\},()=>''));for(const cell of cells)aoa[cell.r][cell.c]=cell.v;return aoa;\}\
-  async function parseXLSX(ab)\{\
-    if(typeof DecompressionStream==='undefined') throw new Error('XLSX requiere Chrome/Edge. Usa CSV.');\
-    const zip=await unzipEntries(ab);\
-    let sn='xl/worksheets/sheet1.xml';\
-    if(!zip.entries.some(e=>e.filename===sn))\{const f=zip.entries.find(e=>/^xl\\/worksheets\\/sheet\\d+\\.xml$/.test(e.filename));if(f)sn=f.filename;else throw new Error('Sin hojas.');\}\
-    const ssU8=await extractFile(zip,'xl/sharedStrings.xml');\
-    const shared=ssU8?parseSharedStrings(new TextDecoder().decode(ssU8)):[];\
-    const shU8=await extractFile(zip,sn);if(!shU8)throw new Error('Sin hoja.');\
-    const aoa=parseSheetAOA(new TextDecoder().decode(shU8),shared);\
-    const csv=aoa.map(r=>r.map(v=>'"'+String(v??'')+'"').join(',')).join('\\n');\
-    return parseCSV(csv);\
-  \}\
-\
-  // \uc0\u9472 \u9472  STATE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  let allRows = [], activeRange = 'ALL', chartCache = \{\};\
-\
-  // \uc0\u9472 \u9472  COMPUTE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function computeStats(rows)\{\
-    const depTx = rows.find(r=>isDeposit(r));\
-    const dep = depTx ? Math.abs(depTx.amount) : 0;\
-    let runP=0, runF=0;\
-    const dailyEq=\{\}, monthlyPnl=\{\};\
-    for(const r of [...rows].sort((a,b)=>a.time-b.time))\{\
-      if(isTrade(r))\{ runP+=r.amountProfit; monthlyPnl[monthKey(r.time)]=(monthlyPnl[monthKey(r.time)]||0)+r.amountProfit; \}\
-      if(isFee(r)) runF+=r.amount;\
-      dailyEq[dayKey(r.time)] = dep+runP+runF;\
-    \}\
-    const equity=dep+runP+runF, roi=dep>0?((equity-dep)/dep*100):0;\
-    const monthlyEntries=Object.entries(monthlyPnl).sort(([a],[b])=>a.localeCompare(b));\
-    const posMonths=monthlyEntries.filter(([,v])=>v>0).length;\
-    const bestEntry=monthlyEntries.reduce((a,b)=>b[1]>a[1]?b:a,['',0]);\
-    const sortedRows=[...rows].sort((a,b)=>a.time-b.time);\
-    const firstDate=sortedRows[0]?.time, lastDate=sortedRows[sortedRows.length-1]?.time;\
-    const days=firstDate&&lastDate?Math.round((lastDate-firstDate)/86400000):0;\
-    const sortedDays=Object.keys(dailyEq).sort();\
-    const equitySeries=sortedDays.map(dk=>(\{dk,eq:dailyEq[dk]\}));\
-    const monthlyEquity=\{\};\
-    for(const \{dk,eq\} of equitySeries) monthlyEquity[dk.slice(0,7)]=eq;\
-    return \{dep,equity,roi,runP,runF,days,firstDate,lastDate,monthlyEntries,posMonths,bestEntry,equitySeries,monthlyEquity\};\
-  \}\
-\
-  // \uc0\u9472 \u9472  HYDRATE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function hydrateSelect()\{\
-    const sel=$('investorSelect'); const cur=sel.value;\
-    sel.innerHTML='';\
-    const invs=[...new Set(allRows.map(r=>r.investor))].sort();\
-    if(invs.length>1)\{ const o=document.createElement('option'); o.value='__all__'; o.textContent='Todos los inversores'; sel.appendChild(o); \}\
-    for(const inv of invs)\{ const o=document.createElement('option'); o.value=o.textContent=inv; sel.appendChild(o); \}\
-    if(invs.length===1) sel.value=invs[0];\
-    else if(invs.includes(cur)) sel.value=cur;\
-  \}\
-\
-  // \uc0\u9472 \u9472  GENERATE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function generate()\{\
-    const inv=$('investorSelect').value;\
-    if(inv==='__none__'||!allRows.length)\{ showErr('Carga un archivo primero.'); return; \}\
-    const rows=inv==='__all__'?allRows:allRows.filter(r=>r.investor===inv);\
-    if(!rows.length)\{ showErr('Sin datos para este inversor.'); return; \}\
-    const displayName=$('displayName').value.trim()||(inv==='__all__'?'Cuenta Consolidada':inv);\
-    const stats=computeStats(rows);\
-    chartCache=\{labels:stats.equitySeries.map(s=>s.dk),equity:stats.equitySeries.map(s=>s.eq),deposit:stats.dep,stats\};\
-\
-    // Switch\
-    $('uploadScreen').style.display='none';\
-    $('reportScreen').style.display='block';\
-\
-    const today=new Date();\
-    const todayStr=`$\{pad2(today.getDate())\}/$\{pad2(today.getMonth()+1)\}/$\{today.getFullYear()\}`;\
-\
-    $('abName').textContent=displayName; $('abDate').textContent=todayStr;\
-    $('rhName').textContent=displayName;\
-    $('rhPeriod').textContent=stats.firstDate&&stats.lastDate?`$\{dayKey(stats.firstDate)\}  \uc0\u8594   $\{dayKey(stats.lastDate)\}`:'\'97';\
-    $('rhDate').textContent=todayStr; $('footerDate').textContent=todayStr;\
-\
-    const sign=stats.roi>=0?'+':'';\
-    $('heroROI').textContent=sign+fmtPct(stats.roi);\
-    $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');\
-    $('heroSub').textContent=`$\{stats.days\} d\'edas desde el dep\'f3sito inicial`;\
-    $('heroEquity').textContent=fmtUSD(stats.equity);\
-    $('heroDeposit').textContent='Dep\'f3sito inicial: '+fmtUSD(stats.dep);\
-\
-    $('kpiProfit').textContent=(stats.runP>=0?'+':'')+fmtUSD(stats.runP);\
-    $('kpiProfit').className='kb-value '+(stats.runP>=0?'pos':'neg');\
-    $('kpiDays').textContent=fmtNum(stats.days);\
-    $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'\'97';\
-    $('kpiBestMonth').textContent=stats.bestEntry[0]?'+'+fmtUSD(stats.bestEntry[1]):'\'97';\
-    $('kpiBestMonthLbl').textContent=stats.bestEntry[0]?monthLabel(stats.bestEntry[0]):'\'97';\
-    $('kpiPosMonths').textContent=`$\{stats.posMonths\} / $\{stats.monthlyEntries.length\}`;\
-\
-    activeRange='ALL'; updateRangeUI();\
-    drawEquityChart(); drawMonthlyChart(stats); buildTable(stats);\
-  \}\
-\
-  function buildTable(stats)\{\
-    const tbody=$('summaryBody'); tbody.innerHTML='';\
-    for(const [mk,pnl] of stats.monthlyEntries)\{\
-      const eq=stats.monthlyEquity[mk]||stats.dep;\
-      const prevEq=eq-pnl; const pct=prevEq>0?(pnl/Math.abs(prevEq)*100):0;\
-      const tr=document.createElement('tr');\
-      tr.innerHTML=`\
-        <td style="font-family:var(--sans);font-size:12px;">$\{monthLabel(mk)\}</td>\
-        <td style="text-align:right;font-family:var(--mono);color:$\{pnl>=0?'var(--good)':'var(--bad)'\};">$\{pnl>=0?'+':''\}$\{fmtUSD(pnl)\}</td>\
-        <td style="text-align:right;font-family:var(--mono);color:$\{pct>=0?'var(--good)':'var(--bad)'\};">$\{pct>=0?'+':''\}$\{fmtPct(pct)\}</td>\
-        <td style="text-align:right;font-family:var(--mono);">$\{fmtUSD(eq)\}</td>`;\
-      tbody.appendChild(tr);\
-    \}\
-  \}\
-\
-  // \uc0\u9472 \u9472  CHARTS \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function hiDPI(canvas, H)\{\
-    const rect=canvas.getBoundingClientRect();\
-    const dpr=window.devicePixelRatio||1;\
-    const W=Math.max(200,rect.width||700);\
-    canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);\
-    canvas.style.height=H+'px';\
-    const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);\
-    return \{ctx,W,H\};\
-  \}\
-\
-  function getFiltered()\{\
-    const \{labels,equity,deposit\}=chartCache;\
-    if(activeRange==='ALL') return \{labels,equity,deposit\};\
-    const last=new Date(labels[labels.length-1]); let ms=null;\
-    if(activeRange==='1M') ms=last.getTime()-30*86400000;\
-    else if(activeRange==='3M')\{const d=new Date(last);d.setMonth(d.getMonth()-3);ms=d.getTime();\}\
-    else if(activeRange==='6M')\{const d=new Date(last);d.setMonth(d.getMonth()-6);ms=d.getTime();\}\
-    const idx=labels.findIndex(l=>new Date(l).getTime()>=ms);\
-    return idx<0?\{labels,equity,deposit\}:\{labels:labels.slice(idx),equity:equity.slice(idx),deposit\};\
-  \}\
-\
-  function drawEquityChart()\{\
-    const \{labels,equity,deposit\}=getFiltered();\
-    const canvas=$('chartEquity');\
-    const \{ctx,W,H\}=hiDPI(canvas,270);\
-    ctx.clearRect(0,0,W,H);\
-    if(!labels.length) return;\
-\
-    const pad=\{l:66,r:14,t:18,b:34\};\
-    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;\
-    const ext=[...equity,deposit];\
-    let minV=Math.min(...ext), maxV=Math.max(...ext);\
-    const mg=(maxV-minV)*0.07||5; minV-=mg; maxV+=mg;\
-    const span=maxV-minV; const n=labels.length;\
-\
-    // Grid\
-    ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;\
-    for(let i=0;i<=5;i++)\{const y=pad.t+ih*(i/5);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();\}\
-\
-    // Y labels\
-    ctx.fillStyle='#9fb0c3'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='right';\
-    for(let i=0;i<=5;i++)\{\
-      const v=maxV-span*(i/5), y=pad.t+ih*(i/5);\
-      ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0), pad.l-8, y+4);\
-    \}\
-\
-    // X labels\
-    const step=Math.max(1,Math.ceil(n/6));\
-    ctx.fillStyle='#9fb0c3'; ctx.textAlign='center';\
-    for(let i=0;i<n;i+=step)\{\
-      const x=pad.l+iw*(i/Math.max(1,n-1));\
-      ctx.fillText(labels[i].slice(5),x,pad.t+ih+22);\
-    \}\
-\
-    // Deposit line\
-    const depY=pad.t+ih*(1-(deposit-minV)/span);\
-    ctx.strokeStyle='rgba(255,255,255,.20)'; ctx.setLineDash([5,6]); ctx.lineWidth=1.2;\
-    ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();\
-    ctx.setLineDash([]);\
-    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='left';\
-    ctx.fillText('Dep\'f3sito',pad.l+6,depY-6);\
-\
-    // Fill\
-    const lastVal=equity[n-1]; const isPos=lastVal>=deposit;\
-    ctx.beginPath();\
-    for(let i=0;i<n;i++)\{const x=pad.l+iw*(i/Math.max(1,n-1));const y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);\}\
-    ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();\
-    const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);\
-    if(isPos)\{grd.addColorStop(0,'rgba(74,222,128,.22)');grd.addColorStop(1,'rgba(74,222,128,.02)');\}\
-    else\{grd.addColorStop(0,'rgba(248,113,113,.18)');grd.addColorStop(1,'rgba(248,113,113,.02)');\}\
-    ctx.fillStyle=grd; ctx.fill();\
-\
-    // Line\
-    ctx.lineWidth=2.2; ctx.lineJoin='round'; ctx.lineCap='round';\
-    ctx.strokeStyle=isPos?'#4ade80':'#f87171';\
-    ctx.beginPath();\
-    for(let i=0;i<n;i++)\{const x=pad.l+iw*(i/Math.max(1,n-1));const y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);\}\
-    ctx.stroke();\
-\
-    // End dot\
-    const ex=pad.l+iw, ey=pad.t+ih*(1-(lastVal-minV)/span);\
-    ctx.fillStyle=isPos?'#4ade80':'#f87171'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();\
-    ctx.fillStyle='rgba(0,0,0,.6)'; ctx.beginPath(); ctx.arc(ex,ey,2,0,Math.PI*2); ctx.fill();\
-\
-    // Store for hover\
-    canvas._d=\{labels,equity,deposit,pad,iw,ih,minV,span\};\
-\
-    // Stats\
-    const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;\
-    $('cstOpen').textContent=fmtUSD(open);\
-    $('cstClose').textContent=fmtUSD(close);\
-    $('cstHigh').textContent=fmtUSD(high);\
-    $('cstChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chgPct>=0?'+':'')+fmtPct(chgPct)+')';\
-    $('cstChg').className='cst-value '+(chg>=0?'pos':'neg');\
-  \}\
-\
-  function drawMonthlyChart(stats)\{\
-    if(!stats.monthlyEntries.length) return;\
-    const canvas=$('chartMonthly');\
-    const \{ctx,W,H\}=hiDPI(canvas,160);\
-    ctx.clearRect(0,0,W,H);\
-    const labels=stats.monthlyEntries.map(([k])=>monthLabel(k));\
-    const values=stats.monthlyEntries.map(([,v])=>v);\
-    const pad=\{l:62,r:10,t:12,b:48\};\
-    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;\
-    const minV=Math.min(0,...values), maxV=Math.max(0,...values), span=(maxV-minV)||1;\
-    const zero=pad.t+ih*(1-(0-minV)/span);\
-\
-    ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;\
-    for(let i=0;i<=4;i++)\{const y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();\}\
-\
-    ctx.fillStyle='#9fb0c3'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='right';\
-    for(let i=0;i<=4;i++)\{\
-      const v=maxV-span*(i/4), y=pad.t+ih*(i/4);\
-      ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0), pad.l-6, y+4);\
-    \}\
-\
-    const n=labels.length, slot=iw/Math.max(1,n), bw=Math.max(6,slot*0.64);\
-    for(let i=0;i<n;i++)\{\
-      const v=values[i], barH=Math.max(2,Math.abs(ih*(v/span)));\
-      const x=pad.l+slot*(i+0.5)-bw/2, y=v>=0?zero-barH:zero;\
-      const grd=ctx.createLinearGradient(0,y,0,y+barH);\
-      if(v>=0)\{grd.addColorStop(0,'rgba(74,222,128,.85)');grd.addColorStop(1,'rgba(74,222,128,.25)');\}\
-      else\{grd.addColorStop(0,'rgba(248,113,113,.80)');grd.addColorStop(1,'rgba(248,113,113,.20)');\}\
-      ctx.fillStyle=grd;\
-      if(ctx.roundRect) ctx.roundRect(x,y,bw,barH,3); else ctx.rect(x,y,bw,barH);\
-      ctx.fill();\
-    \}\
-\
-    ctx.fillStyle='#9fb0c3'; ctx.font='10px Space Grotesk, sans-serif'; ctx.textAlign='center';\
-    for(let i=0;i<n;i++)\{\
-      const x=pad.l+slot*(i+0.5);\
-      ctx.save(); ctx.translate(x,pad.t+ih+10); ctx.rotate(-Math.PI/5);\
-      ctx.fillText(labels[i],0,0); ctx.restore();\
-    \}\
-  \}\
-\
-  // \uc0\u9472 \u9472  HOVER \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  $('chartEquity').addEventListener('mousemove', e=>\{\
-    const canvas=$('chartEquity'); if(!canvas._d) return;\
-    const \{labels,equity,pad,iw,ih,minV,span\}=canvas._d;\
-    const rect=canvas.getBoundingClientRect(), mx=e.clientX-rect.left;\
-    const n=labels.length, i=Math.max(0,Math.min(n-1,Math.round((mx-pad.l)/iw*(n-1))));\
-    const prev=i>0?equity[i-1]:equity[0], chg=equity[i]-prev, pct=prev?(chg/Math.abs(prev)*100):0;\
-    $('ttDate').textContent=labels[i];\
-    $('ttVal').textContent=fmtUSD(equity[i]);\
-    $('ttChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chg>=0?'+':'')+fmtPct(pct)+')';\
-    $('ttChg').style.color=chg>=0?'var(--good)':'var(--bad)';\
-    const tt=$('tooltip'); tt.style.display='block';\
-    tt.style.left=(e.clientX+14)+'px'; tt.style.top=(e.clientY-44)+'px';\
-  \});\
-  $('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');\
-\
-  // \uc0\u9472 \u9472  RANGE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  function updateRangeUI()\{ document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange)); \}\
-  $('rangeBar').addEventListener('click',e=>\{\
-    const b=e.target.closest('[data-range]'); if(!b) return;\
-    activeRange=b.dataset.range; updateRangeUI(); drawEquityChart();\
-  \});\
-\
-  // \uc0\u9472 \u9472  FILE \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  $('fileInput').addEventListener('change', async()=>\{\
-    const f=$('fileInput').files?.[0]; if(!f) return;\
-    try \{\
-      if(f.name.toLowerCase().endsWith('.csv')) allRows=parseCSV(await f.text());\
-      else if(f.name.toLowerCase().endsWith('.xlsx')) allRows=await parseXLSX(await f.arrayBuffer());\
-      else throw new Error('Usa CSV o XLSX.');\
-      allRows.sort((a,b)=>a.time-b.time);\
-      hydrateSelect();\
-      $('uploadedName').textContent='\uc0\u10003  '+f.name+' \'b7 '+allRows.length+' registros';\
-      $('uploadedName').style.display='block';\
-      hideErr();\
-    \} catch(err)\{ showErr(err.message); \}\
-    finally\{ $('fileInput').value=''; \}\
-  \});\
-\
-  // \uc0\u9472 \u9472  BUTTONS \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \
-  $('btnGenerate').addEventListener('click', generate);\
-  $('btnSample').addEventListener('click',()=>\{\
-    const csv=`Id,Reason,InvestmentId,InvestorName,ManagerId,ManagerName,ManagerConfiguration,Currency,Amount,AmountProfit,RolloverId,RequestId,PlatformPositionId,PlatformOperationId,Time\
-1,Deposit,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,518.04,0,9034528,42598,,20665875,2025-10-02T17:52:40\
-2,DepositFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-10.36,0,9034528,42598,,,2025-10-02T17:52:40\
-3,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.17,0,9041780,,,,2025-10-03T00:43:29\
-4,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-8.95,-8.95,,,154873101,,2025-10-15T15:45:30\
-5,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,21.80,21.80,,,154873102,,2025-10-16T15:47:19\
-6,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.14,0,,,,,2025-10-17T00:48:25\
-7,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,18.99,18.99,,,156936345,,2025-10-17T00:48:25\
-8,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-10.15,-10.15,,,159268591,,2025-10-17T20:47:29\
-9,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,0.30,0.30,,,160728487,,2025-10-20T10:51:34\
-10,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-24.45,-24.45,,,160728488,,2025-10-20T18:50:45\
-11,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,15.00,15.00,,,162457201,,2025-10-21T12:51:19\
-12,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.13,0,,,,,2025-10-22T00:50:06\
-13,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-40.00,-40.00,,,164255674,,2025-10-22T14:50:21\
-14,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,8.70,8.70,,,164817415,,2025-10-23T09:58:56\
-15,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,12.50,12.50,,,165000001,,2025-11-01T10:00:00\
-16,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.12,0,,,,,2025-11-01T00:00:01\
-17,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-5.00,-5.00,,,165000002,,2025-11-05T10:00:00\
-18,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,22.00,22.00,,,165000003,,2025-11-10T10:00:00\
-19,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-3.50,-3.50,,,165000004,,2025-11-15T10:00:00\
-20,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,8.00,8.00,,,165000005,,2025-11-20T10:00:00\
-21,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,30.00,30.00,,,165000006,,2025-12-03T10:00:00\
-22,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-15.00,-15.00,,,165000007,,2025-12-10T10:00:00\
-23,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,20.00,20.00,,,165000008,,2025-12-18T10:00:00\
-24,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.10,0,,,,,2025-12-18T00:00:01\
-25,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,5.00,5.00,,,165000009,,2026-01-05T10:00:00\
-26,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-8.00,-8.00,,,165000010,,2026-01-12T10:00:00\
-27,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,18.00,18.00,,,165000011,,2026-01-20T10:00:00\
-28,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,9.00,9.00,,,165000012,,2026-02-03T10:00:00\
-29,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-4.00,-4.00,,,165000013,,2026-02-10T10:00:00\
-30,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,14.00,14.00,,,165000014,,2026-02-20T10:00:00\
-31,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,3.80,3.80,,,165000015,,2026-03-05T10:00:00\
-32,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-2.50,-2.50,,,165000016,,2026-03-12T10:00:00\
-33,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,11.00,11.00,,,165000017,,2026-04-02T10:00:00\
-34,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,6.50,6.50,,,165000018,,2026-04-15T10:00:00\
-35,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-1.20,-1.20,,,165000019,,2026-05-02T10:00:00\
-36,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,9.15,9.15,,,165000020,,2026-05-04T10:00:00`;\
-    try\{ allRows=parseCSV(csv); hydrateSelect(); $('displayName').value='Mariangela Rojas Corro'; generate(); \}\
-    catch(err)\{ showErr(err.message); \}\
-  \});\
-\
-  $('btnBack').addEventListener('click',()=>\{ $('reportScreen').style.display='none'; $('uploadScreen').style.display='flex'; \});\
-\
-  async function doPrint()\{\
-    // Guard: only run if report has data\
-    if(!chartCache.labels?.length)\{\
-      alert('Primero genera el reporte cargando un archivo y haciendo clic en "Generar Reporte".');\
-      return;\
-    \}\
-\
-    const btn1=$('btnPrint'), btn2=$('btnPrint2');\
-    const orig1=btn1.textContent, orig2=btn2.textContent;\
-    btn1.textContent='\uc0\u9203  Generando...'; btn2.textContent='\u9203  Generando...';\
-    btn1.disabled=true; btn2.disabled=true;\
-\
-    try \{\
-      // Redraw canvases fresh\
-      drawEquityChart();\
-      if(chartCache.stats) drawMonthlyChart(chartCache.stats);\
-\
-      // Target: the report content div (always in DOM, visible when report is active)\
-      const target = document.querySelector('.report-wrap');\
-\
-      // Temporarily expand scroll-limited elements and hide print-irrelevant UI\
-      const rangeCtrls = document.querySelectorAll('.range-ctrl');\
-      const scrollWrap = document.querySelector('.scroll-wrap');\
-      const footer = document.querySelector('.report-footer');\
-\
-      // Hide buttons inside footer temporarily\
-      const footerBtn = footer.querySelector('button');\
-      if(footerBtn) footerBtn.style.visibility = 'hidden';\
-      rangeCtrls.forEach(el => el.style.visibility = 'hidden');\
-      scrollWrap.style.maxHeight = 'none';\
-      scrollWrap.style.overflow  = 'visible';\
-\
-      // Wait for DOM to repaint\
-      await new Promise(r => requestAnimationFrame(()=>requestAnimationFrame(r)));\
-      await new Promise(r => setTimeout(r, 100));\
-\
-      const canvas = await html2canvas(target, \{\
-        scale: 2,\
-        useCORS: true,\
-        allowTaint: true,\
-        backgroundColor: '#0b0f14',\
-        logging: false,\
-        width: target.offsetWidth,\
-        height: target.scrollHeight,\
-        scrollX: 0,\
-        scrollY: -window.scrollY,\
-      \});\
-\
-      // Restore\
-      if(footerBtn) footerBtn.style.visibility = '';\
-      rangeCtrls.forEach(el => el.style.visibility = '');\
-      scrollWrap.style.maxHeight = '';\
-      scrollWrap.style.overflow  = '';\
-\
-      // Build PDF \'97 slice canvas into A4 pages\
-      const \{ jsPDF \} = window.jspdf;\
-      const pdf  = new jsPDF(\{ orientation: 'portrait', unit: 'px', format: 'a4' \});\
-      const pgW  = pdf.internal.pageSize.getWidth();\
-      const pgH  = pdf.internal.pageSize.getHeight();\
-      const cW   = canvas.width;\
-      const cH   = canvas.height;\
-      // Scale so canvas width fits page width\
-      const scale = pgW / cW;\
-      const scaledH = cH * scale;\
-      let remaining = scaledH;\
-      let srcY = 0;\
-\
-      while(remaining > 0) \{\
-        const sliceScaledH = Math.min(remaining, pgH);\
-        const sliceSrcH    = sliceScaledH / scale;\
-\
-        const slice = document.createElement('canvas');\
-        slice.width  = cW;\
-        slice.height = sliceSrcH;\
-        slice.getContext('2d').drawImage(canvas, 0, srcY, cW, sliceSrcH, 0, 0, cW, sliceSrcH);\
-\
-        pdf.addImage(slice.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pgW, sliceScaledH);\
-\
-        srcY      += sliceSrcH;\
-        remaining -= sliceScaledH;\
-        if(remaining > 1) pdf.addPage();\
-      \}\
-\
-      const name = ($('abName').textContent || 'Reporte').replace(/\\s+/g,'_');\
-      const date = new Date().toISOString().slice(0,10);\
-      pdf.save(`MentoryCap_$\{name\}_$\{date\}.pdf`);\
-\
-    \} catch(err) \{\
-      alert('Error al generar PDF:\\n' + err.message);\
-    \} finally \{\
-      btn1.textContent=orig1; btn2.textContent=orig2;\
-      btn1.disabled=false; btn2.disabled=false;\
-    \}\
-  \}\
-\
-  [$('btnPrint'),$('btnPrint2')].forEach(b=>b.addEventListener('click', doPrint));\
-  window.addEventListener('resize',()=>\{ if($('reportScreen').style.display!=='none'&&chartCache.labels?.length)\{ drawEquityChart(); if(chartCache.stats) drawMonthlyChart(chartCache.stats); \} \});\
-\
-  function showErr(m)\{ $('errorMsg').textContent=m; $('errorMsg').style.display='block'; \}\
-  function hideErr()\{ $('errorMsg').style.display='none'; \}\
-\})();\
-</script>\
-\
-</body>\
-</html>}
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Reporte de Inversión · MentoryCap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:       #0b0f14;
+      --bg2:      #05070a;
+      --surface:  rgba(255,255,255,.06);
+      --surface2: rgba(255,255,255,.03);
+      --border:   rgba(255,255,255,.10);
+      --border2:  rgba(255,255,255,.16);
+      --text:     #e8eef6;
+      --muted:    #9fb0c3;
+      --good:     #4ade80;
+      --bad:      #f87171;
+      --good-dim: rgba(74,222,128,.15);
+      --bad-dim:  rgba(248,113,113,.12);
+      --accent:   #60a5fa;
+      --accent-dim: rgba(96,165,250,.12);
+      --sans:     'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+      --mono:     'JetBrains Mono', ui-monospace, monospace;
+      --radius:   18px;
+      --shadow:   0 12px 40px rgba(0,0,0,.45);
+    }
+
+```
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(255,255,255,.07), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%,  rgba(96,165,250,.04), transparent 60%),
+    linear-gradient(180deg, #05070a, var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── UPLOAD SCREEN ───────────────────────────────────── */
+#uploadScreen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.upload-logo {
+  width: 60px; height: 60px;
+  border-radius: 16px;
+  background: radial-gradient(60px 60px at 25% 20%, rgba(255,255,255,.22), rgba(255,255,255,.05));
+  border: 1px solid var(--border2);
+  box-shadow: 0 10px 28px rgba(0,0,0,.3);
+  display: grid; place-items: center;
+  margin-bottom: 24px;
+}
+
+#uploadScreen h1 {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.3px;
+  margin-bottom: 6px;
+  text-align: center;
+}
+#uploadScreen > p {
+  font-size: 14px;
+  color: var(--muted);
+  text-align: center;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.upload-box {
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px;
+  width: 100%;
+  max-width: 460px;
+}
+
+.upload-box label.field-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.file-drop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 16px;
+  border: 1px dashed var(--border2);
+  border-radius: 12px;
+  background: rgba(0,0,0,.2);
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color .2s, color .2s, background .2s;
+}
+.file-drop:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+input[type="file"] { display: none; }
+
+.form-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.form-group { flex: 1; min-width: 130px; }
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.form-group select,
+.form-group input[type="text"] {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .2s;
+}
+.form-group select:focus,
+.form-group input:focus { border-color: var(--accent); }
+.form-group select option { background: #111820; }
+
+.btn-generate {
+  width: 100%;
+  margin-top: 18px;
+  padding: 14px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .1px;
+  transition: background .2s, border-color .2s;
+}
+.btn-generate:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.28); }
+
+.btn-sample {
+  width: 100%;
+  margin-top: 10px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 13px;
+  cursor: pointer;
+  transition: color .2s, border-color .2s;
+}
+.btn-sample:hover { color: var(--accent); border-color: rgba(96,165,250,.35); }
+
+#errorMsg    { display:none; margin-top:10px; font-size:13px; color:var(--bad); text-align:center; }
+#uploadedName{ display:none; margin-top:8px; font-size:12px; color:var(--good); text-align:center; font-family:var(--mono); }
+
+/* ── ACTION BAR ──────────────────────────────────────── */
+.action-bar {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(14px);
+  background: rgba(5,7,10,.72);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.ab-info { font-size: 13px; color: var(--muted); }
+.ab-info strong { color: var(--text); }
+.ab-actions { display: flex; gap: 8px; }
+.ab-btn {
+  font-family: var(--sans); font-size: 12px; font-weight: 600;
+  padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  transition: all .15s; border: 1px solid var(--border);
+  background: rgba(255,255,255,.06); color: var(--text);
+}
+.ab-btn:hover { background: rgba(255,255,255,.12); border-color: var(--border2); }
+.ab-btn.primary {
+  background: rgba(255,255,255,.12); border-color: var(--border2);
+}
+.ab-btn.primary:hover { background: rgba(255,255,255,.20); }
+
+/* ── REPORT ──────────────────────────────────────────── */
+#reportScreen { display: none; }
+
+.report-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 36px 24px 80px;
+}
+
+/* Header */
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.rh-eyebrow {
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.6px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 6px;
+}
+.rh-name {
+  font-size: 24px; font-weight: 700; letter-spacing: -.3px;
+  line-height: 1.2;
+}
+.rh-period {
+  font-size: 12px; color: var(--muted); margin-top: 5px; font-family: var(--mono);
+}
+.rh-right { text-align: right; }
+.rh-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: radial-gradient(40px 40px at 25% 20%, rgba(255,255,255,.2), rgba(255,255,255,.05));
+  border: 1px solid var(--border); display: grid; place-items: center;
+  margin-left: auto; margin-bottom: 8px;
+}
+.rh-brand { font-size: 13px; font-weight: 600; }
+.rh-date  { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+
+/* ROI Hero */
+.roi-hero {
+  background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 30px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 24px;
+  align-items: center;
+}
+@media (max-width:580px){ .roi-hero{ grid-template-columns:1fr; } }
+.hero-label {
+  font-size: 10px; font-weight: 600; letter-spacing: 1.2px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 10px;
+}
+.hero-value {
+  font-size: 58px; font-weight: 700; letter-spacing: -3px; line-height: 1;
+  font-family: var(--mono);
+}
+.hero-value.pos { color: var(--good); }
+.hero-value.neg { color: var(--bad); }
+.hero-sub { font-size: 12px; color: var(--muted); margin-top: 10px; }
+
+.hero-right { text-align: right; }
+.hero-equity-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin-bottom: 6px;
+}
+.hero-equity {
+  font-size: 26px; font-weight: 700; font-family: var(--mono); letter-spacing: -.5px;
+}
+.hero-deposit {
+  font-size: 12px; color: var(--muted); margin-top: 4px; font-family: var(--mono);
+}
+
+/* KPI grid */
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+@media (max-width:640px){ .kpi-row{ grid-template-columns: repeat(2,1fr); } }
+
+.kpi-box {
+  background: rgba(0,0,0,.25);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  min-height: 78px;
+}
+.kb-label {
+  font-size: 10px; font-weight: 600; letter-spacing: .7px;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 8px;
+}
+.kb-value {
+  font-size: 17px; font-weight: 700; font-family: var(--mono); letter-spacing: -.3px;
+}
+.kb-value.pos  { color: var(--good); }
+.kb-value.neg  { color: var(--bad); }
+.kb-value.blue { color: var(--accent); }
+.kb-sub { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 22px 0; }
+
+/* Section */
+.section { margin-bottom: 24px; }
+.section-title {
+  font-size: 13px; font-weight: 600; letter-spacing: .1px;
+  color: var(--text); margin-bottom: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 8px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Range controls */
+.range-ctrl { display: flex; gap: 6px; }
+.rc-btn {
+  font-family: var(--sans); font-size: 11px; font-weight: 600;
+  padding: 5px 12px; border-radius: 999px;
+  border: 1px solid var(--border); background: rgba(255,255,255,.05);
+  color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.rc-btn:hover { border-color: var(--border2); color: var(--text); }
+.rc-btn.active { background: rgba(255,255,255,.13); border-color: var(--border2); color: var(--text); }
+
+/* Chart */
+.chart-box {
+  background: rgba(0,0,0,.22);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+}
+canvas { display: block; width: 100% !important; }
+#chartEquity  { height: 270px; }
+#chartMonthly { height: 160px; }
+
+/* Under stats */
+.chart-stats {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 12px;
+}
+@media (max-width:580px){ .chart-stats{ grid-template-columns: repeat(2,1fr); } }
+.cst {
+  background: rgba(0,0,0,.18); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+}
+.cst .cst-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.cst .cst-value { font-family: var(--mono); font-size: 13px; font-weight: 500; }
+.cst .cst-value.pos { color: var(--good); }
+.cst .cst-value.neg { color: var(--bad); }
+
+/* Summary table */
+.scroll-wrap {
+  border: 1px solid var(--border); border-radius: 14px;
+  background: rgba(0,0,0,.18); overflow: auto; max-height: 340px;
+}
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th, td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+th { color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: .6px;
+     text-transform: uppercase; background: rgba(255,255,255,.04); position: sticky; top: 0; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(255,255,255,.02); }
+
+/* Footer */
+.report-footer {
+  margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 12px;
+}
+.rf-disc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+/* Tooltip */
+#tooltip {
+  position: fixed; z-index: 200; pointer-events: none;
+  background: linear-gradient(180deg, rgba(20,28,40,.97), rgba(12,18,28,.97));
+  border: 1px solid var(--border2); border-radius: 12px;
+  padding: 10px 14px; box-shadow: 0 8px 28px rgba(0,0,0,.5);
+  display: none; min-width: 150px;
+}
+.tt-date { font-size: 11px; color: var(--muted); margin-bottom: 4px; font-family: var(--mono); }
+.tt-val  { font-size: 16px; font-weight: 600; font-family: var(--mono); }
+.tt-chg  { font-size: 11px; margin-top: 3px; font-family: var(--mono); }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(14px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.fu  { animation: fadeUp .5s ease both; }
+.fu1 { animation-delay: .04s; }
+.fu2 { animation-delay: .10s; }
+.fu3 { animation-delay: .17s; }
+.fu4 { animation-delay: .24s; }
+.fu5 { animation-delay: .31s; }
+
+/* ── PRINT ── */
+@media print {
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  html, body { background: #0b0f14 !important; color: #e8eef6 !important; }
+  .action-bar   { display: none !important; }
+  #uploadScreen { display: none !important; }
+  #reportScreen { display: block !important; }
+  .report-wrap  { padding: 20px !important; max-width: 100% !important; }
+  .scroll-wrap  { max-height: none !important; overflow: visible !important; }
+  .range-ctrl   { display: none !important; }
+  .roi-hero     { box-shadow: none !important; }
+  canvas        { break-inside: avoid; page-break-inside: avoid; }
+  .kpi-row, .section { break-inside: avoid; page-break-inside: avoid; }
+}
+
+/* Clase que se agrega por JS justo antes de window.print() */
+body.is-printing .action-bar   { display: none !important; }
+body.is-printing #uploadScreen { display: none !important; }
+body.is-printing #reportScreen { display: block !important; }
+body.is-printing .range-ctrl   { display: none !important; }
+body.is-printing .scroll-wrap  { max-height: none !important; overflow: visible !important; }
+```
+
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ UPLOAD SCREEN ══════════════ -->
+
+<div id="uploadScreen">
+  <div class="upload-logo">
+    <svg viewBox="0 0 120 120" width="30" height="30">
+      <path d="M20 84V28h18l22 28 22-28h18v56H82V58L60 84 38 58v26H20z" fill="#e8eef6"/>
+      <path d="M84 60c0-14 12-26 26-26v16c-5 0-10 4-10 10s5 10 10 10v16c-14 0-26-12-26-26z" fill="#60a5fa"/>
+    </svg>
+  </div>
+  <h1>Reporte de Inversión</h1>
+  <p>Carga el historial de transacciones para generar<br/>el reporte personalizado de tu cliente.</p>
+
+  <div class="upload-box">
+    <label class="field-label" for="fileInput">Archivo de transacciones</label>
+    <label class="file-drop" for="fileInput">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+      </svg>
+      Seleccionar CSV o XLSX
+    </label>
+    <input id="fileInput" type="file" accept=".csv,.xlsx"/>
+    <div id="uploadedName"></div>
+
+```
+<div class="form-row">
+  <div class="form-group">
+    <label>Inversor</label>
+    <select id="investorSelect">
+      <option value="__none__">— Carga un archivo primero —</option>
+    </select>
+  </div>
+</div>
+<div class="form-row">
+  <div class="form-group">
+    <label>Nombre para mostrar <span style="font-weight:400;text-transform:none;letter-spacing:0;">(opcional)</span></label>
+    <input type="text" id="displayName" placeholder="Ej: María González"/>
+  </div>
+</div>
+
+<button class="btn-generate" id="btnGenerate">Generar Reporte →</button>
+<button class="btn-sample"   id="btnSample">Ver con datos de ejemplo</button>
+<div id="errorMsg"></div>
+```
+
+  </div>
+</div>
+
+<!-- ══════════════ REPORT SCREEN ══════════════ -->
+
+<div id="reportScreen">
+
+  <div class="action-bar">
+    <div class="ab-info">
+      <strong id="abName">—</strong>
+      <span style="margin:0 6px;opacity:.3;">·</span>
+      Generado el <span id="abDate">—</span>
+    </div>
+    <div class="ab-actions">
+      <button class="ab-btn" id="btnBack">← Volver</button>
+      <button class="ab-btn primary" id="btnPrint">🖨 Imprimir / PDF</button>
+    </div>
+  </div>
+
+  <div class="report-wrap">
+
+```
+<!-- Header -->
+<div class="report-header fu">
+  <div>
+    <div class="rh-eyebrow">Estado de cuenta</div>
+    <div class="rh-name" id="rhName">—</div>
+    <div class="rh-period" id="rhPeriod">—</div>
+  </div>
+  <div class="rh-right">
+    <div class="rh-logo">
+      <svg viewBox="0 0 120 120" width="24" height="24">
+        <path d="M20 84V28h18l22 28 22-28h18v56H82V58L60 84 38 58v26H20z" fill="#e8eef6"/>
+        <path d="M84 60c0-14 12-26 26-26v16c-5 0-10 4-10 10s5 10 10 10v16c-14 0-26-12-26-26z" fill="#60a5fa"/>
+      </svg>
+    </div>
+    <div class="rh-brand">MentoryCap</div>
+    <div class="rh-date" id="rhDate">—</div>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="roi-hero fu fu1">
+  <div>
+    <div class="hero-label">Rendimiento Total</div>
+    <div class="hero-value" id="heroROI">—</div>
+    <div class="hero-sub" id="heroSub">Desde el depósito inicial</div>
+  </div>
+  <div class="hero-right">
+    <div class="hero-equity-label">Valor de la cuenta</div>
+    <div class="hero-equity" id="heroEquity">—</div>
+    <div class="hero-deposit" id="heroDeposit">—</div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row fu fu2">
+  <div class="kpi-box">
+    <div class="kb-label">Profit neto</div>
+    <div class="kb-value" id="kpiProfit">—</div>
+    <div class="kb-sub">Ganancias acumuladas</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kb-label">Días activo</div>
+    <div class="kb-value blue" id="kpiDays">—</div>
+    <div class="kb-sub" id="kpiDaysSub">—</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kb-label">Mejor mes</div>
+    <div class="kb-value pos" id="kpiBestMonth">—</div>
+    <div class="kb-sub" id="kpiBestMonthLbl">—</div>
+  </div>
+  <div class="kpi-box">
+    <div class="kb-label">Meses positivos</div>
+    <div class="kb-value" id="kpiPosMonths">—</div>
+    <div class="kb-sub">De los meses operados</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Equity chart -->
+<div class="section fu fu3">
+  <div class="section-title">
+    <span>Evolución del Capital</span>
+    <div class="range-ctrl" id="rangeBar">
+      <button class="rc-btn active" data-range="ALL">Todo</button>
+      <button class="rc-btn" data-range="6M">6M</button>
+      <button class="rc-btn" data-range="3M">3M</button>
+      <button class="rc-btn" data-range="1M">1M</button>
+    </div>
+  </div>
+  <div class="chart-box">
+    <canvas id="chartEquity"></canvas>
+  </div>
+  <div class="chart-stats">
+    <div class="cst"><div class="cst-label">Inicio período</div><div class="cst-value" id="cstOpen">—</div></div>
+    <div class="cst"><div class="cst-label">Valor actual</div><div class="cst-value" id="cstClose">—</div></div>
+    <div class="cst"><div class="cst-label">Máximo</div><div class="cst-value pos" id="cstHigh">—</div></div>
+    <div class="cst"><div class="cst-label">Variación</div><div class="cst-value" id="cstChg">—</div></div>
+  </div>
+</div>
+
+<!-- Monthly chart -->
+<div class="section fu fu4">
+  <div class="section-title">Resultado Mensual</div>
+  <div class="chart-box">
+    <canvas id="chartMonthly"></canvas>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- Summary table -->
+<div class="section fu fu5">
+  <div class="section-title">Resumen por Período</div>
+  <div class="scroll-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Mes</th>
+          <th style="text-align:right">P&L del mes</th>
+          <th style="text-align:right">Retorno %</th>
+          <th style="text-align:right">Equity final</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="report-footer">
+  <div class="rf-disc">
+    Este reporte es de carácter informativo y refleja el desempeño histórico de la cuenta.<br/>
+    Rendimientos pasados no garantizan resultados futuros. Generado el <span id="footerDate">—</span>.
+  </div>
+  <button class="ab-btn primary" id="btnPrint2">🖨 Guardar PDF</button>
+</div>
+```
+
+  </div><!-- /report-wrap -->
+</div><!-- /reportScreen -->
+
+<div id="tooltip">
+  <div class="tt-date" id="ttDate">—</div>
+  <div class="tt-val"  id="ttVal">—</div>
+  <div class="tt-chg"  id="ttChg">—</div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const pad2 = x => String(x).padStart(2,'0');
+  const dayKey   = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const monthKey = d => `${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
+  const MONTH_NAMES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  const monthLabel = k => { const [y,m]=k.split('-'); return `${MONTH_NAMES[+m-1]} ${y}`; };
+  const fmtUSD = n => (isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtPct = n => (isFinite(n)?n:0).toFixed(2)+'%';
+  const fmtNum = n => (isFinite(n)?n:0).toLocaleString('en-US');
+
+  // ── PARSERS ──────────────────────────────────────────────────────────────
+  function parseDateAny(s){
+    if(!s) return null; const str=String(s).trim();
+    let d=new Date(str); if(!isNaN(d)) return d;
+    const m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
+    if(m){ d=new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0)); return isNaN(d)?null:d; }
+    return null;
+  }
+  function parseNum(v){ if(!v&&v!==0) return 0; let s=String(v).trim().replace(/[^\d.,\-+]/g,''); if(!s) return 0; const hC=s.includes(','),hD=s.includes('.'); if(hC&&hD) s=s.replace(/,/g,''); else if(hC&&!hD){const p=s.split(',');s=(p.length===2&&p[1].length<=2)?p[0]+'.'+p[1]:s.replace(/,/g,'');} return +s||0; }
+  function detectSep(t){ const l=(t.split(/\r?\n/)[0]||''); return (l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':','; }
+  function smartSplit(line,sep){ const out=[]; let cur='',inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;} out.push(cur); return out.map(x=>x.trim().replace(/^"|"$/g,'')); }
+
+  const INV_COLS = ['investorname','investor','inversor','user','usuario','account','name','cliente'];
+  const isTrade   = r => /traderesult/i.test(r.reason);
+  const isDeposit = r => /^deposit$/i.test(r.reason);
+  const isFee     = r => /fee/i.test(r.reason);
+
+  function parseCSV(text){
+    const sep=detectSep(text), lines=text.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2) throw new Error('CSV vacío.');
+    const h=smartSplit(lines[0],sep).map(x=>x.toLowerCase().replace(/\s+/g,''));
+    const col=(...names)=>{ for(const n of names){const i=h.indexOf(n);if(i>=0)return i;} return -1; };
+    const iT=col('time','fecha','date','datetime'), iR=col('reason','tipo','type');
+    const iA=col('amount','monto','importe'), iP=col('amountprofit','profit','pnl','ganancia');
+    const iId=col('investmentid','investment_id','accountid');
+    if(iT<0||iR<0) throw new Error('Se requieren columnas Time y Reason.');
+    let iI=-1; for(const c of INV_COLS){const i=h.indexOf(c);if(i>=0){iI=i;break;}}
+    const out=[];
+    for(let i=1;i<lines.length;i++){
+      const c=smartSplit(lines[i],sep); if(c.length<3) continue;
+      const time=parseDateAny(c[iT]); if(!time) continue;
+      out.push({time,reason:c[iR]||'',amount:iA>=0?parseNum(c[iA]):0,amountProfit:iP>=0?parseNum(c[iP]):0,investor:(iI>=0?(c[iI]||''):'(sin nombre)').trim(),investmentId:iId>=0?c[iId]||'':''});
+    }
+    if(!out.length) throw new Error('Sin filas con fechas válidas.');
+    return out.sort((a,b)=>a.time-b.time);
+  }
+
+  // XLSX offline
+  function u16(b,o){return b[o]|(b[o+1]<<8);}function u32(b,o){return(b[o]|(b[o+1]<<8)|(b[o+2]<<16)|(b[o+3]<<24))>>>0;}
+  function findEOCD(bytes){for(let i=bytes.length-22;i>=0&&i>bytes.length-70000;i--)if(bytes[i]===0x50&&bytes[i+1]===0x4b&&bytes[i+2]===0x05&&bytes[i+3]===0x06)return i;return -1;}
+  async function inflateRaw(u8){const ds=new DecompressionStream('deflate-raw');const s=new Blob([u8]).stream().pipeThrough(ds);return new Uint8Array(await new Response(s).arrayBuffer());}
+  async function unzipEntries(ab){const bytes=new Uint8Array(ab);const eocd=findEOCD(bytes);if(eocd<0)throw new Error('ZIP inválido.');const cdSize=u32(bytes,eocd+12),cdOff=u32(bytes,eocd+16);const entries=[];let p=cdOff;while(p<cdOff+cdSize){if(u32(bytes,p)!==0x02014b50)break;const cm=u16(bytes,p+10),cs=u32(bytes,p+20),us=u32(bytes,p+24),fnLen=u16(bytes,p+28),exLen=u16(bytes,p+30),coLen=u16(bytes,p+32),lho=u32(bytes,p+42),fn=new TextDecoder().decode(bytes.slice(p+46,p+46+fnLen));entries.push({filename:fn,compMethod:cm,compSize:cs,uncompSize:us,localHeaderOffset:lho});p+=46+fnLen+exLen+coLen;}return{bytes,entries};}
+  async function extractFile(zip,name){const e=zip.entries.find(x=>x.filename===name);if(!e)return null;const b=zip.bytes;let p=e.localHeaderOffset;const fnLen=u16(b,p+26),exLen=u16(b,p+28),ds=p+30+fnLen+exLen,comp=b.slice(ds,ds+e.compSize);if(e.compMethod===0)return comp;if(e.compMethod===8)return await inflateRaw(comp);throw new Error('Compresión no soportada.');}
+  function colIdx(c){let n=0;for(let i=0;i<c.length;i++)n=n*26+(c.charCodeAt(i)-64);return n-1;}
+  function cellRC(r){const m=String(r).match(/^([A-Z]+)(\d+)$/);if(!m)return null;return{r:parseInt(m[2],10)-1,c:colIdx(m[1])};}
+  function parseSharedStrings(xml){const doc=new DOMParser().parseFromString(xml,'application/xml');return[...doc.getElementsByTagName('si')].map(n=>[...n.getElementsByTagName('t')].map(t=>t.textContent||'').join(''));}
+  function parseSheetAOA(xml,shared){const doc=new DOMParser().parseFromString(xml,'application/xml');const rows=[...doc.getElementsByTagName('row')];let mR=0,mC=0;const cells=[];for(const row of rows){for(const c of[...row.getElementsByTagName('c')]){const r=c.getAttribute('r'),t=c.getAttribute('t')||'',vn=c.getElementsByTagName('v')[0];let val=vn?vn.textContent:'';if(t==='s')val=shared?.[parseInt(val||'0',10)]??'';else{const num=Number(val);if(!isNaN(num)&&val!=='')val=num;}const rc=cellRC(r);if(rc){cells.push({r:rc.r,c:rc.c,v:val});if(rc.r>mR)mR=rc.r;if(rc.c>mC)mC=rc.c;}}}const aoa=Array.from({length:mR+1},()=>Array.from({length:mC+1},()=>''));for(const cell of cells)aoa[cell.r][cell.c]=cell.v;return aoa;}
+  async function parseXLSX(ab){
+    if(typeof DecompressionStream==='undefined') throw new Error('XLSX requiere Chrome/Edge. Usa CSV.');
+    const zip=await unzipEntries(ab);
+    let sn='xl/worksheets/sheet1.xml';
+    if(!zip.entries.some(e=>e.filename===sn)){const f=zip.entries.find(e=>/^xl\/worksheets\/sheet\d+\.xml$/.test(e.filename));if(f)sn=f.filename;else throw new Error('Sin hojas.');}
+    const ssU8=await extractFile(zip,'xl/sharedStrings.xml');
+    const shared=ssU8?parseSharedStrings(new TextDecoder().decode(ssU8)):[];
+    const shU8=await extractFile(zip,sn);if(!shU8)throw new Error('Sin hoja.');
+    const aoa=parseSheetAOA(new TextDecoder().decode(shU8),shared);
+    const csv=aoa.map(r=>r.map(v=>'"'+String(v??'')+'"').join(',')).join('\n');
+    return parseCSV(csv);
+  }
+
+  // ── STATE ────────────────────────────────────────────────────────────────
+  let allRows = [], activeRange = 'ALL', chartCache = {};
+
+  // ── COMPUTE ──────────────────────────────────────────────────────────────
+  function computeStats(rows){
+    const depTx = rows.find(r=>isDeposit(r));
+    const dep = depTx ? Math.abs(depTx.amount) : 0;
+    let runP=0, runF=0;
+    const dailyEq={}, monthlyPnl={};
+    for(const r of [...rows].sort((a,b)=>a.time-b.time)){
+      if(isTrade(r)){ runP+=r.amountProfit; monthlyPnl[monthKey(r.time)]=(monthlyPnl[monthKey(r.time)]||0)+r.amountProfit; }
+      if(isFee(r)) runF+=r.amount;
+      dailyEq[dayKey(r.time)] = dep+runP+runF;
+    }
+    const equity=dep+runP+runF, roi=dep>0?((equity-dep)/dep*100):0;
+    const monthlyEntries=Object.entries(monthlyPnl).sort(([a],[b])=>a.localeCompare(b));
+    const posMonths=monthlyEntries.filter(([,v])=>v>0).length;
+    const bestEntry=monthlyEntries.reduce((a,b)=>b[1]>a[1]?b:a,['',0]);
+    const sortedRows=[...rows].sort((a,b)=>a.time-b.time);
+    const firstDate=sortedRows[0]?.time, lastDate=sortedRows[sortedRows.length-1]?.time;
+    const days=firstDate&&lastDate?Math.round((lastDate-firstDate)/86400000):0;
+    const sortedDays=Object.keys(dailyEq).sort();
+    const equitySeries=sortedDays.map(dk=>({dk,eq:dailyEq[dk]}));
+    const monthlyEquity={};
+    for(const {dk,eq} of equitySeries) monthlyEquity[dk.slice(0,7)]=eq;
+    return {dep,equity,roi,runP,runF,days,firstDate,lastDate,monthlyEntries,posMonths,bestEntry,equitySeries,monthlyEquity};
+  }
+
+  // ── HYDRATE ──────────────────────────────────────────────────────────────
+  function hydrateSelect(){
+    const sel=$('investorSelect'); const cur=sel.value;
+    sel.innerHTML='';
+    const invs=[...new Set(allRows.map(r=>r.investor))].sort();
+    if(invs.length>1){ const o=document.createElement('option'); o.value='__all__'; o.textContent='Todos los inversores'; sel.appendChild(o); }
+    for(const inv of invs){ const o=document.createElement('option'); o.value=o.textContent=inv; sel.appendChild(o); }
+    if(invs.length===1) sel.value=invs[0];
+    else if(invs.includes(cur)) sel.value=cur;
+  }
+
+  // ── GENERATE ─────────────────────────────────────────────────────────────
+  function generate(){
+    const inv=$('investorSelect').value;
+    if(inv==='__none__'||!allRows.length){ showErr('Carga un archivo primero.'); return; }
+    const rows=inv==='__all__'?allRows:allRows.filter(r=>r.investor===inv);
+    if(!rows.length){ showErr('Sin datos para este inversor.'); return; }
+    const displayName=$('displayName').value.trim()||(inv==='__all__'?'Cuenta Consolidada':inv);
+    const stats=computeStats(rows);
+    chartCache={labels:stats.equitySeries.map(s=>s.dk),equity:stats.equitySeries.map(s=>s.eq),deposit:stats.dep,stats};
+
+    // Switch
+    $('uploadScreen').style.display='none';
+    $('reportScreen').style.display='block';
+
+    const today=new Date();
+    const todayStr=`${pad2(today.getDate())}/${pad2(today.getMonth()+1)}/${today.getFullYear()}`;
+
+    $('abName').textContent=displayName; $('abDate').textContent=todayStr;
+    $('rhName').textContent=displayName;
+    $('rhPeriod').textContent=stats.firstDate&&stats.lastDate?`${dayKey(stats.firstDate)}  →  ${dayKey(stats.lastDate)}`:'—';
+    $('rhDate').textContent=todayStr; $('footerDate').textContent=todayStr;
+
+    const sign=stats.roi>=0?'+':'';
+    $('heroROI').textContent=sign+fmtPct(stats.roi);
+    $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
+    $('heroSub').textContent=`${stats.days} días desde el depósito inicial`;
+    $('heroEquity').textContent=fmtUSD(stats.equity);
+    $('heroDeposit').textContent='Depósito inicial: '+fmtUSD(stats.dep);
+
+    $('kpiProfit').textContent=(stats.runP>=0?'+':'')+fmtUSD(stats.runP);
+    $('kpiProfit').className='kb-value '+(stats.runP>=0?'pos':'neg');
+    $('kpiDays').textContent=fmtNum(stats.days);
+    $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'—';
+    $('kpiBestMonth').textContent=stats.bestEntry[0]?'+'+fmtUSD(stats.bestEntry[1]):'—';
+    $('kpiBestMonthLbl').textContent=stats.bestEntry[0]?monthLabel(stats.bestEntry[0]):'—';
+    $('kpiPosMonths').textContent=`${stats.posMonths} / ${stats.monthlyEntries.length}`;
+
+    activeRange='ALL'; updateRangeUI();
+    drawEquityChart(); drawMonthlyChart(stats); buildTable(stats);
+  }
+
+  function buildTable(stats){
+    const tbody=$('summaryBody'); tbody.innerHTML='';
+    for(const [mk,pnl] of stats.monthlyEntries){
+      const eq=stats.monthlyEquity[mk]||stats.dep;
+      const prevEq=eq-pnl; const pct=prevEq>0?(pnl/Math.abs(prevEq)*100):0;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`
+        <td style="font-family:var(--sans);font-size:12px;">${monthLabel(mk)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${pnl>=0?'var(--good)':'var(--bad)'};">${pnl>=0?'+':''}${fmtUSD(pnl)}</td>
+        <td style="text-align:right;font-family:var(--mono);color:${pct>=0?'var(--good)':'var(--bad)'};">${pct>=0?'+':''}${fmtPct(pct)}</td>
+        <td style="text-align:right;font-family:var(--mono);">${fmtUSD(eq)}</td>`;
+      tbody.appendChild(tr);
+    }
+  }
+
+  // ── CHARTS ───────────────────────────────────────────────────────────────
+  function hiDPI(canvas, H){
+    const rect=canvas.getBoundingClientRect();
+    const dpr=window.devicePixelRatio||1;
+    const W=Math.max(200,rect.width||700);
+    canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+    canvas.style.height=H+'px';
+    const ctx=canvas.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx,W,H};
+  }
+
+  function getFiltered(){
+    const {labels,equity,deposit}=chartCache;
+    if(activeRange==='ALL') return {labels,equity,deposit};
+    const last=new Date(labels[labels.length-1]); let ms=null;
+    if(activeRange==='1M') ms=last.getTime()-30*86400000;
+    else if(activeRange==='3M'){const d=new Date(last);d.setMonth(d.getMonth()-3);ms=d.getTime();}
+    else if(activeRange==='6M'){const d=new Date(last);d.setMonth(d.getMonth()-6);ms=d.getTime();}
+    const idx=labels.findIndex(l=>new Date(l).getTime()>=ms);
+    return idx<0?{labels,equity,deposit}:{labels:labels.slice(idx),equity:equity.slice(idx),deposit};
+  }
+
+  function drawEquityChart(){
+    const {labels,equity,deposit}=getFiltered();
+    const canvas=$('chartEquity');
+    const {ctx,W,H}=hiDPI(canvas,270);
+    ctx.clearRect(0,0,W,H);
+    if(!labels.length) return;
+
+    const pad={l:66,r:14,t:18,b:34};
+    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+    const ext=[...equity,deposit];
+    let minV=Math.min(...ext), maxV=Math.max(...ext);
+    const mg=(maxV-minV)*0.07||5; minV-=mg; maxV+=mg;
+    const span=maxV-minV; const n=labels.length;
+
+    // Grid
+    ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+    for(let i=0;i<=5;i++){const y=pad.t+ih*(i/5);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
+
+    // Y labels
+    ctx.fillStyle='#9fb0c3'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='right';
+    for(let i=0;i<=5;i++){
+      const v=maxV-span*(i/5), y=pad.t+ih*(i/5);
+      ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0), pad.l-8, y+4);
+    }
+
+    // X labels
+    const step=Math.max(1,Math.ceil(n/6));
+    ctx.fillStyle='#9fb0c3'; ctx.textAlign='center';
+    for(let i=0;i<n;i+=step){
+      const x=pad.l+iw*(i/Math.max(1,n-1));
+      ctx.fillText(labels[i].slice(5),x,pad.t+ih+22);
+    }
+
+    // Deposit line
+    const depY=pad.t+ih*(1-(deposit-minV)/span);
+    ctx.strokeStyle='rgba(255,255,255,.20)'; ctx.setLineDash([5,6]); ctx.lineWidth=1.2;
+    ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='rgba(255,255,255,.35)'; ctx.font='10px JetBrains Mono, monospace'; ctx.textAlign='left';
+    ctx.fillText('Depósito',pad.l+6,depY-6);
+
+    // Fill
+    const lastVal=equity[n-1]; const isPos=lastVal>=deposit;
+    ctx.beginPath();
+    for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1));const y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();
+    const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
+    if(isPos){grd.addColorStop(0,'rgba(74,222,128,.22)');grd.addColorStop(1,'rgba(74,222,128,.02)');}
+    else{grd.addColorStop(0,'rgba(248,113,113,.18)');grd.addColorStop(1,'rgba(248,113,113,.02)');}
+    ctx.fillStyle=grd; ctx.fill();
+
+    // Line
+    ctx.lineWidth=2.2; ctx.lineJoin='round'; ctx.lineCap='round';
+    ctx.strokeStyle=isPos?'#4ade80':'#f87171';
+    ctx.beginPath();
+    for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1));const y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.stroke();
+
+    // End dot
+    const ex=pad.l+iw, ey=pad.t+ih*(1-(lastVal-minV)/span);
+    ctx.fillStyle=isPos?'#4ade80':'#f87171'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.6)'; ctx.beginPath(); ctx.arc(ex,ey,2,0,Math.PI*2); ctx.fill();
+
+    // Store for hover
+    canvas._d={labels,equity,deposit,pad,iw,ih,minV,span};
+
+    // Stats
+    const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;
+    $('cstOpen').textContent=fmtUSD(open);
+    $('cstClose').textContent=fmtUSD(close);
+    $('cstHigh').textContent=fmtUSD(high);
+    $('cstChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chgPct>=0?'+':'')+fmtPct(chgPct)+')';
+    $('cstChg').className='cst-value '+(chg>=0?'pos':'neg');
+  }
+
+  function drawMonthlyChart(stats){
+    if(!stats.monthlyEntries.length) return;
+    const canvas=$('chartMonthly');
+    const {ctx,W,H}=hiDPI(canvas,160);
+    ctx.clearRect(0,0,W,H);
+    const labels=stats.monthlyEntries.map(([k])=>monthLabel(k));
+    const values=stats.monthlyEntries.map(([,v])=>v);
+    const pad={l:62,r:10,t:12,b:48};
+    const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+    const minV=Math.min(0,...values), maxV=Math.max(0,...values), span=(maxV-minV)||1;
+    const zero=pad.t+ih*(1-(0-minV)/span);
+
+    ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+    for(let i=0;i<=4;i++){const y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
+
+    ctx.fillStyle='#9fb0c3'; ctx.font='11px JetBrains Mono, monospace'; ctx.textAlign='right';
+    for(let i=0;i<=4;i++){
+      const v=maxV-span*(i/4), y=pad.t+ih*(i/4);
+      ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0), pad.l-6, y+4);
+    }
+
+    const n=labels.length, slot=iw/Math.max(1,n), bw=Math.max(6,slot*0.64);
+    for(let i=0;i<n;i++){
+      const v=values[i], barH=Math.max(2,Math.abs(ih*(v/span)));
+      const x=pad.l+slot*(i+0.5)-bw/2, y=v>=0?zero-barH:zero;
+      const grd=ctx.createLinearGradient(0,y,0,y+barH);
+      if(v>=0){grd.addColorStop(0,'rgba(74,222,128,.85)');grd.addColorStop(1,'rgba(74,222,128,.25)');}
+      else{grd.addColorStop(0,'rgba(248,113,113,.80)');grd.addColorStop(1,'rgba(248,113,113,.20)');}
+      ctx.fillStyle=grd;
+      if(ctx.roundRect) ctx.roundRect(x,y,bw,barH,3); else ctx.rect(x,y,bw,barH);
+      ctx.fill();
+    }
+
+    ctx.fillStyle='#9fb0c3'; ctx.font='10px Space Grotesk, sans-serif'; ctx.textAlign='center';
+    for(let i=0;i<n;i++){
+      const x=pad.l+slot*(i+0.5);
+      ctx.save(); ctx.translate(x,pad.t+ih+10); ctx.rotate(-Math.PI/5);
+      ctx.fillText(labels[i],0,0); ctx.restore();
+    }
+  }
+
+  // ── HOVER ────────────────────────────────────────────────────────────────
+  $('chartEquity').addEventListener('mousemove', e=>{
+    const canvas=$('chartEquity'); if(!canvas._d) return;
+    const {labels,equity,pad,iw,ih,minV,span}=canvas._d;
+    const rect=canvas.getBoundingClientRect(), mx=e.clientX-rect.left;
+    const n=labels.length, i=Math.max(0,Math.min(n-1,Math.round((mx-pad.l)/iw*(n-1))));
+    const prev=i>0?equity[i-1]:equity[0], chg=equity[i]-prev, pct=prev?(chg/Math.abs(prev)*100):0;
+    $('ttDate').textContent=labels[i];
+    $('ttVal').textContent=fmtUSD(equity[i]);
+    $('ttChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chg>=0?'+':'')+fmtPct(pct)+')';
+    $('ttChg').style.color=chg>=0?'var(--good)':'var(--bad)';
+    const tt=$('tooltip'); tt.style.display='block';
+    tt.style.left=(e.clientX+14)+'px'; tt.style.top=(e.clientY-44)+'px';
+  });
+  $('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');
+
+  // ── RANGE ────────────────────────────────────────────────────────────────
+  function updateRangeUI(){ document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange)); }
+  $('rangeBar').addEventListener('click',e=>{
+    const b=e.target.closest('[data-range]'); if(!b) return;
+    activeRange=b.dataset.range; updateRangeUI(); drawEquityChart();
+  });
+
+  // ── FILE ─────────────────────────────────────────────────────────────────
+  $('fileInput').addEventListener('change', async()=>{
+    const f=$('fileInput').files?.[0]; if(!f) return;
+    try {
+      if(f.name.toLowerCase().endsWith('.csv')) allRows=parseCSV(await f.text());
+      else if(f.name.toLowerCase().endsWith('.xlsx')) allRows=await parseXLSX(await f.arrayBuffer());
+      else throw new Error('Usa CSV o XLSX.');
+      allRows.sort((a,b)=>a.time-b.time);
+      hydrateSelect();
+      $('uploadedName').textContent='✓ '+f.name+' · '+allRows.length+' registros';
+      $('uploadedName').style.display='block';
+      hideErr();
+    } catch(err){ showErr(err.message); }
+    finally{ $('fileInput').value=''; }
+  });
+
+  // ── BUTTONS ──────────────────────────────────────────────────────────────
+  $('btnGenerate').addEventListener('click', generate);
+  $('btnSample').addEventListener('click',()=>{
+    const csv=`Id,Reason,InvestmentId,InvestorName,ManagerId,ManagerName,ManagerConfiguration,Currency,Amount,AmountProfit,RolloverId,RequestId,PlatformPositionId,PlatformOperationId,Time
+1,Deposit,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,518.04,0,9034528,42598,,20665875,2025-10-02T17:52:40
+2,DepositFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-10.36,0,9034528,42598,,,2025-10-02T17:52:40
+3,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.17,0,9041780,,,,2025-10-03T00:43:29
+4,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-8.95,-8.95,,,154873101,,2025-10-15T15:45:30
+5,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,21.80,21.80,,,154873102,,2025-10-16T15:47:19
+6,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.14,0,,,,,2025-10-17T00:48:25
+7,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,18.99,18.99,,,156936345,,2025-10-17T00:48:25
+8,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-10.15,-10.15,,,159268591,,2025-10-17T20:47:29
+9,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,0.30,0.30,,,160728487,,2025-10-20T10:51:34
+10,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-24.45,-24.45,,,160728488,,2025-10-20T18:50:45
+11,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,15.00,15.00,,,162457201,,2025-10-21T12:51:19
+12,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.13,0,,,,,2025-10-22T00:50:06
+13,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-40.00,-40.00,,,164255674,,2025-10-22T14:50:21
+14,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,8.70,8.70,,,164817415,,2025-10-23T09:58:56
+15,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,12.50,12.50,,,165000001,,2025-11-01T10:00:00
+16,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.12,0,,,,,2025-11-01T00:00:01
+17,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-5.00,-5.00,,,165000002,,2025-11-05T10:00:00
+18,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,22.00,22.00,,,165000003,,2025-11-10T10:00:00
+19,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-3.50,-3.50,,,165000004,,2025-11-15T10:00:00
+20,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,8.00,8.00,,,165000005,,2025-11-20T10:00:00
+21,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,30.00,30.00,,,165000006,,2025-12-03T10:00:00
+22,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-15.00,-15.00,,,165000007,,2025-12-10T10:00:00
+23,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,20.00,20.00,,,165000008,,2025-12-18T10:00:00
+24,ManagementFee,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-0.10,0,,,,,2025-12-18T00:00:01
+25,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,5.00,5.00,,,165000009,,2026-01-05T10:00:00
+26,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-8.00,-8.00,,,165000010,,2026-01-12T10:00:00
+27,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,18.00,18.00,,,165000011,,2026-01-20T10:00:00
+28,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,9.00,9.00,,,165000012,,2026-02-03T10:00:00
+29,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-4.00,-4.00,,,165000013,,2026-02-10T10:00:00
+30,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,14.00,14.00,,,165000014,,2026-02-20T10:00:00
+31,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,3.80,3.80,,,165000015,,2026-03-05T10:00:00
+32,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-2.50,-2.50,,,165000016,,2026-03-12T10:00:00
+33,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,11.00,11.00,,,165000017,,2026-04-02T10:00:00
+34,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,6.50,6.50,,,165000018,,2026-04-15T10:00:00
+35,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,-1.20,-1.20,,,165000019,,2026-05-02T10:00:00
+36,TradeResults,16724,MARIANGELA ROJAS CORRO,1128,RC Capital,1,USD,9.15,9.15,,,165000020,,2026-05-04T10:00:00`;
+    try{ allRows=parseCSV(csv); hydrateSelect(); $('displayName').value='Mariangela Rojas Corro'; generate(); }
+    catch(err){ showErr(err.message); }
+  });
+
+  $('btnBack').addEventListener('click',()=>{ $('reportScreen').style.display='none'; $('uploadScreen').style.display='flex'; });
+
+  async function doPrint(){
+    // Guard: only run if report has data
+    if(!chartCache.labels?.length){
+      alert('Primero genera el reporte cargando un archivo y haciendo clic en "Generar Reporte".');
+      return;
+    }
+
+    const btn1=$('btnPrint'), btn2=$('btnPrint2');
+    const orig1=btn1.textContent, orig2=btn2.textContent;
+    btn1.textContent='⏳ Generando...'; btn2.textContent='⏳ Generando...';
+    btn1.disabled=true; btn2.disabled=true;
+
+    try {
+      // Redraw canvases fresh
+      drawEquityChart();
+      if(chartCache.stats) drawMonthlyChart(chartCache.stats);
+
+      // Target: the report content div (always in DOM, visible when report is active)
+      const target = document.querySelector('.report-wrap');
+
+      // Temporarily expand scroll-limited elements and hide print-irrelevant UI
+      const rangeCtrls = document.querySelectorAll('.range-ctrl');
+      const scrollWrap = document.querySelector('.scroll-wrap');
+      const footer = document.querySelector('.report-footer');
+
+      // Hide buttons inside footer temporarily
+      const footerBtn = footer.querySelector('button');
+      if(footerBtn) footerBtn.style.visibility = 'hidden';
+      rangeCtrls.forEach(el => el.style.visibility = 'hidden');
+      scrollWrap.style.maxHeight = 'none';
+      scrollWrap.style.overflow  = 'visible';
+
+      // Wait for DOM to repaint
+      await new Promise(r => requestAnimationFrame(()=>requestAnimationFrame(r)));
+      await new Promise(r => setTimeout(r, 100));
+
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0b0f14',
+        logging: false,
+        width: target.offsetWidth,
+        height: target.scrollHeight,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+      });
+
+      // Restore
+      if(footerBtn) footerBtn.style.visibility = '';
+      rangeCtrls.forEach(el => el.style.visibility = '');
+      scrollWrap.style.maxHeight = '';
+      scrollWrap.style.overflow  = '';
+
+      // Build PDF — slice canvas into A4 pages
+      const { jsPDF } = window.jspdf;
+      const pdf  = new jsPDF({ orientation: 'portrait', unit: 'px', format: 'a4' });
+      const pgW  = pdf.internal.pageSize.getWidth();
+      const pgH  = pdf.internal.pageSize.getHeight();
+      const cW   = canvas.width;
+      const cH   = canvas.height;
+      // Scale so canvas width fits page width
+      const scale = pgW / cW;
+      const scaledH = cH * scale;
+      let remaining = scaledH;
+      let srcY = 0;
+
+      while(remaining > 0) {
+        const sliceScaledH = Math.min(remaining, pgH);
+        const sliceSrcH    = sliceScaledH / scale;
+
+        const slice = document.createElement('canvas');
+        slice.width  = cW;
+        slice.height = sliceSrcH;
+        slice.getContext('2d').drawImage(canvas, 0, srcY, cW, sliceSrcH, 0, 0, cW, sliceSrcH);
+
+        pdf.addImage(slice.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pgW, sliceScaledH);
+
+        srcY      += sliceSrcH;
+        remaining -= sliceScaledH;
+        if(remaining > 1) pdf.addPage();
+      }
+
+      const name = ($('abName').textContent || 'Reporte').replace(/\s+/g,'_');
+      const date = new Date().toISOString().slice(0,10);
+      pdf.save(`MentoryCap_${name}_${date}.pdf`);
+
+    } catch(err) {
+      alert('Error al generar PDF:\n' + err.message);
+    } finally {
+      btn1.textContent=orig1; btn2.textContent=orig2;
+      btn1.disabled=false; btn2.disabled=false;
+    }
+  }
+
+  [$('btnPrint'),$('btnPrint2')].forEach(b=>b.addEventListener('click', doPrint));
+  window.addEventListener('resize',()=>{ if($('reportScreen').style.display!=='none'&&chartCache.labels?.length){ drawEquityChart(); if(chartCache.stats) drawMonthlyChart(chartCache.stats); } });
+
+  function showErr(m){ $('errorMsg').textContent=m; $('errorMsg').style.display='block'; }
+  function hideErr(){ $('errorMsg').style.display='none'; }
+})();
+</script>
+
+</body>
+</html>
