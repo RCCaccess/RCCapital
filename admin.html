@@ -624,21 +624,55 @@ function computeEquityCurve(csvText){
 async function loadClientSparkline(c, safeId){
   // Load most recent report
   const { data } = await db.from('reportes')
-    .select('csv_data, mes')
+    .select('csv_data, mes, created_at')
     .eq('cliente_id', c.id)
     .order('mes', {ascending:false})
     .limit(1)
     .single();
 
-  // Update last upload date
+  // Update last upload status indicator
   const repEl = $('lastRep-'+c.id);
-  if(repEl && data && data.created_at){
-    const d = new Date(data.created_at);
-    const pad = x => String(x).padStart(2,'0');
-    repEl.textContent = '↑ '+pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes());
-    repEl.style.color = 'var(--accent)';
-  } else if(repEl){
-    repEl.textContent = 'Sin reportes';
+  if(repEl){
+    if(data && data.mes){
+      const now = new Date();
+      const curYear  = now.getFullYear();
+      const curMonth = now.getMonth()+1; // 1-12
+      const lastDay  = new Date(curYear, curMonth, 0).getDate(); // last day of current month
+      const daysLeft = lastDay - now.getDate(); // days remaining in month
+
+      // Parse report month (format: YYYY-MM)
+      const [repYear, repMonth] = data.mes.split('-').map(Number);
+
+      // Format upload date
+      const pad = x => String(x).padStart(2,'0');
+      const d = data.created_at ? new Date(data.created_at) : null;
+      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()) : data.mes;
+
+      let icon, color, label;
+
+      if(repYear === curYear && repMonth === curMonth){
+        // ✅ Report is from current month — up to date
+        icon  = '✅';
+        color = 'var(--good)';
+        label = 'Al día · '+uploadStr;
+      } else if(daysLeft <= 5){
+        // ⚠️ Report is from a previous month AND we're close to end of month
+        icon  = '⚠️';
+        color = 'var(--warn)';
+        label = 'Vence en '+daysLeft+'d · últ. '+uploadStr;
+      } else {
+        // 🔴 Report is from a previous month
+        icon  = '🔴';
+        color = 'var(--bad)';
+        label = 'Desactualizado · '+uploadStr;
+      }
+
+      repEl.innerHTML = icon+' <span style="font-family:var(--mono);font-size:10px;">'+label+'</span>';
+      repEl.style.color = color;
+
+    } else {
+      repEl.innerHTML = '⚪ <span style="font-family:var(--mono);font-size:10px;color:var(--muted);">Sin reportes</span>';
+    }
   }
 
   if(!data || !data.csv_data) return;
