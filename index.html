@@ -63,7 +63,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .hero-right{text-align:right;}
 .hero-eq-label{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
 .hero-eq{font-size:28px;font-weight:800;font-family:var(--mono);letter-spacing:-.5px;}
-.hero-dep{font-size:12px;color:var(--muted);margin-top:4px;font-family:var(--mono);}
+.hero-dep{font-size:12px;color:var(--muted);margin-top:6px;font-family:var(--mono);line-height:1.8;}
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
 @media(max-width:640px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
 .kpi-box{background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:16px;padding:14px 16px;}
@@ -162,24 +162,14 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="kpi-box"><div class="kb-label">Mejor mes</div><div class="kb-value pos" id="kpiBest">—</div><div class="kb-sub" id="kpiBestLbl">— <span style="font-size:9px;opacity:.6;">neto</span></div></div>
         <div class="kpi-box"><div class="kb-label">Meses positivos</div><div class="kb-value" id="kpiPosM">—</div><div class="kb-sub">De los meses operados</div></div>
       </div>
-      <div class="kpi-box" id="kpiDepFeeBox" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px;">
-  <div>
-    <div class="kb-label">Activation Fee (Depósito)</div>
-    <div class="kb-sub">Costo único de activación de la cuenta</div>
-  </div>
-  <div style="text-align:right;">
-    <div class="kb-value neg" id="kpiDepFee">—</div>
-    <div class="kb-sub">de <span id="kpiDepGross">—</span> depositados</div>
-  </div>
-</div>
-<div class="divider"></div>
+      <div class="divider"></div>
       <div class="section fu fu3">
         <div class="section-title"><span>Evolución del Capital</span>
           <div class="range-ctrl" id="rangeBar"><button class="rc-btn active" data-range="ALL">Todo</button><button class="rc-btn" data-range="6M">6M</button><button class="rc-btn" data-range="3M">3M</button><button class="rc-btn" data-range="1M">1M</button></div>
         </div>
         <div class="chart-box"><canvas id="chartEquity"></canvas></div>
         <div class="chart-stats">
-          <div class="cst"><div class="cst-label">Inicio período</div><div class="cst-value" id="cstOpen">—</div></div>
+          <div class="cst"><div class="cst-label">Capital inicial</div><div class="cst-value" id="cstOpen">—</div></div>
           <div class="cst"><div class="cst-label">Valor actual</div><div class="cst-value" id="cstClose">—</div></div>
           <div class="cst"><div class="cst-label">Máximo</div><div class="cst-value pos" id="cstHigh">—</div></div>
           <div class="cst"><div class="cst-label">Variación</div><div class="cst-value" id="cstChg">—</div></div>
@@ -293,7 +283,14 @@ function renderReporte(rep){
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
   $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
   $('heroEq').textContent=fmtUSD(stats.equity);
-  $('heroDep').textContent='Capital gestionado: '+fmtUSD(stats.dep)+(stats.depFeeAmt>0?' · Activation fee: '+fmtUSD(stats.depFeeAmt):'');
+  if(stats.depFeeAmt>0){
+    $('heroDep').innerHTML=
+      'Depósito inicial: <span style="color:var(--text);font-weight:600;">'+fmtUSD(stats.depGross)+'</span><br>'+
+      'Activation fee: <span style="color:var(--bad);">-'+fmtUSD(stats.depFeeAmt)+'</span><br>'+
+      '<span style="color:var(--accent);font-weight:700;">Capital a gestionar: '+fmtUSD(stats.dep)+'</span>';
+  } else {
+    $('heroDep').textContent='Depósito inicial: '+fmtUSD(stats.depGross);
+  }
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
@@ -302,13 +299,7 @@ function renderReporte(rep){
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
   $('kpiPosM').textContent=stats.posM+' / '+stats.me.length;
-  if(stats.depFeeAmt>0){
-    $('kpiDepFeeBox').style.display='flex';
-    $('kpiDepFee').textContent='-'+fmtUSD(stats.depFeeAmt);
-    $('kpiDepGross').textContent=fmtUSD(stats.depGross);
-  } else {
-    $('kpiDepFeeBox').style.display='none';
-  }
+ 
   activeRange='ALL';updateRangeUI();drawEquityChart();drawMonthlyChart(stats);buildTable(stats);
 }
  
@@ -349,7 +340,7 @@ function drawEquityChart(){
   ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(ex,ey,2,0,Math.PI*2);ctx.fill();
   canvas._d={labels,equity,deposit,pad,iw,ih,minV,span};
   const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;
-  $('cstOpen').textContent=fmtUSD(open);$('cstClose').textContent=fmtUSD(close);$('cstHigh').textContent=fmtUSD(high);
+  $('cstOpen').textContent=fmtUSD(CC.deposit);$('cstClose').textContent=fmtUSD(close);$('cstHigh').textContent=fmtUSD(high);
   $('cstChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chgPct>=0?'+':'')+fmtPct(chgPct)+')';
   $('cstChg').className='cst-value '+(chg>=0?'pos':'neg');
 }
@@ -411,7 +402,8 @@ async function generarPDF(){
     pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('heroSub').textContent||'',colL+5,y+31);
     pdf.setFontSize(6);pdf.text('VALOR DE LA CUENTA',colL+colLW-5,y+7,{align:'right'});
     pdf.setFont('helvetica','bold');pdf.setFontSize(12);pdf.setTextColor(226,234,245);pdf.text($('heroEq').textContent||'—',colL+colLW-5,y+19,{align:'right'});
-    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('heroDep').textContent||'—',colL+colLW-5,y+26,{align:'right'});
+    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);const depLines=stats&&stats.depFeeAmt>0?['Depósito: '+fmtUSD(stats.depGross),'Fee: -'+fmtUSD(stats.depFeeAmt),'Capital: '+fmtUSD(stats.dep)]:['Depósito: '+fmtUSD(CC.deposit)];
+      depLines.forEach((ln,li)=>{pdf.setTextColor(li===2?[0,194,255]:[107,128,154]);pdf.text(ln,colL+colLW-5,y+20+li*5,{align:'right'});});
     y+=38;
     const kpis=[{label:'PROFIT NETO',val:$('kpiProfit').textContent,t:'profit'},{label:'DÍAS ACTIVO',val:$('kpiDays').textContent,t:'blue'},{label:'MEJOR MES',val:$('kpiBest').textContent,t:'good'},{label:'MESES POSITIVOS',val:$('kpiPosM').textContent,t:'neutral'}];
     const kW=(colLW-3)/2;
