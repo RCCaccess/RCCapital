@@ -129,7 +129,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="login-footer">Reporte personal · Solo tú puedes ver tu información</div>
   </div>
 </div>
-
+ 
 <div id="appScreen">
   <div class="action-bar">
     <div class="ab-brand"><div class="dot"></div><span>RCCapital</span></div>
@@ -157,9 +157,9 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="hero-right"><div class="hero-eq-label">Valor de la cuenta</div><div class="hero-eq" id="heroEq">—</div><div class="hero-dep" id="heroDep">—</div></div>
       </div>
       <div class="kpi-row fu fu2">
-        <div class="kpi-box"><div class="kb-label">Profit neto</div><div class="kb-value" id="kpiProfit">—</div><div class="kb-sub">Ganancias acumuladas</div></div>
+        <div class="kpi-box"><div class="kb-label">Profit neto</div><div class="kb-value" id="kpiProfit">—</div><div class="kb-sub">Después de comisiones</div></div>
         <div class="kpi-box"><div class="kb-label">Días activo</div><div class="kb-value accent" id="kpiDays">—</div><div class="kb-sub" id="kpiDaysSub">—</div></div>
-        <div class="kpi-box"><div class="kb-label">Mejor mes</div><div class="kb-value pos" id="kpiBest">—</div><div class="kb-sub" id="kpiBestLbl">—</div></div>
+        <div class="kpi-box"><div class="kb-label">Mejor mes</div><div class="kb-value pos" id="kpiBest">—</div><div class="kb-sub" id="kpiBestLbl">— <span style="font-size:9px;opacity:.6;">neto</span></div></div>
         <div class="kpi-box"><div class="kb-label">Meses positivos</div><div class="kb-value" id="kpiPosM">—</div><div class="kb-sub">De los meses operados</div></div>
       </div>
       <div class="divider"></div>
@@ -179,14 +179,14 @@ tr:hover td{background:rgba(255,255,255,.02);}
       <div class="divider"></div>
       <div class="section">
         <div class="section-title">Resumen por Período</div>
-        <div class="scroll-wrap"><table><thead><tr><th>Mes</th><th style="text-align:right">P&L del mes</th><th style="text-align:right">Retorno %</th><th style="text-align:right">Equity final</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
+        <div class="scroll-wrap"><table><thead><tr><th>Mes</th><th style="text-align:right">P&L neto del mes</th><th style="text-align:right">Retorno %</th><th style="text-align:right">Equity final</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
       </div>
       <div class="report-footer">Este reporte es de carácter informativo y refleja el desempeño histórico de la cuenta.<br/>Rendimientos pasados no garantizan resultados futuros. Generado el <span id="footerDate">—</span>.</div>
     </div>
   </div>
 </div>
 <div id="tooltip"><div class="tt-date" id="ttDate">—</div><div class="tt-val" id="ttVal">—</div><div class="tt-chg" id="ttChg">—</div></div>
-
+ 
 <script>
 const SUPABASE_URL='https://oettmexxsohqudmshhip.supabase.co';
 const SUPABASE_KEY='sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
@@ -202,10 +202,10 @@ const mLabel=k=>{const[y,m]=k.split('-');return`${MN[+m-1]} ${y}`;};
 const fmtUSD=n=>(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
 const fmtPct=n=>(isFinite(n)?n:0).toFixed(2)+'%';
 const fmtNum=n=>(isFinite(n)?n:0).toLocaleString('en-US');
-
+ 
 $('clientEmail').addEventListener('keydown',e=>e.key==='Enter'&&login());
 $('clientPass').addEventListener('keydown',e=>e.key==='Enter'&&login());
-
+ 
 async function login(){
   const email=$('clientEmail').value.trim().toLowerCase();
   const pass=$('clientPass').value;
@@ -222,7 +222,7 @@ async function login(){
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
 function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
 async function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;await loadReportes();}
-
+ 
 async function loadReportes(){
   $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
   const{data,error}=await db.from('reportes').select('*').eq('cliente_id',currentCliente.id).order('mes',{ascending:false});
@@ -233,7 +233,7 @@ async function loadReportes(){
   $('loadingState').style.display='none';
   renderReporte(data[0]);
 }
-
+ 
 function detectSep(t){const l=(t.split(/\r?\n/)[0]||'');return(l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':',';}
 function smartSplit(line,sep){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;}out.push(cur);return out.map(x=>x.trim().replace(/^"|"$/g,''));}
 function parseNum(v){if(!v&&v!==0)return 0;let s=String(v).trim().replace(/[^\d.,\-+]/g,'');if(!s)return 0;const hC=s.includes(','),hD=s.includes('.');if(hC&&hD)s=s.replace(/,/g,'');else if(hC&&!hD){const p=s.split(',');s=(p.length===2&&p[1].length<=2)?p[0]+'.'+p[1]:s.replace(/,/g,'');}return+s||0;}
@@ -253,11 +253,11 @@ function parseCSV(text){
   for(let i=1;i<lines.length;i++){const c=smartSplit(lines[i],sep);if(c.length<3)continue;const time=parseDateAny(c[iT]);if(!time)continue;out.push({time,reason:c[iR]||'',amount:iA>=0?parseNum(c[iA]):0,amountProfit:iP>=0?parseNum(c[iP]):0});}
   return out.sort((a,b)=>a.time-b.time);
 }
-
+ 
 function computeStats(rows){
   const depTx=rows.find(r=>isDeposit(r));const dep=depTx?Math.abs(depTx.amount):0;
   let runP=0,runF=0;const dailyEq={},monthlyPnl={};
-  for(const r of rows){if(isTrade(r)){runP+=r.amountProfit;monthlyPnl[mKey(r.time)]=(monthlyPnl[mKey(r.time)]||0)+r.amountProfit;}if(isFee(r))runF+=r.amount;dailyEq[dayKey(r.time)]=dep+runP+runF;}
+  for(const r of rows){if(isDeposit(r))continue;const mk=mKey(r.time);if(!monthlyPnl[mk])monthlyPnl[mk]=0;if(isTrade(r)){runP+=r.amountProfit;monthlyPnl[mk]+=r.amountProfit;}if(isFee(r)){runF+=r.amount;monthlyPnl[mk]+=r.amount;}dailyEq[dayKey(r.time)]=dep+runP+runF;}
   const equity=dep+runP+runF,roi=dep>0?((equity-dep)/dep*100):0;
   const me=Object.entries(monthlyPnl).sort(([a],[b])=>a.localeCompare(b));
   const posM=me.filter(([,v])=>v>0).length;
@@ -268,7 +268,7 @@ function computeStats(rows){
   const mEq={};for(const{dk,eq}of es)mEq[dk.slice(0,7)]=eq;
   return{dep,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq};
 }
-
+ 
 function renderReporte(rep){
   let rows;try{rows=parseCSV(rep.csv_data);}catch(e){$('emptyState').style.display='block';return;}
   const stats=computeStats(rows);
@@ -280,11 +280,12 @@ function renderReporte(rep){
   $('rhDate').textContent=ts;$('footerDate').textContent=ts;
   $('heroROI').textContent=(stats.roi>=0?'+':'')+fmtPct(stats.roi);
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
-  $('heroSub').textContent=stats.days+' días desde el depósito inicial';
+  $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
   $('heroEq').textContent=fmtUSD(stats.equity);
   $('heroDep').textContent='Depósito inicial: '+fmtUSD(stats.dep);
-  $('kpiProfit').textContent=(stats.runP>=0?'+':'')+fmtUSD(stats.runP);
-  $('kpiProfit').className='kb-value '+(stats.runP>=0?'pos':'neg');
+  const netProfit=stats.runP+stats.runF;
+  $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
+  $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
   $('kpiDays').textContent=fmtNum(stats.days);
   $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'—';
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
@@ -292,15 +293,15 @@ function renderReporte(rep){
   $('kpiPosM').textContent=stats.posM+' / '+stats.me.length;
   activeRange='ALL';updateRangeUI();drawEquityChart();drawMonthlyChart(stats);buildTable(stats);
 }
-
+ 
 function buildTable(stats){
   const tbody=$('summaryBody');tbody.innerHTML='';
   for(const[mk,pnl]of stats.me){const eq=stats.mEq[mk]||stats.dep,prev=eq-pnl,pct=prev>0?(pnl/Math.abs(prev)*100):0;const tr=document.createElement('tr');tr.innerHTML=`<td style="font-family:var(--sans);font-size:13px;">${mLabel(mk)}</td><td style="text-align:right;font-family:var(--mono);color:${pnl>=0?'var(--good)':'var(--bad)'};">${pnl>=0?'+':''}${fmtUSD(pnl)}</td><td style="text-align:right;font-family:var(--mono);color:${pct>=0?'var(--good)':'var(--bad)'};">${pct>=0?'+':''}${fmtPct(pct)}</td><td style="text-align:right;font-family:var(--mono);">${fmtUSD(eq)}</td>`;tbody.appendChild(tr);}
 }
-
+ 
 function hiDPI(canvas,H){const rect=canvas.getBoundingClientRect();const dpr=window.devicePixelRatio||1;const W=Math.max(200,rect.width||700);canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.height=H+'px';const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);return{ctx,W,H};}
 function getFiltered(){const{labels,equity,deposit}=CC;if(activeRange==='ALL')return{labels,equity,deposit};const last=new Date(labels[labels.length-1]);let ms=null;if(activeRange==='1M')ms=last.getTime()-30*86400000;else if(activeRange==='3M'){const d=new Date(last);d.setMonth(d.getMonth()-3);ms=d.getTime();}else if(activeRange==='6M'){const d=new Date(last);d.setMonth(d.getMonth()-6);ms=d.getTime();}const idx=labels.findIndex(l=>new Date(l).getTime()>=ms);return idx<0?{labels,equity,deposit}:{labels:labels.slice(idx),equity:equity.slice(idx),deposit};}
-
+ 
 function drawEquityChart(){
   const{labels,equity,deposit}=getFiltered();const canvas=$('chartEquity');
   const{ctx,W,H}=hiDPI(canvas,260);ctx.clearRect(0,0,W,H);if(!labels.length)return;
@@ -334,7 +335,7 @@ function drawEquityChart(){
   $('cstChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chgPct>=0?'+':'')+fmtPct(chgPct)+')';
   $('cstChg').className='cst-value '+(chg>=0?'pos':'neg');
 }
-
+ 
 function drawMonthlyChart(stats){
   if(!stats.me.length)return;const canvas=$('chartMonthly');
   const{ctx,W,H}=hiDPI(canvas,160);ctx.clearRect(0,0,W,H);
@@ -353,7 +354,7 @@ function drawMonthlyChart(stats){
   ctx.fillStyle='#6b809a';ctx.font='10px Syne,sans-serif';ctx.textAlign='center';
   for(let i=0;i<n;i++){const x=pad.l+slot*(i+0.5);ctx.save();ctx.translate(x,pad.t+ih+10);ctx.rotate(-Math.PI/5);ctx.fillText(labels[i],0,0);ctx.restore();}
 }
-
+ 
 $('chartEquity').addEventListener('mousemove',e=>{
   const canvas=$('chartEquity');if(!canvas._d)return;
   const{labels,equity,pad,iw}=canvas._d;
@@ -366,10 +367,10 @@ $('chartEquity').addEventListener('mousemove',e=>{
   const tt=$('tooltip');tt.style.display='block';tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-44)+'px';
 });
 $('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');
-
+ 
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
-
+ 
 async function generarPDF(){
   if(!CC.labels||!CC.labels.length){alert('No hay datos para generar el PDF.');return;}
   const btn=$('btnPDF');btn.textContent='⏳ Generando...';btn.disabled=true;
@@ -422,7 +423,7 @@ async function generarPDF(){
   }catch(err){alert('Error PDF: '+err.message);}
   finally{btn.textContent='⬇️ Guardar PDF';btn.disabled=false;}
 }
-
+ 
 window.addEventListener('resize',()=>{if(CC.labels&&CC.labels.length){drawEquityChart();if(CC.stats)drawMonthlyChart(CC.stats);}});
 const saved=sessionStorage.getItem('rc_client');
 if(saved){try{currentCliente=JSON.parse(saved);showApp();}catch(e){}}
