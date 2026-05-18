@@ -505,9 +505,9 @@ function renderClientesTable(){
     card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
     const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
     card.innerHTML =
-      // COL 1: Info + inline sparkline (CMC style)
-      '<div style="display:flex;align-items:center;gap:0;">' +
-        // Left: all text info
+      // COL 1: Sparkline LEFT + info right (original style)
+      '<div style="display:flex;align-items:center;gap:14px;">' +
+        '<canvas id="spark-' + safeId + '" width="160" height="56" style="flex-shrink:0;border-radius:8px;display:block;"></canvas>' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">' + c.nombre + '</div>' +
           '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px;">' + c.email + '</div>' +
@@ -525,8 +525,6 @@ function renderClientesTable(){
             '<span style="font-size:11px;font-family:var(--mono);color:var(--muted);">' + fmtDate(c.created_at) + '</span></div>' +
           '</div>' +
         '</div>' +
-        // Right: sparkline flush right inside col1 (CMC style)
-        '<canvas id="spark-' + safeId + '" width="160" height="56" style="flex-shrink:0;margin-left:16px;border-radius:6px;display:block;"></canvas>' +
       '</div>' +
       // COL 2: Password with eye
       '<div style="text-align:center;min-width:120px;">' +
@@ -538,7 +536,7 @@ function renderClientesTable(){
         '</div>' +
       '</div>' +
       // COL 3: Delete
-      '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="align-self:center;white-space:nowrap;">🗑</button>';
+      '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="align-self:center;">🗑</button>';
     cards.appendChild(card);
     loadClientSparkline(c, safeId);
   });
