@@ -496,36 +496,60 @@ function renderClientesTable(){
  
   clientesCache.forEach(c => {
     const safeId = c.id.replace(/-/g,'');
+    const passId = 'pass-'+safeId;
+    const eyeId  = 'eye-'+safeId;
     const card = document.createElement('div');
     card.id = 'card-'+safeId;
-    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;transition:border-color .2s;';
+    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto auto;gap:16px;align-items:center;transition:border-color .2s;';
     card.onmouseenter = () => card.style.borderColor='rgba(255,255,255,.16)';
     card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
-    card.innerHTML = `
-      <div style="display:flex;align-items:center;gap:14px;">
-        <canvas id="spark-${safeId}" width="90" height="40" style="border-radius:6px;flex-shrink:0;"></canvas>
-        <div>
-          <div style="font-weight:700;font-size:14px;">${c.nombre}</div>
-          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;">${c.email}</div>
-          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <span id="roi-${safeId}" style="font-size:11px;font-weight:700;font-family:var(--mono);">—</span>
-            <span id="eq-${safeId}" style="font-size:11px;color:var(--muted);font-family:var(--mono);">—</span>
-            <span id="repCount-${c.id}" class="badge warn" style="font-size:10px;">...</span>
-          </div>
-        </div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Contraseña</div>
-        <div style="font-family:var(--mono);font-size:12px;color:var(--warn);">${c.password_hash||'—'}</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px;">${fmtDate(c.created_at)}</div>
-      </div>
-      <button class="btn danger" onclick="confirmDelete('${c.id}','${c.nombre}')" style="align-self:center;">🗑 Eliminar</button>
-    `;
+    const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    card.innerHTML =
+      '<div>' +
+        '<div style="font-weight:700;font-size:14px;margin-bottom:3px;">' + c.nombre + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px;">' + c.email + '</div>' +
+        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">' +
+          '<span id="roi-' + safeId + '" style="font-size:12px;font-weight:700;font-family:var(--mono);">—</span>' +
+          '<span id="eq-' + safeId + '" style="font-size:11px;color:var(--muted);font-family:var(--mono);">—</span>' +
+          '<span id="repCount-' + c.id + '" class="badge warn" style="font-size:10px;">...</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap;">' +
+          '<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Inicio</div>' +
+          '<div id="startDate-' + safeId + '" style="font-size:11px;font-family:var(--mono);color:var(--text);margin-top:2px;">—</div></div>' +
+          '<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Días activo</div>' +
+          '<div id="daysActive-' + safeId + '" style="font-size:11px;font-family:var(--mono);color:var(--accent);margin-top:2px;">—</div></div>' +
+          '<div><div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Registrado</div>' +
+          '<div style="font-size:11px;font-family:var(--mono);color:var(--muted);margin-top:2px;">' + fmtDate(c.created_at) + '</div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="text-align:center;">' +
+        '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px;">Contraseña</div>' +
+        '<div style="display:flex;align-items:center;gap:6px;justify-content:center;">' +
+          '<span id="' + passId + '" data-visible="0" style="font-family:var(--mono);font-size:12px;color:var(--warn);letter-spacing:2px;">••••••••</span>' +
+          '<button id="' + eyeId + '" onclick="togglePass(\'' + passId + '\',\'' + eyeId + '\',\'' + passEscaped + '\')" ' +
+            'style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;font-size:14px;line-height:1;transition:color .15s;" title="Mostrar/ocultar">👁</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+        '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Progreso</div>' +
+        '<canvas id="spark-' + safeId + '" width="120" height="50" style="border-radius:8px;display:block;"></canvas>' +
+      '</div>' +
+      '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="align-self:center;">🗑</button>';
     cards.appendChild(card);
- 
-    // Load latest report and draw sparkline
     loadClientSparkline(c, safeId);
   });
+}
+ 
+// ── TOGGLE PASSWORD ──────────────────────────────────────────────
+function togglePass(passId, eyeId, password){
+  const el=$( passId), btn=$(eyeId); if(!el) return;
+  if(el.dataset.visible==='1'){
+    el.textContent='••••••••'; el.dataset.visible='0';
+    el.style.letterSpacing='2px'; btn.style.color='var(--muted)';
+  } else {
+    el.textContent=password||'—'; el.dataset.visible='1';
+    el.style.letterSpacing='normal'; btn.style.color='var(--accent)';
+  }
 }
  
 // ── CSV HELPERS (admin) ──────────────────────────────────────────
@@ -574,7 +598,10 @@ function computeEquityCurve(csvText){
     if(!equity.length) return {dep, equity:[dep], roi:0};
     const lastEq = equity[equity.length-1];
     const roi = dep>0 ? ((lastEq-dep)/dep*100) : 0;
-    return {dep, equity:[dep,...equity], roi};
+    const sortedRows2 = rows.filter(r=>!/^deposit$/.test(r.reason)&&!/^depositfee$/.test(r.reason));
+    const firstDate = sortedRows2.length ? sortedRows2[0].time : null;
+    const lastDate  = sortedRows2.length ? sortedRows2[sortedRows2.length-1].time : null;
+    return {dep, equity:[dep,...equity], roi, firstDate, lastDate};
   } catch(e){ return null; }
 }
  
@@ -603,6 +630,8 @@ async function loadClientSparkline(c, safeId){
   // Update ROI and equity labels
   const roiEl = $('roi-'+safeId);
   const eqEl  = $('eq-'+safeId);
+  const sdEl  = $('startDate-'+safeId);
+  const daEl  = $('daysActive-'+safeId);
   if(roiEl){
     roiEl.textContent = (isPos?'+':'')+roi.toFixed(2)+'%';
     roiEl.style.color = isPos ? 'var(--good)' : 'var(--bad)';
@@ -611,12 +640,20 @@ async function loadClientSparkline(c, safeId){
     const lastEq = equity[equity.length-1];
     eqEl.textContent = 'Equity: $'+lastEq.toFixed(2);
   }
+  if(result.firstDate && sdEl){
+    const fd = result.firstDate;
+    sdEl.textContent = fd.getDate().toString().padStart(2,'0')+'/'+(fd.getMonth()+1).toString().padStart(2,'0')+'/'+fd.getFullYear();
+  }
+  if(result.firstDate && result.lastDate && daEl){
+    const days = Math.round((result.lastDate - result.firstDate)/86400000);
+    daEl.textContent = days + ' días';
+  }
  
   // Draw sparkline
   const canvas = $('spark-'+safeId);
   if(!canvas) return;
   const dpr = window.devicePixelRatio||1;
-  const W=90, H=40;
+  const W=120, H=50;
   canvas.width=W*dpr; canvas.height=H*dpr;
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');
