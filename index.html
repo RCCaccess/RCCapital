@@ -157,12 +157,22 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="hero-right"><div class="hero-eq-label">Valor de la cuenta</div><div class="hero-eq" id="heroEq">—</div><div class="hero-dep" id="heroDep">—</div></div>
       </div>
       <div class="kpi-row fu fu2">
-        <div class="kpi-box"><div class="kb-label">Profit neto</div><div class="kb-value" id="kpiProfit">—</div><div class="kb-sub">Después de comisiones</div></div>
+        <div class="kpi-box"><div class="kb-label">Profit neto</div><div class="kb-value" id="kpiProfit">—</div><div class="kb-sub">Neto después de comisiones</div></div>
         <div class="kpi-box"><div class="kb-label">Días activo</div><div class="kb-value accent" id="kpiDays">—</div><div class="kb-sub" id="kpiDaysSub">—</div></div>
         <div class="kpi-box"><div class="kb-label">Mejor mes</div><div class="kb-value pos" id="kpiBest">—</div><div class="kb-sub" id="kpiBestLbl">— <span style="font-size:9px;opacity:.6;">neto</span></div></div>
         <div class="kpi-box"><div class="kb-label">Meses positivos</div><div class="kb-value" id="kpiPosM">—</div><div class="kb-sub">De los meses operados</div></div>
       </div>
-      <div class="divider"></div>
+      <div class="kpi-box" id="kpiDepFeeBox" style="margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px;">
+  <div>
+    <div class="kb-label">Activation Fee (Depósito)</div>
+    <div class="kb-sub">Costo único de activación de la cuenta</div>
+  </div>
+  <div style="text-align:right;">
+    <div class="kb-value neg" id="kpiDepFee">—</div>
+    <div class="kb-sub">de <span id="kpiDepGross">—</span> depositados</div>
+  </div>
+</div>
+<div class="divider"></div>
       <div class="section fu fu3">
         <div class="section-title"><span>Evolución del Capital</span>
           <div class="range-ctrl" id="rangeBar"><button class="rc-btn active" data-range="ALL">Todo</button><button class="rc-btn" data-range="6M">6M</button><button class="rc-btn" data-range="3M">3M</button><button class="rc-btn" data-range="1M">1M</button></div>
@@ -238,9 +248,10 @@ function detectSep(t){const l=(t.split(/\r?\n/)[0]||'');return(l.match(/;/g)||[]
 function smartSplit(line,sep){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;}out.push(cur);return out.map(x=>x.trim().replace(/^"|"$/g,''));}
 function parseNum(v){if(!v&&v!==0)return 0;let s=String(v).trim().replace(/[^\d.,\-+]/g,'');if(!s)return 0;const hC=s.includes(','),hD=s.includes('.');if(hC&&hD)s=s.replace(/,/g,'');else if(hC&&!hD){const p=s.split(',');s=(p.length===2&&p[1].length<=2)?p[0]+'.'+p[1]:s.replace(/,/g,'');}return+s||0;}
 function parseDateAny(s){if(!s)return null;const str=String(s).trim();let d=new Date(str);if(!isNaN(d))return d;const m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);if(m){d=new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));return isNaN(d)?null:d;}return null;}
-const isTrade=r=>/traderesult/i.test(r.reason);
-const isDeposit=r=>/^deposit$/i.test(r.reason);
-const isFee=r=>/fee/i.test(r.reason);
+const isTrade     = r => /traderesult/i.test(r.reason);
+const isDeposit   = r => /^deposit$/i.test(r.reason);
+const isDepositFee= r => /^depositfee$/i.test(r.reason);
+const isFee       = r => /fee/i.test(r.reason) && !isDepositFee(r);
 function parseCSV(text){
   const sep=detectSep(text),lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(lines.length<2)throw new Error('CSV vacío');
@@ -255,9 +266,9 @@ function parseCSV(text){
 }
  
 function computeStats(rows){
-  const depTx=rows.find(r=>isDeposit(r));const dep=depTx?Math.abs(depTx.amount):0;
+  const depTx=rows.find(r=>isDeposit(r));const depGross=depTx?Math.abs(depTx.amount):0;const depFeeTx=rows.find(r=>isDepositFee(r));const depFeeAmt=depFeeTx?Math.abs(depFeeTx.amount):0;const dep=depGross-depFeeAmt;
   let runP=0,runF=0;const dailyEq={},monthlyPnl={};
-  for(const r of rows){if(isDeposit(r))continue;const mk=mKey(r.time);if(!monthlyPnl[mk])monthlyPnl[mk]=0;if(isTrade(r)){runP+=r.amountProfit;monthlyPnl[mk]+=r.amountProfit;}if(isFee(r)){runF+=r.amount;monthlyPnl[mk]+=r.amount;}dailyEq[dayKey(r.time)]=dep+runP+runF;}
+  for(const r of rows){if(isDeposit(r)||isDepositFee(r))continue;const mk=mKey(r.time);if(!monthlyPnl[mk])monthlyPnl[mk]=0;if(isTrade(r)){runP+=r.amountProfit;monthlyPnl[mk]+=r.amountProfit;}if(isFee(r)){runF+=r.amount;monthlyPnl[mk]+=r.amount;}dailyEq[dayKey(r.time)]=dep+runP+runF;}
   const equity=dep+runP+runF,roi=dep>0?((equity-dep)/dep*100):0;
   const me=Object.entries(monthlyPnl).sort(([a],[b])=>a.localeCompare(b));
   const posM=me.filter(([,v])=>v>0).length;
@@ -266,7 +277,7 @@ function computeStats(rows){
   const days=fd&&ld?Math.round((ld-fd)/86400000):0;
   const sd=Object.keys(dailyEq).sort();const es=sd.map(dk=>({dk,eq:dailyEq[dk]}));
   const mEq={};for(const{dk,eq}of es)mEq[dk.slice(0,7)]=eq;
-  return{dep,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq};
+  return{dep,depGross,depFeeAmt,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq};
 }
  
 function renderReporte(rep){
@@ -282,7 +293,7 @@ function renderReporte(rep){
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
   $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
   $('heroEq').textContent=fmtUSD(stats.equity);
-  $('heroDep').textContent='Depósito inicial: '+fmtUSD(stats.dep);
+  $('heroDep').textContent='Capital gestionado: '+fmtUSD(stats.dep)+(stats.depFeeAmt>0?' · Activation fee: '+fmtUSD(stats.depFeeAmt):'');
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
@@ -291,6 +302,13 @@ function renderReporte(rep){
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
   $('kpiPosM').textContent=stats.posM+' / '+stats.me.length;
+  if(stats.depFeeAmt>0){
+    $('kpiDepFeeBox').style.display='flex';
+    $('kpiDepFee').textContent='-'+fmtUSD(stats.depFeeAmt);
+    $('kpiDepGross').textContent=fmtUSD(stats.depGross);
+  } else {
+    $('kpiDepFeeBox').style.display='none';
+  }
   activeRange='ALL';updateRangeUI();drawEquityChart();drawMonthlyChart(stats);buildTable(stats);
 }
  
