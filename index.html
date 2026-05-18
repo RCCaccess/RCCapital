@@ -1,3 +1,6 @@
+
+Copiar
+
 <!doctype html>
 <html lang="es">
 <head>
@@ -170,9 +173,10 @@ tr:hover td{background:rgba(255,255,255,.02);}
         <div class="chart-box"><canvas id="chartEquity"></canvas></div>
         <div class="chart-stats">
           <div class="cst"><div class="cst-label">Capital inicial</div><div class="cst-value" id="cstOpen">—</div></div>
+        <div class="cst"><div class="cst-label">Mínimo</div><div class="cst-value neg" id="cstLow">—</div></div>
           <div class="cst"><div class="cst-label">Valor actual</div><div class="cst-value" id="cstClose">—</div></div>
           <div class="cst"><div class="cst-label">Máximo</div><div class="cst-value pos" id="cstHigh">—</div></div>
-          <div class="cst"><div class="cst-label">Variación</div><div class="cst-value" id="cstChg">—</div></div>
+          
         </div>
       </div>
       <div class="section fu fu4"><div class="section-title">Resultado Mensual</div><div class="chart-box"><canvas id="chartMonthly"></canvas></div></div>
@@ -341,8 +345,9 @@ function drawEquityChart(){
   canvas._d={labels,equity,deposit,pad,iw,ih,minV,span};
   const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;
   $('cstOpen').textContent=fmtUSD(CC.deposit);$('cstClose').textContent=fmtUSD(close);$('cstHigh').textContent=fmtUSD(high);
-  $('cstChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chgPct>=0?'+':'')+fmtPct(chgPct)+')';
-  $('cstChg').className='cst-value '+(chg>=0?'pos':'neg');
+  const low=Math.min(...equity);
+  $('cstLow').textContent=fmtUSD(low);
+  
 }
  
 function drawMonthlyChart(stats){
@@ -409,7 +414,7 @@ async function generarPDF(){
     const kW=(colLW-3)/2;
     kpis.forEach((k,i)=>{const kx=colL+(i%2)*(kW+3),ky=y+Math.floor(i/2)*20;pdf.setFillColor(10,15,24);pdf.roundedRect(kx,ky,kW,17,2,2,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);pdf.text(k.label,kx+3,ky+6);pdf.setFontSize(9);if(k.t==='profit'){if(k.val.startsWith('-')){pdf.setTextColor(255,79,106);}else{pdf.setTextColor(34,214,138);}}else if(k.t==='blue')pdf.setTextColor(0,194,255);else if(k.t==='good')pdf.setTextColor(34,214,138);else pdf.setTextColor(226,234,245);pdf.text(k.val||'—',kx+3,ky+13);});
     y+=43;
-    const cs=[{l:'INICIO',v:$('cstOpen').textContent},{l:'ACTUAL',v:$('cstClose').textContent},{l:'MÁXIMO',v:$('cstHigh').textContent},{l:'VARIAC.',v:$('cstChg').textContent}];
+    const cs=[{l:'INICIO',v:$('cstOpen').textContent},{l:'ACTUAL',v:$('cstClose').textContent},{l:'MÁXIMO',v:$('cstHigh').textContent},{l:'MÍNIMO',v:$('cstLow').textContent}];
     const csW=(colLW-9)/4;
     cs.forEach((s,i)=>{const sx=colL+i*(csW+3);pdf.setFillColor(8,12,20);pdf.roundedRect(sx,y,csW,12,2,2,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.setTextColor(107,128,154);pdf.text(s.l,sx+2,y+5);pdf.setFontSize(6);pdf.setFont('helvetica','normal');const sp=!s.v.startsWith('-');if(i===3){if(sp){pdf.setTextColor(34,214,138);}else{pdf.setTextColor(255,79,106);}}else{pdf.setTextColor(226,234,245);}pdf.text(s.v||'—',sx+2,y+10);});
     y+=16;
