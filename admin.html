@@ -16,7 +16,7 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
   background-image:radial-gradient(ellipse 900px 500px at 80% -10%,rgba(0,194,255,.05),transparent);}
-
+ 
 /* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
 .login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;
@@ -39,10 +39,10 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .btn-primary:hover{opacity:.85;}
 .btn-primary:disabled{opacity:.4;cursor:not-allowed;}
 #loginErr{font-size:12px;color:var(--bad);margin-top:10px;text-align:center;display:none;}
-
+ 
 /* MAIN APP */
 #appScreen{display:none;min-height:100vh;}
-
+ 
 /* SIDEBAR */
 .layout{display:flex;min-height:100vh;}
 .sidebar{width:220px;background:var(--surface);border-right:1px solid var(--border);
@@ -64,21 +64,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
   border:1px solid rgba(255,79,106,.15);width:100%;font-family:var(--sans);font-weight:600;
   transition:all .15s;}
 .logout-btn:hover{background:rgba(255,79,106,.15);}
-
+ 
 /* CONTENT */
 .content{flex:1;padding:32px;overflow-y:auto;}
 .page{display:none;}
 .page.active{display:block;}
 .page-title{font-size:22px;font-weight:800;margin-bottom:4px;}
 .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
-
+ 
 /* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
 .card-hd{padding:16px 20px;border-bottom:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;gap:12px;}
 .card-hd h3{font-size:13px;font-weight:700;}
 .card-bd{padding:20px;}
-
+ 
 /* STATS ROW */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
 .stat-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
@@ -86,7 +86,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .stat-box .sv{font-size:26px;font-weight:800;font-family:var(--mono);}
 .stat-box.accent .sv{color:var(--accent);}
 .stat-box.good .sv{color:var(--good);}
-
+ 
 /* BUTTONS */
 .btn{font-family:var(--sans);font-size:12px;font-weight:700;padding:8px 14px;
   border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,.06);
@@ -98,7 +98,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:1
 .btn.danger:hover{background:rgba(255,79,106,.18);}
 .btn.good{background:rgba(34,214,138,.1);border-color:rgba(34,214,138,.25);color:var(--good);}
 .btn:disabled{opacity:.4;cursor:not-allowed;}
-
+ 
 /* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
 table{width:100%;border-collapse:collapse;font-size:13px;}
@@ -113,7 +113,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 .badge.good{background:rgba(34,214,138,.12);color:var(--good);border:1px solid rgba(34,214,138,.2);}
 .badge.warn{background:rgba(245,166,35,.1);color:var(--warn);border:1px solid rgba(245,166,35,.2);}
 .badge.bad{background:rgba(255,79,106,.1);color:var(--bad);border:1px solid rgba(255,79,106,.2);}
-
+ 
 /* FORM */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 @media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
@@ -128,7 +128,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   border:1.5px dashed var(--border2);border-radius:8px;color:var(--muted);
   font-family:var(--sans);font-size:13px;cursor:pointer;width:100%;display:block;}
 .form-full{grid-column:1/-1;}
-
+ 
 /* TOAST */
 #toast{position:fixed;right:20px;bottom:20px;z-index:999;
   background:var(--surface2);border:1px solid var(--border2);
@@ -136,7 +136,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;max-width:320px;}
 #toast.good{border-color:rgba(34,214,138,.3);color:var(--good);}
 #toast.bad{border-color:rgba(255,79,106,.3);color:var(--bad);}
-
+ 
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);
   display:none;place-items:center;z-index:200;padding:20px;}
@@ -146,24 +146,24 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 .modal h3{font-size:16px;font-weight:800;margin-bottom:6px;}
 .modal p{font-size:13px;color:var(--muted);margin-bottom:20px;}
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
-
+ 
 /* EMPTY */
 .empty{text-align:center;padding:48px 20px;color:var(--muted);}
 .empty .ei{font-size:40px;margin-bottom:12px;}
 .empty p{font-size:13px;}
-
+ 
 /* LOADER */
 .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);
   border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
+ 
 /* UPLOAD PROGRESS */
 .progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px;}
 .progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
 </style>
 </head>
 <body>
-
+ 
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
@@ -184,7 +184,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     <div id="loginErr"></div>
   </div>
 </div>
-
+ 
 <!-- APP -->
 <div id="appScreen">
   <div class="layout">
@@ -207,10 +207,10 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
       </div>
     </div>
-
+ 
     <!-- CONTENT -->
     <div class="content">
-
+ 
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-title">Dashboard</div>
@@ -227,7 +227,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
           </div>
         </div>
       </div>
-
+ 
       <!-- CLIENTES -->
       <div class="page" id="page-clientes">
         <div class="page-title">Clientes</div>
@@ -281,7 +281,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
           </div>
         </div>
       </div>
-
+ 
       <!-- REPORTES -->
       <div class="page" id="page-reportes">
         <div class="page-title">Reportes</div>
@@ -338,11 +338,11 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
           </div>
         </div>
       </div>
-
+ 
     </div><!-- /content -->
   </div><!-- /layout -->
 </div><!-- /appScreen -->
-
+ 
 <!-- MODAL CONFIRMAR ELIMINAR -->
 <div class="modal-overlay" id="modalEliminar">
   <div class="modal">
@@ -354,26 +354,26 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     </div>
   </div>
 </div>
-
+ 
 <div id="toast"></div>
-
+ 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
-
+ 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
 const ADMIN_PASS  = 'RCCapital2024Admin';
-
+ 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
+ 
 // ── HELPERS ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 let clientesCache = [];
 let pendingDeleteId = null;
-
+ 
 function toast(msg, type='good'){
   const t = $('toast');
   t.textContent = msg;
@@ -382,22 +382,22 @@ function toast(msg, type='good'){
   clearTimeout(toast._t);
   toast._t = setTimeout(()=> t.style.display='none', 3500);
 }
-
+ 
 function fmtDate(iso){
   if(!iso) return '—';
   return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
-
+ 
 // ── AUTH ──────────────────────────────────────────────────────────
 $('adminEmail').addEventListener('keydown', e => e.key==='Enter' && login());
 $('adminPass').addEventListener('keydown',  e => e.key==='Enter' && login());
-
+ 
 async function login(){
   const email = $('adminEmail').value.trim();
   const pass  = $('adminPass').value;
   const err   = $('loginErr');
   const btn   = $('loginBtn');
-
+ 
   if(!email || !pass){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
   if(email !== ADMIN_EMAIL || pass !== ADMIN_PASS){
     err.textContent='Credenciales incorrectas.'; err.style.display='block'; return;
@@ -406,20 +406,20 @@ async function login(){
   sessionStorage.setItem('rcadmin','1');
   showApp();
 }
-
+ 
 function logout(){
   sessionStorage.removeItem('rcadmin');
   $('appScreen').style.display='none';
   $('loginScreen').style.display='flex';
   $('adminPass').value='';
 }
-
+ 
 function showApp(){
   $('loginScreen').style.display='none';
   $('appScreen').style.display='block';
   loadAll();
 }
-
+ 
 // ── NAVIGATION ────────────────────────────────────────────────────
 function showPage(name, el){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -427,14 +427,14 @@ function showPage(name, el){
   $('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
 }
-
+ 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
 async function loadAll(){
   await loadClientes();
   await loadReportes();
   updateDashboard();
 }
-
+ 
 async function loadClientes(){
   const { data, error } = await db.from('clientes').select('*').order('created_at',{ascending:false});
   if(error){ toast('Error cargando clientes','bad'); return; }
@@ -443,7 +443,7 @@ async function loadClientes(){
   renderClientesSelect();
   $('clienteCount').textContent = clientesCache.length;
 }
-
+ 
 async function loadReportes(){
   const { data, error } = await db.from('reportes')
     .select('*, clientes(nombre,email)')
@@ -452,7 +452,7 @@ async function loadReportes(){
   renderReportesTable(data || []);
   return data || [];
 }
-
+ 
 // ── DASHBOARD ────────────────────────────────────────────────────
 async function updateDashboard(){
   $('statClientes').textContent = clientesCache.length;
@@ -460,7 +460,7 @@ async function updateDashboard(){
   const all = reps || [];
   $('statReportes').textContent = all.length;
   $('statUltimo').textContent = all[0] ? fmtDate(all[0].created_at) : '—';
-
+ 
   const act = $('actividadReciente');
   if(!all.length){
     act.innerHTML='<div class="empty"><div class="ei">📋</div><p>Sin actividad aún. Sube el primer reporte.</p></div>';
@@ -479,7 +479,7 @@ async function updateDashboard(){
     </tr>`).join('')}</tbody>
   </table>`;
 }
-
+ 
 // ── CLIENTES TABLE ───────────────────────────────────────────────
 function renderClientesTable(){
   const tbody = $('clientesBody');
@@ -493,7 +493,7 @@ function renderClientesTable(){
   container.style.background = 'transparent';
   container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
   const cards = $('clientCards');
-
+ 
   clientesCache.forEach(c => {
     const safeId = c.id.replace(/-/g,'');
     const passId = 'pass-'+safeId;
@@ -536,12 +536,15 @@ function renderClientesTable(){
         '</div>' +
       '</div>' +
       // COL 3: Delete
-      '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="align-self:center;">🗑</button>';
+      '<div style="display:flex;flex-direction:column;gap:6px;align-self:center;">' +
+        '<button class="btn accent" onclick="openEditPass(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="font-size:11px;padding:6px 10px;">🔑 Clave</button>' +
+        '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="font-size:11px;padding:6px 10px;">🗑 Borrar</button>' +
+      '</div>';
     cards.appendChild(card);
     loadClientSparkline(c, safeId);
   });
 }
-
+ 
 // ── TOGGLE PASSWORD ──────────────────────────────────────────────
 function togglePass(passId, eyeId, password){
   const el=$( passId), btn=$(eyeId); if(!el) return;
@@ -553,7 +556,7 @@ function togglePass(passId, eyeId, password){
     el.style.letterSpacing='normal'; btn.style.color='var(--accent)';
   }
 }
-
+ 
 // ── CSV HELPERS (admin) ──────────────────────────────────────────
 function detectSepA(t){ const l=(t.split(/\r?\n/)[0]||''); return (l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':',';}
 function smartSplitA(line,sep){ const out=[]; let cur='',inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;} out.push(cur); return out.map(x=>x.trim().replace(/^"|"$/g,'')); }
@@ -561,7 +564,7 @@ function parseNumA(v){ if(!v&&v!==0)return 0; let s=String(v).trim().replace(/[^
 function parseDateA(s){ if(!s)return null; const str=String(s).trim(); let d=new Date(str); if(!isNaN(d))return d; const m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/); if(m){d=new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));return isNaN(d)?null:d;} return null; }
 const pad2A = x => String(x).padStart(2,'0');
 const dayKeyA = d => `${d.getFullYear()}-${pad2A(d.getMonth()+1)}-${pad2A(d.getDate())}`;
-
+ 
 function computeEquityCurve(csvText){
   try {
     const sep=detectSepA(csvText), lines=csvText.split(/\r?\n/).filter(l=>l.trim());
@@ -571,7 +574,7 @@ function computeEquityCurve(csvText){
     const iT=col('time','fecha','date','datetime'), iR=col('reason','tipo','type');
     const iA=col('amount','monto','importe'), iP=col('amountprofit','profit','pnl','ganancia');
     if(iT<0||iR<0) return null;
-
+ 
     const rows=[];
     for(let i=1;i<lines.length;i++){
       const c=smartSplitA(lines[i],sep); if(c.length<3) continue;
@@ -579,14 +582,14 @@ function computeEquityCurve(csvText){
       rows.push({time, reason:(c[iR]||'').toLowerCase(), amount:iA>=0?parseNumA(c[iA]):0, amountProfit:iP>=0?parseNumA(c[iP]):0});
     }
     rows.sort((a,b)=>a.time-b.time);
-
+ 
     const depTx = rows.find(r=>/^deposit$/.test(r.reason));
     const depGross = depTx ? Math.abs(depTx.amount) : 0;
     const depFeeTx = rows.find(r=>/^depositfee$/.test(r.reason));
     const depFee = depFeeTx ? Math.abs(depFeeTx.amount) : 0;
     const dep = depGross - depFee;
     if(!dep) return null;
-
+ 
     let runP=0, runF=0;
     const dailyEq={};
     for(const r of rows){
@@ -595,7 +598,7 @@ function computeEquityCurve(csvText){
       if(/fee/i.test(r.reason)&&!/^depositfee$/.test(r.reason)) runF+=r.amount;
       dailyEq[dayKeyA(r.time)] = dep+runP+runF;
     }
-
+ 
     const equity = Object.values(dailyEq);
     if(!equity.length) return {dep, equity:[dep], roi:0};
     const lastEq = equity[equity.length-1];
@@ -606,7 +609,7 @@ function computeEquityCurve(csvText){
     return {dep, equity:[dep,...equity], roi, firstDate, lastDate};
   } catch(e){ return null; }
 }
-
+ 
 async function loadClientSparkline(c, safeId){
   // Load most recent report
   const { data } = await db.from('reportes')
@@ -615,20 +618,20 @@ async function loadClientSparkline(c, safeId){
     .order('mes', {ascending:false})
     .limit(1)
     .single();
-
+ 
   // Update rep count
   const { count } = await db.from('reportes').select('*',{count:'exact',head:true}).eq('cliente_id',c.id);
   const repEl = $('repCount-'+c.id);
   if(repEl) repEl.textContent = (count||0)+' rep.';
-
+ 
   if(!data || !data.csv_data) return;
-
+ 
   const result = computeEquityCurve(data.csv_data);
   if(!result) return;
-
+ 
   const { equity, roi } = result;
   const isPos = roi >= 0;
-
+ 
   // Update ROI and equity labels
   const roiEl = $('roi-'+safeId);
   const eqEl  = $('eq-'+safeId);
@@ -650,7 +653,7 @@ async function loadClientSparkline(c, safeId){
     const days = Math.round((result.lastDate - result.firstDate)/86400000);
     daEl.textContent = days + ' días';
   }
-
+ 
   // Draw sparkline
   const canvas = $('spark-'+safeId);
   if(!canvas) return;
@@ -661,11 +664,11 @@ async function loadClientSparkline(c, safeId){
   const ctx=canvas.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
-
+ 
   // Background
   ctx.fillStyle='rgba(0,0,0,.3)';
   ctx.roundRect(0,0,W,H,6); ctx.fill();
-
+ 
   const n=equity.length;
   if(n<2) return;
   const minV=Math.min(...equity), maxV=Math.max(...equity);
@@ -674,13 +677,13 @@ async function loadClientSparkline(c, safeId){
   const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
   const dep=equity[0];
   const depY=pad.t+ih*(1-(dep-minV)/span);
-
+ 
   // Deposit baseline
   ctx.strokeStyle='rgba(255,255,255,.15)';
   ctx.setLineDash([3,3]); ctx.lineWidth=0.8;
   ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();
   ctx.setLineDash([]);
-
+ 
   // Area fill
   const color = isPos ? '34,214,138' : '255,79,106';
   ctx.beginPath();
@@ -693,7 +696,7 @@ async function loadClientSparkline(c, safeId){
   const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
   grd.addColorStop(0,`rgba(${color},.35)`); grd.addColorStop(1,`rgba(${color},.02)`);
   ctx.fillStyle=grd; ctx.fill();
-
+ 
   // Line
   ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},.9)`;
   ctx.beginPath();
@@ -703,12 +706,12 @@ async function loadClientSparkline(c, safeId){
     i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.stroke();
-
+ 
   // End dot
   const ex=pad.l+iw, ey=pad.t+ih*(1-(equity[n-1]-minV)/span);
   ctx.fillStyle=`rgba(${color},1)`; ctx.beginPath(); ctx.arc(ex,ey,2.5,0,Math.PI*2); ctx.fill();
 }
-
+ 
 function renderClientesSelect(){
   const sel = $('repCliente');
   sel.innerHTML = '<option value="">— Selecciona un cliente —</option>';
@@ -719,22 +722,22 @@ function renderClientesSelect(){
     sel.appendChild(o);
   });
 }
-
+ 
 // ── AGREGAR CLIENTE ──────────────────────────────────────────────
 async function agregarCliente(){
   const nombre = $('newNombre').value.trim();
   const email  = $('newEmail').value.trim().toLowerCase();
   const pass   = $('newPass').value.trim();
   const btn    = $('btnAgregarCliente');
-
+ 
   if(!nombre||!email||!pass){ toast('Completa todos los campos','bad'); return; }
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast('Email inválido','bad'); return; }
-
+ 
   btn.innerHTML='<span class="spinner"></span> Guardando...'; btn.disabled=true;
-
+ 
   const { error } = await db.from('clientes').insert({nombre, email, password_hash: pass});
   btn.innerHTML='➕ Agregar cliente'; btn.disabled=false;
-
+ 
   if(error){
     if(error.code==='23505') toast('Este email ya existe','bad');
     else toast('Error: '+error.message,'bad');
@@ -745,7 +748,7 @@ async function agregarCliente(){
   await loadClientes();
   updateDashboard();
 }
-
+ 
 // ── ELIMINAR CLIENTE ─────────────────────────────────────────────
 function confirmDelete(id, nombre){
   pendingDeleteId = id;
@@ -761,7 +764,51 @@ function confirmDelete(id, nombre){
   };
 }
 function closeModal(){ $('modalEliminar').classList.remove('open'); }
-
+ 
+// ── EDITAR CONTRASEÑA ─────────────────────────────────────────────
+let editingClientId = null;
+ 
+function openEditPass(id, nombre){
+  editingClientId = id;
+  $('editPassMsg').textContent = 'Nueva contraseña para ' + nombre + ':';
+  $('editPassInput').value = '';
+  $('modalEditPass').classList.add('open');
+  setTimeout(() => $('editPassInput').focus(), 100);
+}
+ 
+function closeEditPass(){
+  $('modalEditPass').classList.remove('open');
+  editingClientId = null;
+}
+ 
+// Close on Enter key
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ closeModal(); closeEditPass(); }
+});
+ 
+async function saveNewPass(){
+  const newPass = $('editPassInput').value.trim();
+  if(!newPass){ toast('Escribe una contraseña','bad'); return; }
+  if(newPass.length < 4){ toast('Mínimo 4 caracteres','bad'); return; }
+ 
+  const btn = $('editPassConfirmBtn');
+  btn.innerHTML = '<span class="spinner"></span>';
+  btn.disabled = true;
+ 
+  const { error } = await db.from('clientes')
+    .update({ password_hash: newPass })
+    .eq('id', editingClientId);
+ 
+  btn.innerHTML = 'Guardar';
+  btn.disabled = false;
+ 
+  if(error){ toast('Error: ' + error.message, 'bad'); return; }
+ 
+  toast('✅ Contraseña actualizada correctamente');
+  closeEditPass();
+  await loadClientes(); // refresh to show new password dots
+}
+ 
 // ── REPORTES TABLE ───────────────────────────────────────────────
 function renderReportesTable(data){
   const tbody = $('reportesBody');
@@ -780,7 +827,7 @@ function renderReportesTable(data){
       </td>
     </tr>`).join('');
 }
-
+ 
 // ── SUBIR REPORTE ────────────────────────────────────────────────
 // ── VALIDATE CSV INVESTOR ─────────────────────────────────────────
 function extractInvestorFromCSV(text){
@@ -799,11 +846,11 @@ function extractInvestorFromCSV(text){
   const firstRow = lines[1].split(sep);
   return (firstRow[invIdx] || '').trim().replace(/^"|"$/g,'').toUpperCase();
 }
-
+ 
 function normalize(str){
   return (str||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
 }
-
+ 
 async function subirReporte(){
   const clienteId = $('repCliente').value;
   const mes       = $('repMes').value;
@@ -811,40 +858,40 @@ async function subirReporte(){
   const file      = fileInput.files && fileInput.files[0];
   const btn       = $('btnSubirReporte');
   const status    = $('uploadStatus');
-
+ 
   if(!clienteId){ toast('Selecciona un cliente','bad'); return; }
   if(!mes){ toast('Selecciona el período','bad'); return; }
   if(!file){ toast('Selecciona un archivo CSV','bad'); return; }
-
+ 
   btn.innerHTML='<span class="spinner"></span> Verificando...'; btn.disabled=true;
   status.textContent='Leyendo archivo...';
   $('uploadProgress').style.display='block';
   $('uploadFill').style.width='20%';
-
+ 
   try {
     const text = await file.text();
     $('uploadFill').style.width='40%';
-
+ 
     // ── VALIDACIÓN: verificar que el CSV pertenece al cliente seleccionado ──
     const investorInFile = extractInvestorFromCSV(text);
     const clienteSeleccionado = clientesCache.find(c => c.id === clienteId);
-
+ 
     if(investorInFile && clienteSeleccionado){
       const nombreArchivo = normalize(investorInFile);
       const nombreCliente = normalize(clienteSeleccionado.nombre);
-
+ 
       // Check if names share at least one significant word (handles partial matches)
       const wordsArchivo  = nombreArchivo.split(' ').filter(w => w.length > 2);
       const wordsCliente  = nombreCliente.split(' ').filter(w => w.length > 2);
       const coincide = wordsCliente.some(w => wordsArchivo.includes(w));
-
+ 
       if(!coincide){
         // Show warning modal instead of toast
         $('uploadFill').style.width='0%';
         $('uploadProgress').style.display='none';
         btn.innerHTML='⬆️ Subir reporte'; btn.disabled=false;
         status.textContent='';
-
+ 
         const confirmar = confirm(
           `⚠️ ADVERTENCIA — Archivo incorrecto\n\n` +
           `Cliente seleccionado: ${clienteSeleccionado.nombre}\n` +
@@ -853,7 +900,7 @@ async function subirReporte(){
           `¿Estás seguro que quieres subir este archivo de todas formas?`
         );
         if(!confirmar) return;
-
+ 
         // If admin confirms anyway, restart upload
         btn.innerHTML='<span class="spinner"></span> Subiendo...'; btn.disabled=true;
         $('uploadProgress').style.display='block';
@@ -862,14 +909,14 @@ async function subirReporte(){
         status.textContent='✅ Archivo verificado — pertenece a '+clienteSeleccionado.nombre;
       }
     }
-
+ 
     $('uploadFill').style.width='70%';
     status.textContent='Guardando en base de datos...';
-
+ 
     // Check if report already exists for this client+month
     const { data: existing } = await db.from('reportes')
       .select('id').eq('cliente_id',clienteId).eq('mes',mes).single();
-
+ 
     let error;
     if(existing){
       // Update existing
@@ -878,11 +925,11 @@ async function subirReporte(){
       // Insert new
       ({ error } = await db.from('reportes').insert({cliente_id:clienteId, mes, csv_data:text}));
     }
-
+ 
     $('uploadFill').style.width='100%';
-
+ 
     if(error){ toast('Error guardando: '+error.message,'bad'); return; }
-
+ 
     const cliente = clientesCache.find(c=>c.id===clienteId);
     toast(`✅ Reporte de ${cliente?.nombre||''} subido para ${mes}`);
     fileInput.value='';
@@ -890,7 +937,7 @@ async function subirReporte(){
     $('repMes').value='';
     await loadReportes();
     updateDashboard();
-
+ 
   } catch(err){
     toast('Error leyendo archivo: '+err.message,'bad');
   } finally {
@@ -899,7 +946,7 @@ async function subirReporte(){
     setTimeout(()=>{ $('uploadProgress').style.display='none'; $('uploadFill').style.width='0%'; },1000);
   }
 }
-
+ 
 // ── ELIMINAR REPORTE ─────────────────────────────────────────────
 async function eliminarReporte(id){
   if(!confirm('¿Eliminar este reporte?')) return;
@@ -909,13 +956,29 @@ async function eliminarReporte(id){
   await loadReportes();
   updateDashboard();
 }
-
+ 
 // ── INIT ──────────────────────────────────────────────────────────
 if(sessionStorage.getItem('rcadmin')==='1') showApp();
-
+ 
 // Set current month as default
 const now = new Date();
 $('repMes').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
 </script>
+ 
+<!-- MODAL EDITAR CONTRASEÑA -->
+<div class="modal-overlay" id="modalEditPass">
+  <div class="modal">
+    <h3>🔑 Cambiar contraseña</h3>
+    <p id="editPassMsg">Ingresa la nueva contraseña para este cliente.</p>
+    <div class="form-field" style="margin-top:4px;">
+      <label>Nueva contraseña</label>
+      <input type="text" id="editPassInput" placeholder="Ej: RCC2024NuevaClave" style="width:100%;padding:10px 12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:14px;outline:none;"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEditPass()">Cancelar</button>
+      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">Guardar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
