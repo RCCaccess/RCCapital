@@ -286,8 +286,39 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <div class="page" id="page-reportes">
         <div class="page-title">Reportes</div>
         <div class="page-sub">Sube el CSV de Vantage para cada cliente</div>
+
+        <!-- BULK UPLOAD -->
+        <div class="card" style="border-color:rgba(0,194,255,.25);background:linear-gradient(160deg,rgba(0,194,255,.05),rgba(0,0,0,.2));">
+          <div class="card-hd">
+            <h3>⚡ Subida masiva</h3>
+            <span style="font-size:11px;color:var(--muted);">Arrastra todos los CSVs — auto-detecta el cliente por InvestorName</span>
+          </div>
+          <div class="card-bd">
+            <div id="dropZone"
+              style="border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(0,194,255,.04);"
+              ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='rgba(0,194,255,.12)';"
+              ondragleave="this.style.borderColor='rgba(0,194,255,.3)';this.style.background='rgba(0,194,255,.04)';"
+              ondrop="handleDrop(event)"
+              onclick="$('bulkFileInput').click()">
+              <div style="font-size:40px;margin-bottom:12px;">📂</div>
+              <div style="font-size:15px;font-weight:700;color:var(--accent);">Arrastra aquí todos los CSVs de Vantage</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px;">o haz clic para seleccionar múltiples archivos</div>
+            </div>
+            <input type="file" id="bulkFileInput" accept=".csv" multiple style="display:none;" onchange="handleBulkFiles(this.files)"/>
+            <div id="bulkPreview" style="display:none;margin-top:16px;">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Archivos detectados:</div>
+              <div id="bulkList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
+              <div style="display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap;">
+                <button class="btn accent" id="btnBulkUpload" onclick="uploadAllBulk()" style="font-size:13px;padding:10px 20px;">⬆️ Subir todos</button>
+                <button class="btn" onclick="clearBulk()">✕ Limpiar</button>
+                <span id="bulkStatus" style="font-size:12px;color:var(--muted);"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="card">
-          <div class="card-hd"><h3>Subir nuevo reporte</h3></div>
+          <div class="card-hd"><h3>Subir reporte individual</h3></div>
           <div class="card-bd">
             <div class="form-grid">
               <div class="form-field">
@@ -1042,3 +1073,127 @@ $('repMes').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,
 </div>
 </body>
 </html>
+<script>
+// ── BULK UPLOAD ───────────────────────────────────────────────────
+let bulkFiles = [];
+
+function handleDrop(e){
+  e.preventDefault();
+  var dz=$('dropZone');
+  dz.style.borderColor='rgba(0,194,255,.3)';
+  dz.style.background='rgba(0,194,255,.04)';
+  handleBulkFiles(e.dataTransfer.files);
+}
+
+async function handleBulkFiles(fileList){
+  if(!fileList||!fileList.length) return;
+  bulkFiles=[];
+  $('bulkList').innerHTML='<div style="color:var(--muted);font-size:12px;">Analizando archivos...</div>';
+  $('bulkPreview').style.display='block';
+  var now=new Date();
+  var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  for(var i=0;i<fileList.length;i++){
+    var file=fileList[i];
+    try{
+      var text=await file.text();
+      var investor=extractInvestorFromCSV(text);
+      var match=findClientByInvestor(investor);
+      bulkFiles.push({file,text,investor:investor||'(desconocido)',clienteId:match?match.id:null,clienteName:match?match.nombre:null,mes:curMes,status:'pending'});
+    }catch(ex){
+      bulkFiles.push({file,text:'',investor:'Error',clienteId:null,clienteName:null,mes:curMes,status:'error'});
+    }
+  }
+  renderBulkList();
+}
+
+function findClientByInvestor(investorName){
+  if(!investorName) return null;
+  function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
+  var normInv=norm(investorName);
+  var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
+  var best=null,bestScore=0;
+  for(var i=0;i<clientesCache.length;i++){
+    var c=clientesCache[i];
+    var normC=norm(c.nombre);
+    var wordsC=normC.split(' ').filter(function(w){return w.length>2;});
+    var matches=wordsC.filter(function(w){return wordsInv.indexOf(w)>=0;}).length;
+    if(matches>bestScore){bestScore=matches;best=c;}
+  }
+  return bestScore>0?best:null;
+}
+
+function renderBulkList(){
+  var list=$('bulkList'); list.innerHTML='';
+  var ready=0,noMatch=0;
+  bulkFiles.forEach(function(bf,idx){
+    var row=document.createElement('div');
+    row.style.cssText='display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:10px;background:rgba(0,0,0,.2);border:1px solid var(--border);margin-bottom:6px;';
+    var icon='⏳',iconColor='var(--muted)';
+    if(bf.status==='ok'){icon='✅';iconColor='var(--good)';}
+    if(bf.status==='error'){icon='❌';iconColor='var(--bad)';}
+    if(!bf.clienteId&&bf.status==='pending'){icon='⚠️';iconColor='var(--warn)';}
+    if(bf.clienteId&&bf.status==='pending'){ready++;}
+    if(!bf.clienteId&&bf.status==='pending'){noMatch++;}
+    var opts=clientesCache.map(function(c){return '<option value="'+c.id+'"'+(bf.clienteId===c.id?' selected':'')+'>'+c.nombre+'</option>';}).join('');
+    var statusLine='';
+    if(bf.status==='ok') statusLine='<div style="font-size:11px;color:var(--good);">Subido correctamente</div>';
+    if(bf.status==='error') statusLine='<div style="font-size:11px;color:var(--bad);">Error al subir</div>';
+    var dis=bf.status!=='pending'?'disabled':'';
+    row.innerHTML=
+      '<span style="font-size:20px;">'+icon+'</span>'+
+      '<div>'+
+        '<div style="font-size:12px;font-weight:600;margin-bottom:2px;">'+bf.file.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);">'+bf.investor+'</div>'+
+        statusLine+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:5px;">'+
+        '<select '+dis+' onchange="bulkFiles['+idx+'].clienteId=this.value;" '+
+          'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--text);min-width:170px;">'+
+          '<option value="">— Asignar cliente —</option>'+opts+
+        '</select>'+
+        '<input type="month" value="'+bf.mes+'" '+dis+' onchange="bulkFiles['+idx+'].mes=this.value;" '+
+          'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--text);"/>'+
+      '</div>'+
+      '<span style="font-size:16px;">'+(bf.clienteId&&bf.status==='pending'?'🟢':'')+'</span>';
+    list.appendChild(row);
+  });
+  $('bulkStatus').innerHTML=
+    '<span style="color:var(--good);">'+ready+' listos para subir</span>'+
+    (noMatch>0?' &nbsp;·&nbsp; <span style="color:var(--warn);">'+noMatch+' sin asignar (asígnalos manualmente arriba)</span>':'');
+}
+
+async function uploadAllBulk(){
+  var toUpload=bulkFiles.filter(function(b){return b.clienteId&&b.status==='pending';});
+  if(!toUpload.length){toast('Sin archivos listos para subir','bad');return;}
+  var btn=$('btnBulkUpload');
+  btn.innerHTML='<span class="spinner"></span> Subiendo...'; btn.disabled=true;
+  var ok=0,fail=0;
+  for(var i=0;i<toUpload.length;i++){
+    var bf=toUpload[i];
+    try{
+      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).eq('mes',bf.mes).single();
+      var error;
+      if(res.data){
+        var u=await db.from('reportes').update({csv_data:bf.text}).eq('id',res.data.id);
+        error=u.error;
+      } else {
+        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text});
+        error=ins.error;
+      }
+      if(error){bf.status='error';fail++;}else{bf.status='ok';ok++;}
+    }catch(ex){bf.status='error';fail++;}
+    renderBulkList();
+  }
+  btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
+  toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':''));
+  await loadReportes(); updateDashboard(); await loadClientes();
+}
+
+function clearBulk(){
+  bulkFiles=[];
+  $('bulkPreview').style.display='none';
+  $('bulkFileInput').value='';
+  $('bulkList').innerHTML='';
+  $('bulkStatus').textContent='';
+}
+</script>
