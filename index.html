@@ -132,7 +132,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
     <div class="login-card">
       <div class="field"><label>Email</label><input type="email" id="clientEmail" placeholder="tu@email.com" autocomplete="email"/></div>
       <div class="field"><label>Contraseña</label><input type="password" id="clientPass" placeholder="••••••••" autocomplete="current-password"/></div>
-      <button class="btn-login" id="loginBtn">Acceder a mi reporte →</button>
+      <button class="btn-login" id="loginBtn" onclick="login()">Acceder a mi reporte →</button>
       <div id="loginErr"></div>
     </div>
     <div class="login-footer">Reporte personal · Solo tú puedes ver tu información</div>
@@ -231,7 +231,7 @@ async function login(){
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
 function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
-async function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;await loadReportes();}
+function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;loadReportes();}
 
 async function loadReportes(){
   $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
