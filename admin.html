@@ -487,24 +487,187 @@ function renderClientesTable(){
     tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ei">👥</div><p>Sin clientes aún. Agrega el primero arriba.</p></div></td></tr>';
     return;
   }
-  tbody.innerHTML = clientesCache.map(c=>`
-    <tr>
-      <td><strong>${c.nombre}</strong></td>
-      <td><span class="mono">${c.email}</span></td>
-      <td><span class="mono" style="color:var(--warn);">${c.password_hash||'—'}</span></td>
-      <td><span class="badge good" id="repCount-${c.id}">...</span></td>
-      <td><span class="mono">${fmtDate(c.created_at)}</span></td>
-      <td>
-        <button class="btn danger" onclick="confirmDelete('${c.id}','${c.nombre}')">🗑 Eliminar</button>
-      </td>
-    </tr>`).join('');
+  // Switch to card layout instead of table rows
+  const container = tbody.closest('.tbl-wrap');
+  container.style.border = 'none';
+  container.style.background = 'transparent';
+  container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
+  const cards = $('clientCards');
  
-  // Load report counts per client
-  clientesCache.forEach(async c => {
-    const { count } = await db.from('reportes').select('*',{count:'exact',head:true}).eq('cliente_id',c.id);
-    const el = $('repCount-'+c.id);
-    if(el) el.textContent = (count||0)+' rep.';
+  clientesCache.forEach(c => {
+    const safeId = c.id.replace(/-/g,'');
+    const card = document.createElement('div');
+    card.id = 'card-'+safeId;
+    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:16px;align-items:center;transition:border-color .2s;';
+    card.onmouseenter = () => card.style.borderColor='rgba(255,255,255,.16)';
+    card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
+    card.innerHTML = `
+      <div style="display:flex;align-items:center;gap:14px;">
+        <canvas id="spark-${safeId}" width="90" height="40" style="border-radius:6px;flex-shrink:0;"></canvas>
+        <div>
+          <div style="font-weight:700;font-size:14px;">${c.nombre}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:2px;">${c.email}</div>
+          <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <span id="roi-${safeId}" style="font-size:11px;font-weight:700;font-family:var(--mono);">—</span>
+            <span id="eq-${safeId}" style="font-size:11px;color:var(--muted);font-family:var(--mono);">—</span>
+            <span id="repCount-${c.id}" class="badge warn" style="font-size:10px;">...</span>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Contraseña</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--warn);">${c.password_hash||'—'}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:4px;">${fmtDate(c.created_at)}</div>
+      </div>
+      <button class="btn danger" onclick="confirmDelete('${c.id}','${c.nombre}')" style="align-self:center;">🗑 Eliminar</button>
+    `;
+    cards.appendChild(card);
+ 
+    // Load latest report and draw sparkline
+    loadClientSparkline(c, safeId);
   });
+}
+ 
+// ── CSV HELPERS (admin) ──────────────────────────────────────────
+function detectSepA(t){ const l=(t.split(/\r?\n/)[0]||''); return (l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':',';}
+function smartSplitA(line,sep){ const out=[]; let cur='',inQ=false; for(let i=0;i<line.length;i++){ const ch=line[i]; if(ch==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(ch===sep&&!inQ){out.push(cur);cur='';}else cur+=ch;} out.push(cur); return out.map(x=>x.trim().replace(/^"|"$/g,'')); }
+function parseNumA(v){ if(!v&&v!==0)return 0; let s=String(v).trim().replace(/[^\d.,\-+]/g,''); if(!s)return 0; const hC=s.includes(','),hD=s.includes('.'); if(hC&&hD)s=s.replace(/,/g,''); else if(hC&&!hD){const p=s.split(',');s=(p.length===2&&p[1].length<=2)?p[0]+'.'+p[1]:s.replace(/,/g,'');} return+s||0; }
+function parseDateA(s){ if(!s)return null; const str=String(s).trim(); let d=new Date(str); if(!isNaN(d))return d; const m=str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?$/); if(m){d=new Date(+m[3]<100?2000+ +m[3]:+m[3],+m[2]-1,+m[1],+(m[4]||0),+(m[5]||0),+(m[6]||0));return isNaN(d)?null:d;} return null; }
+const pad2A = x => String(x).padStart(2,'0');
+const dayKeyA = d => `${d.getFullYear()}-${pad2A(d.getMonth()+1)}-${pad2A(d.getDate())}`;
+ 
+function computeEquityCurve(csvText){
+  try {
+    const sep=detectSepA(csvText), lines=csvText.split(/\r?\n/).filter(l=>l.trim());
+    if(lines.length<2) return null;
+    const h=smartSplitA(lines[0],sep).map(x=>x.toLowerCase().replace(/\s+/g,''));
+    const col=(...names)=>{ for(const n of names){const i=h.indexOf(n);if(i>=0)return i;} return -1;};
+    const iT=col('time','fecha','date','datetime'), iR=col('reason','tipo','type');
+    const iA=col('amount','monto','importe'), iP=col('amountprofit','profit','pnl','ganancia');
+    if(iT<0||iR<0) return null;
+ 
+    const rows=[];
+    for(let i=1;i<lines.length;i++){
+      const c=smartSplitA(lines[i],sep); if(c.length<3) continue;
+      const time=parseDateA(c[iT]); if(!time) continue;
+      rows.push({time, reason:(c[iR]||'').toLowerCase(), amount:iA>=0?parseNumA(c[iA]):0, amountProfit:iP>=0?parseNumA(c[iP]):0});
+    }
+    rows.sort((a,b)=>a.time-b.time);
+ 
+    const depTx = rows.find(r=>/^deposit$/.test(r.reason));
+    const depGross = depTx ? Math.abs(depTx.amount) : 0;
+    const depFeeTx = rows.find(r=>/^depositfee$/.test(r.reason));
+    const depFee = depFeeTx ? Math.abs(depFeeTx.amount) : 0;
+    const dep = depGross - depFee;
+    if(!dep) return null;
+ 
+    let runP=0, runF=0;
+    const dailyEq={};
+    for(const r of rows){
+      if(/^deposit$/.test(r.reason)||/^depositfee$/.test(r.reason)) continue;
+      if(/traderesult/i.test(r.reason)) runP+=r.amountProfit;
+      if(/fee/i.test(r.reason)&&!/^depositfee$/.test(r.reason)) runF+=r.amount;
+      dailyEq[dayKeyA(r.time)] = dep+runP+runF;
+    }
+ 
+    const equity = Object.values(dailyEq);
+    if(!equity.length) return {dep, equity:[dep], roi:0};
+    const lastEq = equity[equity.length-1];
+    const roi = dep>0 ? ((lastEq-dep)/dep*100) : 0;
+    return {dep, equity:[dep,...equity], roi};
+  } catch(e){ return null; }
+}
+ 
+async function loadClientSparkline(c, safeId){
+  // Load most recent report
+  const { data } = await db.from('reportes')
+    .select('csv_data, mes')
+    .eq('cliente_id', c.id)
+    .order('mes', {ascending:false})
+    .limit(1)
+    .single();
+ 
+  // Update rep count
+  const { count } = await db.from('reportes').select('*',{count:'exact',head:true}).eq('cliente_id',c.id);
+  const repEl = $('repCount-'+c.id);
+  if(repEl) repEl.textContent = (count||0)+' rep.';
+ 
+  if(!data || !data.csv_data) return;
+ 
+  const result = computeEquityCurve(data.csv_data);
+  if(!result) return;
+ 
+  const { equity, roi } = result;
+  const isPos = roi >= 0;
+ 
+  // Update ROI and equity labels
+  const roiEl = $('roi-'+safeId);
+  const eqEl  = $('eq-'+safeId);
+  if(roiEl){
+    roiEl.textContent = (isPos?'+':'')+roi.toFixed(2)+'%';
+    roiEl.style.color = isPos ? 'var(--good)' : 'var(--bad)';
+  }
+  if(eqEl){
+    const lastEq = equity[equity.length-1];
+    eqEl.textContent = 'Equity: $'+lastEq.toFixed(2);
+  }
+ 
+  // Draw sparkline
+  const canvas = $('spark-'+safeId);
+  if(!canvas) return;
+  const dpr = window.devicePixelRatio||1;
+  const W=90, H=40;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+ 
+  // Background
+  ctx.fillStyle='rgba(0,0,0,.3)';
+  ctx.roundRect(0,0,W,H,6); ctx.fill();
+ 
+  const n=equity.length;
+  if(n<2) return;
+  const minV=Math.min(...equity), maxV=Math.max(...equity);
+  const span=(maxV-minV)||1;
+  const pad={l:4,r:4,t:5,b:5};
+  const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const dep=equity[0];
+  const depY=pad.t+ih*(1-(dep-minV)/span);
+ 
+  // Deposit baseline
+  ctx.strokeStyle='rgba(255,255,255,.15)';
+  ctx.setLineDash([3,3]); ctx.lineWidth=0.8;
+  ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();
+  ctx.setLineDash([]);
+ 
+  // Area fill
+  const color = isPos ? '34,214,138' : '255,79,106';
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x=pad.l+iw*(i/Math.max(1,n-1));
+    const y=pad.t+ih*(1-(equity[i]-minV)/span);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();
+  const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
+  grd.addColorStop(0,`rgba(${color},.35)`); grd.addColorStop(1,`rgba(${color},.02)`);
+  ctx.fillStyle=grd; ctx.fill();
+ 
+  // Line
+  ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},.9)`;
+  ctx.beginPath();
+  for(let i=0;i<n;i++){
+    const x=pad.l+iw*(i/Math.max(1,n-1));
+    const y=pad.t+ih*(1-(equity[i]-minV)/span);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+ 
+  // End dot
+  const ex=pad.l+iw, ey=pad.t+ih*(1-(equity[n-1]-minV)/span);
+  ctx.fillStyle=`rgba(${color},1)`; ctx.beginPath(); ctx.arc(ex,ey,2.5,0,Math.PI*2); ctx.fill();
 }
  
 function renderClientesSelect(){
