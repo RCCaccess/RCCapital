@@ -491,10 +491,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
                   <option value="">— Selecciona un cliente —</option>
                 </select>
               </div>
-              <div class="form-field">
-                <label>Período (mes)</label>
-                <input type="month" id="repMes"/>
-              </div>
+
               <div class="form-field form-full">
                 <label>Archivo CSV de Vantage</label>
                 <input type="file" id="repCSV" accept=".csv,.xlsx" class="file-input"/>
@@ -1125,14 +1122,16 @@ function normalize(str){
 
 async function subirReporte(){
   const clienteId = $('repCliente').value;
-  const mes       = $('repMes').value;
+  // Auto-detect period from CSV filename or use current month
+  const now = new Date();
+  const mes = now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
   const fileInput = $('repCSV');
   const file      = fileInput.files && fileInput.files[0];
   const btn       = $('btnSubirReporte');
   const status    = $('uploadStatus');
 
   if(!clienteId){ toast('Selecciona un cliente','bad'); return; }
-  if(!mes){ toast('Selecciona el período','bad'); return; }
+
   if(!file){ toast('Selecciona un archivo CSV','bad'); return; }
 
   btn.innerHTML='<span class="spinner"></span> Verificando...'; btn.disabled=true;
@@ -1213,7 +1212,7 @@ async function subirReporte(){
     if(lastConsolidatedCSV) mcProcessCSV(lastConsolidatedCSV);
     fileInput.value='';
     $('repCliente').value='';
-    $('repMes').value='';
+
     await loadReportes();
     updateDashboard();
 
@@ -1244,9 +1243,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if(np) np.value = generatePass();
 });
 
-// Set current month as default
-const now = new Date();
-$('repMes').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
 </script>
 <!-- MODAL EDITAR CONTRASEÑA -->
 <
@@ -1387,14 +1384,12 @@ function splitConsolidatedCSV(text){
 }
 
 function handleBulkFiles(fileList){
-  console.log('handleBulkFiles called, files:', fileList ? fileList.length : 'null');
-  if(!fileList||!fileList.length){ console.log('No files'); return; }
+  if(!fileList||!fileList.length){ return; }
   bulkFiles=[];
   $('bulkList').innerHTML='<div style="color:var(--muted);font-size:12px;">⏳ Analizando...</div>';
   $('bulkPreview').style.display='block';
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  console.log('Mode:', bulkMode, 'Mes:', curMes);
 
   // Read first file (consolidated mode) or all files (multi mode)
   var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
@@ -1418,7 +1413,6 @@ function handleBulkFiles(fileList){
 }
 
 function processAllLoaded(results, curMes){
-  console.log('processAllLoaded called, results:', results.length);
   bulkFiles = [];
   results.forEach(function(r){
     if(!r.text){
@@ -1467,19 +1461,21 @@ function findClientByInvestor(investorName){
   function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
   var normInv=norm(investorName);
   var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
-  var best=null,bestScore=0;
+  var best=null,bestScore=0,bestPct=0;
   for(var i=0;i<clientesCache.length;i++){
     var c=clientesCache[i];
     var normC=norm(c.nombre);
+    if(normC===normInv) return c; // exact match wins immediately
     var wordsC=normC.split(' ').filter(function(w){return w.length>2;});
     var matches=wordsC.filter(function(w){return wordsInv.indexOf(w)>=0;}).length;
-    if(matches>bestScore){bestScore=matches;best=c;}
+    var pct=wordsC.length>0?matches/wordsC.length:0;
+    // Require at least 2 matching words AND more than 50% of client name matched
+    if(matches>=2&&pct>bestPct){bestPct=pct;bestScore=matches;best=c;}
   }
-  return bestScore>0?best:null;
+  return best;
 }
 
 function renderBulkList(){
-  console.log('renderBulkList called, bulkFiles:', bulkFiles.length);
   var list=$('bulkList'); list.innerHTML='';
   var ready=0,noMatch=0;
   bulkFiles.forEach(function(bf,idx){
@@ -1508,8 +1504,6 @@ function renderBulkList(){
           'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--text);min-width:170px;">'+
           '<option value="">— Asignar cliente —</option>'+opts+
         '</select>'+
-        '<input type="month" value="'+bf.mes+'" '+dis+' onchange="bulkFiles['+idx+'].mes=this.value;" '+
-          'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:6px;color:var(--text);"/>'+
       '</div>'+
       '<span style="font-size:16px;">'+(bf.clienteId&&bf.status==='pending'?'🟢':'')+'</span>';
     list.appendChild(row);
@@ -1896,21 +1890,7 @@ function mcDrawChart(monthKeys, monthly){
 </script>
 
 <!-- MODAL EDITAR CONTRASEÑA -->
-<div class="modal-overlay" id="modalEditPass">
-  <div class="modal">
-    <h3>🔑 Nueva clave de acceso</h3>
-    <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
-    <div style="margin-top:12px;padding:14px 16px;background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="editPassInput" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;">—</span>
-      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;" title="Generar otra">🔄</button>
-    </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Guarda esta clave — se la debes enviar al cliente.</p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditPass()">Cancelar</button>
-      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar y guardar</button>
-    </div>
-  </div>
-</div>
+
 
 </body>
 </html>
