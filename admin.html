@@ -195,10 +195,10 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 /* MODAL */
 .modal-overlay{
   position:fixed;top:0;left:0;right:0;bottom:0;
-  background:rgba(0,0,0,.75);
+  background:rgba(0,0,0,.85);
   display:none;align-items:center;justify-content:center;
-  z-index:500;padding:20px;
-  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  z-index:9999;padding:20px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
 }
 .modal-overlay.open{display:flex;}
 .modal{
@@ -1045,9 +1045,16 @@ let editingClientId = null;
 
 function openEditPass(id, nombre){
   editingClientId = id;
-  $('editPassMsg').textContent = 'Nueva clave generada para ' + nombre + ':';
-  $('editPassInput').textContent = generatePass();
+  $('editPassMsg').textContent = 'Nueva clave para: ' + nombre;
+  var newKey = generatePass();
+  $('editPassInput').textContent = newKey;
+  $('editPassInput').setAttribute('data-pass', newKey);
   $('modalEditPass').style.display='flex';
+}
+function regeneratePassPreview(){
+  var newKey = generatePass();
+  $('editPassInput').textContent = newKey;
+  $('editPassInput').setAttribute('data-pass', newKey);
 }
 
 function regeneratePassPreview(){
@@ -1065,7 +1072,7 @@ document.addEventListener('keydown', e => {
 });
 
 async function saveNewPass(){
-  const newPass = ($('editPassInput').textContent || '').trim();
+  const newPass = ($('editPassInput').getAttribute('data-pass') || $('editPassInput').textContent || '').trim();
   if(!newPass){ toast('Escribe una contraseña','bad'); return; }
   if(newPass.length < 4){ toast('Mínimo 4 caracteres','bad'); return; }
 
@@ -1262,8 +1269,6 @@ window.addEventListener('DOMContentLoaded', () => {
     <h3>🔑 Nueva clave de acceso</h3>
     <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
     <div style="margin-top:12px;padding:14px 16px;background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="editPassInput" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;">—</span>
-      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;transition:color .15s;" title="Generar otra">🔄</button>
     </div>
     <p style="font-size:11px;color:var(--muted);margin-top:8px;">Guarda esta clave — se la debes enviar al cliente.</p>
     <div class="modal-actions">
@@ -1296,31 +1301,13 @@ window.addEventListener('DOMContentLoaded', () => {
       <button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
     </div>
     <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
-  </div>
-</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR ya incluido arriba -->
 
 
-<!-- MODAL EDITAR CONTRASEÑA -->
-<div class="modal-overlay" id="modalEditPass" style="display:none;">
-  <div class="modal">
-    <h3>🔑 Nueva clave de acceso</h3>
-    <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
-    <div style="margin-top:12px;padding:14px 16px;background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="editPassInput" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent);letter-spacing:2px;">—</span>
-      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:18px;" title="Generar otra">🔄</button>
-    </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Guarda esta clave — se la debes enviar al cliente.</p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditPass()">Cancelar</button>
-      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar y guardar</button>
-    </div>
-  </div>
-</div>
+<div id="toast"></div>
 
-</body>
-</html>
 <script>
-
 // ── BULK UPLOAD ───────────────────────────────────────────────────
 var bulkFiles = [];
 var bulkMode = 'single'; // 'single' = consolidated CSV, 'multi' = multiple CSVs
@@ -1896,10 +1883,34 @@ function mcDrawChart(monthKeys, monthly){
   ctx.fillStyle='rgba(255,79,106,.8)'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='left';
   ctx.fillText('─ Retiros', W-118, 16);
 }
-</script>
+
 
 <!-- MODAL EDITAR CONTRASEÑA -->
 
 
+
+
+</div>
+
+
+<!-- MODAL NUEVA CLAVE -->
+<div class="modal-overlay" id="modalEditPass" style="display:none;">
+  <div class="modal">
+    <h3>🔑 Nueva clave de acceso</h3>
+    <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
+    <div style="margin-top:14px;padding:16px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span id="editPassInput" style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:3px;">—</span>
+      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;" title="Otra">🔄</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Envíasela al cliente por WhatsApp.</p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEditPass()">Cancelar</button>
+      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
+</script>
 </body>
 </html>
