@@ -274,6 +274,9 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <button class="nav-item" data-page="reportes" onclick="showPage('reportes',this)">
           <span class="icon">📁</span><span class="nav-label"> Reportes</span>
         </button>
+        <button class="nav-item" data-page="micuenta" onclick="showPage('micuenta',this)">
+          <span class="icon">💰</span><span class="nav-label"> Mi Cuenta</span>
+        </button>
       </div>
       <div class="sidebar-bottom">
         <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
@@ -299,6 +302,90 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
           </div>
         </div>
       </div>
+
+      <!-- MI CUENTA -->
+      <div class="page" id="page-micuenta">
+        <div class="page-title">Mi Cuenta</div>
+        <div class="page-sub">Tus comisiones y retiros como gestor — desde el CSV consolidado</div>
+
+        <!-- Upload consolidated CSV -->
+        <div class="card" id="mcUploadCard" style="border-color:rgba(245,166,35,.2);background:linear-gradient(160deg,rgba(245,166,35,.04),rgba(0,0,0,.2));">
+          <div class="card-hd">
+            <h3>📤 Cargar CSV consolidado</h3>
+            <span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span>
+          </div>
+          <div class="card-bd">
+            <div id="mcDropZone"
+              style="border:2px dashed rgba(245,166,35,.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,166,35,.04);"
+              ondragover="event.preventDefault();this.style.borderColor='var(--warn)';this.style.background='rgba(245,166,35,.1)';"
+              ondragleave="this.style.borderColor='rgba(245,166,35,.3)';this.style.background='rgba(245,166,35,.04)';"
+              ondrop="mcHandleDrop(event)"
+              onclick="$('mcFileInput').click()">
+              <div style="font-size:32px;margin-bottom:8px;">📊</div>
+              <div style="font-size:14px;font-weight:700;color:var(--warn);">Arrastra el CSV consolidado de Vantage</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="mcDropSub">Se actualiza automáticamente al subir reportes · o carga aquí el CSV</div>
+            </div>
+            <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
+            <div id="mcFileStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
+          </div>
+        </div>
+
+        <!-- KPIs gestor -->
+        <div id="mcStats" style="display:none;">
+          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
+            <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
+            <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
+            <div class="stat-box" style="border-color:rgba(255,79,106,.2);">
+              <div class="sl">Total retirado</div>
+              <div class="sv" style="color:var(--bad);" id="mcWithdrawals">—</div>
+            </div>
+          </div>
+          <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:-4px;">
+            <div class="stat-box"><div class="sl">Deposit fees</div><div class="sv" id="mcDepFees">—</div></div>
+            <div class="stat-box good"><div class="sl">Balance disponible</div><div class="sv" id="mcBalance">—</div></div>
+            <div class="stat-box"><div class="sl">Meses operados</div><div class="sv" id="mcMeses">—</div></div>
+          </div>
+
+          <!-- Chart: comisiones mensuales -->
+          <div class="card" style="margin-top:4px;">
+            <div class="card-hd">
+              <h3>Comisiones mensuales</h3>
+              <div style="display:flex;gap:6px;">
+                <span id="mcLegPerf" style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(34,214,138,.12);color:var(--good);font-family:var(--mono);">● Performance</span>
+                <span id="mcLegMgmt" style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(0,194,255,.12);color:var(--accent);font-family:var(--mono);">● Management</span>
+                <span id="mcLegDep"  style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(245,166,35,.12);color:var(--warn);font-family:var(--mono);">● Deposit</span>
+              </div>
+            </div>
+            <div class="card-bd">
+              <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+                <canvas id="mcChart" style="display:block;width:100%;height:220px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desglose mensual tabla -->
+          <div class="card">
+            <div class="card-hd"><h3>Desglose mensual</h3></div>
+            <div class="card-bd" style="padding:0;">
+              <div style="overflow:auto;border-radius:10px;border:1px solid var(--border);">
+                <table>
+                  <thead><tr>
+                    <th>Mes</th>
+                    <th style="text-align:right">Performance</th>
+                    <th style="text-align:right">Management</th>
+                    <th style="text-align:right">Deposit</th>
+                    <th style="text-align:right">Total fees</th>
+                    <th style="text-align:right">Retiros</th>
+                    <th style="text-align:right">Neto mes</th>
+                  </tr></thead>
+                  <tbody id="mcTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div><!-- /mcStats -->
+      </div><!-- /page-micuenta -->
 
       <!-- CLIENTES -->
       <div class="page" id="page-clientes">
@@ -362,21 +449,26 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <!-- BULK UPLOAD -->
         <div class="card" style="border-color:rgba(0,194,255,.25);background:linear-gradient(160deg,rgba(0,194,255,.05),rgba(0,0,0,.2));">
           <div class="card-hd">
-            <h3>⚡ Subida masiva</h3>
-            <span style="font-size:11px;color:var(--muted);">Arrastra todos los CSVs — auto-detecta el cliente por InvestorName</span>
+            <h3>⚡ Actualización masiva</h3>
+            <span style="font-size:11px;color:var(--muted);">Un solo CSV consolidado de Vantage — actualiza todos los clientes de una vez</span>
           </div>
           <div class="card-bd">
+            <!-- Mode toggle -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <button id="modeSingle" class="btn active" onclick="setMode('single')" style="font-size:12px;">📄 CSV consolidado</button>
+              <button id="modeMulti"  class="btn" onclick="setMode('multi')"  style="font-size:12px;">📂 Múltiples CSVs</button>
+            </div>
             <div id="dropZone"
               style="border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(0,194,255,.04);"
               ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='rgba(0,194,255,.12)';"
               ondragleave="this.style.borderColor='rgba(0,194,255,.3)';this.style.background='rgba(0,194,255,.04)';"
               ondrop="handleDrop(event)"
               onclick="$('bulkFileInput').click()">
-              <div style="font-size:40px;margin-bottom:12px;">📂</div>
-              <div style="font-size:15px;font-weight:700;color:var(--accent);">Arrastra aquí todos los CSVs de Vantage</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px;">o haz clic para seleccionar múltiples archivos</div>
+              <div style="font-size:40px;margin-bottom:12px;">📄</div>
+              <div id="dropZoneTitle" style="font-size:15px;font-weight:700;color:var(--accent);">Arrastra el CSV consolidado de Vantage</div>
+              <div id="dropZoneSub" style="font-size:12px;color:var(--muted);margin-top:6px;">Contiene todos los clientes — se separan automáticamente</div>
             </div>
-            <input type="file" id="bulkFileInput" accept=".csv" multiple style="display:none;" onchange="handleBulkFiles(this.files)"/>
+            <input type="file" id="bulkFileInput" accept=".csv" style="display:none;" onchange="handleBulkFiles(this.files)"/>
             <div id="bulkPreview" style="display:none;margin-top:16px;">
               <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Archivos detectados:</div>
               <div id="bulkList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
@@ -1111,7 +1203,9 @@ async function subirReporte(){
     if(error){ toast('Error guardando: '+error.message,'bad'); return; }
 
     const cliente = clientesCache.find(c=>c.id===clienteId);
-    toast(`✅ Reporte de ${cliente?.nombre||''} subido para ${mes}`);
+    toast(`✅ Reporte de ${cliente?.nombre||''} subido para ${mes} · 💰 Mi Cuenta actualizada`);
+    // Re-process Mi Cuenta if we have cached data
+    if(lastConsolidatedCSV) mcProcessCSV(lastConsolidatedCSV);
     fileInput.value='';
     $('repCliente').value='';
     $('repMes').value='';
@@ -1197,7 +1291,32 @@ $('repMes').value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,
 </html>
 <script>
 // ── BULK UPLOAD ───────────────────────────────────────────────────
-let bulkFiles = [];
+var bulkFiles = [];
+var bulkMode = 'single'; // 'single' = consolidated CSV, 'multi' = multiple CSVs
+
+function setMode(mode){
+  bulkMode = mode;
+  var fi = $('bulkFileInput');
+  var title = $('dropZoneTitle');
+  var sub = $('dropZoneSub');
+  var dz = $('dropZone');
+  if(mode==='single'){
+    fi.removeAttribute('multiple');
+    dz.querySelector('div').textContent='📄';
+    title.textContent='Arrastra el CSV consolidado de Vantage';
+    sub.textContent='Contiene todos los clientes — se separan automáticamente';
+    $('modeSingle').classList.add('active');
+    $('modeMulti').classList.remove('active');
+  } else {
+    fi.setAttribute('multiple','');
+    dz.querySelector('div').textContent='📂';
+    title.textContent='Arrastra todos los CSVs de Vantage';
+    sub.textContent='Un archivo por cliente — auto-detecta por InvestorName';
+    $('modeMulti').classList.add('active');
+    $('modeSingle').classList.remove('active');
+  }
+  clearBulk();
+}
 
 function handleDrop(e){
   e.preventDefault();
@@ -1210,22 +1329,79 @@ function handleDrop(e){
 async function handleBulkFiles(fileList){
   if(!fileList||!fileList.length) return;
   bulkFiles=[];
-  $('bulkList').innerHTML='<div style="color:var(--muted);font-size:12px;">Analizando archivos...</div>';
+  $('bulkList').innerHTML='<div style="color:var(--muted);font-size:12px;">Analizando...</div>';
   $('bulkPreview').style.display='block';
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
-  for(var i=0;i<fileList.length;i++){
-    var file=fileList[i];
+
+  if(bulkMode==='single'){
+    // ── CONSOLIDATED CSV: split by InvestorName ──
+    var file=fileList[0];
     try{
       var text=await file.text();
-      var investor=extractInvestorFromCSV(text);
-      var match=findClientByInvestor(investor);
-      bulkFiles.push({file,text,investor:investor||'(desconocido)',clienteId:match?match.id:null,clienteName:match?match.nombre:null,mes:curMes,status:'pending'});
+      var split=splitConsolidatedCSV(text);
+      split.forEach(function(inv){
+        var match=findClientByInvestor(inv.investorName);
+        bulkFiles.push({
+          file:file, text:inv.csvText,
+          investor:inv.investorName,
+          clienteId:match?match.id:null,
+          clienteName:match?match.nombre:null,
+          mes:curMes, status:'pending',
+          rowCount:inv.rowCount
+        });
+      });
     }catch(ex){
-      bulkFiles.push({file,text:'',investor:'Error',clienteId:null,clienteName:null,mes:curMes,status:'error'});
+      bulkFiles.push({file:file,text:'',investor:'Error leyendo',clienteId:null,clienteName:null,mes:curMes,status:'error',rowCount:0});
+    }
+  } else {
+    // ── MULTIPLE CSVs: one per client ──
+    for(var i=0;i<fileList.length;i++){
+      var f=fileList[i];
+      try{
+        var t=await f.text();
+        var inv=extractInvestorFromCSV(t);
+        var m=findClientByInvestor(inv);
+        bulkFiles.push({file:f,text:t,investor:inv||'(desconocido)',clienteId:m?m.id:null,clienteName:m?m.nombre:null,mes:curMes,status:'pending',rowCount:0});
+      }catch(ex){
+        bulkFiles.push({file:f,text:'',investor:'Error',clienteId:null,clienteName:null,mes:curMes,status:'error',rowCount:0});
+      }
     }
   }
   renderBulkList();
+}
+
+// Split a consolidated CSV into per-investor CSVs
+function splitConsolidatedCSV(text){
+  var sep=detectSepA(text);
+  var lines=text.split(/
+?\n/).filter(function(l){return l.trim();});
+  if(lines.length<2) return [];
+  var header=lines[0];
+  var h=smartSplitA(header,sep).map(function(x){return x.toLowerCase().replace(/\s+/g,'');});
+  var INV_COLS=['investorname','investor','inversor','user','usuario','name','cliente'];
+  var iI=-1;
+  for(var ci=0;ci<INV_COLS.length;ci++){var ix=h.indexOf(INV_COLS[ci]);if(ix>=0){iI=ix;break;}}
+  if(iI<0) return [{investorName:'(todos)',csvText:text,rowCount:lines.length-1}];
+
+  // Group rows by investor
+  var groups={};
+  for(var i=1;i<lines.length;i++){
+    var cols=smartSplitA(lines[i],sep);
+    if(cols.length<3) continue;
+    var name=(cols[iI]||'').trim().replace(/^"|"$/g,'');
+    if(!name) continue;
+    if(!groups[name]) groups[name]=[];
+    groups[name].push(lines[i]);
+  }
+
+  return Object.keys(groups).map(function(name){
+    return{
+      investorName:name,
+      csvText:header+'\n'+groups[name].join('\n'),
+      rowCount:groups[name].length
+    };
+  });
 }
 
 function findClientByInvestor(investorName){
@@ -1307,8 +1483,10 @@ async function uploadAllBulk(){
     renderBulkList();
   }
   btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
-  toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':''));
+  toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':'')+' · 💰 Mi Cuenta actualizada');
   await loadReportes(); updateDashboard(); await loadClientes();
+  // Auto-feed Mi Cuenta from the same CSV data
+  autoFeedMiCuenta();
 }
 
 function clearBulk(){
@@ -1419,5 +1597,234 @@ function toggleSidebar(){
     if(sb){ sb.classList.add('collapsed'); if(btn) btn.textContent='▶'; }
   }
 })();
+
+
+// ── MI CUENTA (GESTOR) ────────────────────────────────────────────
+var mcData = null;
+var lastConsolidatedCSV = null; // cache of the last full CSV loaded
+
+// Called automatically after bulk upload
+function autoFeedMiCuenta(){
+  // In single mode: use first bulkFile's original full text
+  // In multi mode: reconstruct by concatenating with shared header
+  var fullText = null;
+
+  if(bulkMode === 'single' && bulkFiles.length > 0){
+    // Get original text - need to re-read, but we stored split texts
+    // Instead, reconstruct: header + all rows from all investors
+    var allTexts = bulkFiles.map(function(bf){ return bf.text; });
+    if(allTexts.length > 0){
+      // Extract header from first
+      var header = allTexts[0].split(/\r?\n/)[0];
+      var rows = [];
+      allTexts.forEach(function(t){
+        var lines = t.split(/\r?\n/);
+        for(var i=1;i<lines.length;i++){
+          if(lines[i].trim()) rows.push(lines[i]);
+        }
+      });
+      fullText = header + '\n' + rows.join('\n');
+    }
+  } else if(bulkMode === 'multi' && bulkFiles.length > 0){
+    var header = bulkFiles[0].text.split(/\r?\n/)[0];
+    var rows = [];
+    bulkFiles.forEach(function(bf){
+      var lines = bf.text.split(/\r?\n/);
+      for(var i=1;i<lines.length;i++){
+        if(lines[i].trim()) rows.push(lines[i]);
+      }
+    });
+    fullText = header + '\n' + rows.join('\n');
+  }
+
+  if(fullText){
+    lastConsolidatedCSV = fullText;
+    mcProcessCSV(fullText);
+    // Show a subtle indicator on Mi Cuenta nav
+    var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
+    if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
+  }
+}
+
+function mcHandleDrop(e){
+  e.preventDefault();
+  var dz=$('mcDropZone');
+  dz.style.borderColor='rgba(245,166,35,.3)';dz.style.background='rgba(245,166,35,.04)';
+  mcLoadFile(e.dataTransfer.files);
+}
+
+async function mcLoadFile(fileList){
+  if(!fileList||!fileList.length) return;
+  var file=fileList[0];
+  $('mcFileStatus').textContent='⏳ Analizando...';
+  try{
+    var text=await file.text();
+    lastConsolidatedCSV=text;
+    mcProcessCSV(text);
+    $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
+    $('mcFileInput').value='';
+  }catch(e){
+    $('mcFileStatus').textContent='❌ Error: '+e.message;
+  }
+}
+
+function mcProcessCSV(text){
+  var sep=detectSepA(text);
+  var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
+  if(lines.length<2) return;
+  var h=smartSplitA(lines[0],sep).map(function(x){return x.toLowerCase().replace(/\s+/g,'');});
+  var iR=h.indexOf('reason')||h.indexOf('tipo')||h.indexOf('type');
+  var iA=['amount','monto','importe'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
+  var iT=['time','fecha','date','datetime'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
+  var iMgr=['managerid','manager_id'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
+  var iMgrName=['managername','manager_name','manager'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
+
+  // Find reason column
+  iR=-1;
+  ['reason','tipo','type'].forEach(function(n){if(iR<0)iR=h.indexOf(n);});
+
+  // Totals
+  var totalPerf=0,totalMgmt=0,totalDep=0,totalWith=0;
+  var monthly={}; // {YYYY-MM: {perf,mgmt,dep,with}}
+
+  for(var i=1;i<lines.length;i++){
+    var cols=smartSplitA(lines[i],sep);
+    if(cols.length<3) continue;
+    var reason=(iR>=0?(cols[iR]||''):'').toLowerCase().trim();
+    var amount=iA>=0?parseNumA(cols[iA]):0;
+    var time=iT>=0?parseDateA(cols[iT]):null;
+    if(!time) continue;
+    var mk=time.getFullYear()+'-'+String(time.getMonth()+1).padStart(2,'0');
+    if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
+
+    if(reason==='performancefee'||reason==='performance fee'){
+      var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
+    } else if(reason==='managementfee'||reason==='management fee'){
+      var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
+    } else if(reason==='depositfee'||reason==='deposit fee'){
+      var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
+    } else if(reason==='withdrawal'||reason==='retiro'){
+      var v=Math.abs(amount); totalWith+=v; monthly[mk].with+=v;
+    }
+  }
+
+  var totalFees=totalPerf+totalMgmt+totalDep;
+  var balance=totalFees-totalWith;
+  var monthKeys=Object.keys(monthly).sort();
+
+  // Update KPIs
+  var fmt=function(n){return(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
+  $('mcTotalFees').textContent=fmt(totalFees);
+  $('mcPerfFees').textContent=fmt(totalPerf);
+  $('mcMgmtFees').textContent=fmt(totalMgmt);
+  $('mcDepFees').textContent=fmt(totalDep);
+  $('mcWithdrawals').textContent=fmt(totalWith);
+  $('mcBalance').textContent=fmt(balance);
+  $('mcMeses').textContent=monthKeys.length;
+
+  // Build table
+  var tbody=$('mcTableBody'); tbody.innerHTML='';
+  var MNS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  monthKeys.forEach(function(mk){
+    var m=monthly[mk];
+    var total=m.perf+m.mgmt+m.dep;
+    var neto=total-m.with;
+    var parts=mk.split('-');
+    var label=MNS[+parts[1]-1]+' '+parts[0];
+    var tr=document.createElement('tr');
+    tr.innerHTML=
+      '<td style="font-family:var(--sans);">'+label+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);color:var(--good);">'+fmt(m.perf)+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);color:var(--accent);">'+fmt(m.mgmt)+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);color:var(--warn);">'+fmt(m.dep)+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);font-weight:700;">'+fmt(total)+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);color:var(--bad);">'+fmt(m.with)+'</td>'+
+      '<td style="text-align:right;font-family:var(--mono);color:'+(neto>=0?'var(--good)':'var(--bad)')+';">'+fmt(neto)+'</td>';
+    tbody.appendChild(tr);
+  });
+
+  // Draw chart
+  mcDrawChart(monthKeys, monthly);
+  $('mcStats').style.display='block';
+}
+
+function mcDrawChart(monthKeys, monthly){
+  var canvas=$('mcChart');
+  var dpr=window.devicePixelRatio||1;
+  var rect=canvas.getBoundingClientRect();
+  var W=Math.max(300,rect.width||700), H=220;
+  canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  var ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  var pad={l:64,r:16,t:16,b:52};
+  var iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  var n=monthKeys.length;
+  if(!n) return;
+
+  // Max value for scale
+  var maxV=0;
+  monthKeys.forEach(function(mk){
+    var m=monthly[mk];
+    maxV=Math.max(maxV, m.perf+m.mgmt+m.dep);
+  });
+  maxV=maxV||1;
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){var y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
+  ctx.fillStyle='#6b809a'; ctx.font='11px JetBrains Mono,monospace'; ctx.textAlign='right';
+  for(var i=0;i<=4;i++){var v=maxV*(1-i/4);ctx.fillText('$'+(v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)),pad.l-6,pad.t+ih*(i/4)+4);}
+
+  // Bars - stacked per/mgmt/dep
+  var slotW=iw/Math.max(1,n);
+  var barW=Math.max(8,slotW*0.6);
+  var MNS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+  monthKeys.forEach(function(mk,idx){
+    var m=monthly[mk];
+    var x=pad.l+slotW*(idx+0.5)-barW/2;
+    var bottom=pad.t+ih;
+    var parts=mk.split('-');
+    var label=MNS[+parts[1]-1]+"'"+parts[0].slice(2);
+
+    // Draw stacked bars bottom→top: perf(green), mgmt(blue), dep(yellow)
+    var segments=[
+      {v:m.perf, color:'rgba(34,214,138,.85)'},
+      {v:m.mgmt, color:'rgba(0,194,255,.75)'},
+      {v:m.dep,  color:'rgba(245,166,35,.8)'},
+    ];
+    var currentY=bottom;
+    segments.forEach(function(seg){
+      if(seg.v<=0) return;
+      var barH=Math.max(2,(seg.v/maxV)*ih);
+      currentY-=barH;
+      ctx.fillStyle=seg.color;
+      ctx.fillRect(x,currentY,barW,barH);
+    });
+
+    // Withdrawal line marker
+    if(m.with>0){
+      var wy=pad.t+ih*(1-(m.with/maxV));
+      ctx.strokeStyle='rgba(255,79,106,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(x-2,wy); ctx.lineTo(x+barW+2,wy); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    // X label
+    ctx.fillStyle='#6b809a'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='center';
+    ctx.save(); ctx.translate(x+barW/2, pad.t+ih+8); ctx.rotate(-Math.PI/6);
+    ctx.fillText(label,0,0); ctx.restore();
+  });
+
+  // Withdrawal legend
+  ctx.strokeStyle='rgba(255,79,106,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+  ctx.beginPath(); ctx.moveTo(W-140,12); ctx.lineTo(W-122,12); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,79,106,.8)'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='left';
+  ctx.fillText('─ Retiros', W-118, 16);
+}
 
 </script>
