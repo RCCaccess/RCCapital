@@ -545,7 +545,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 </div><!-- /appScreen -->
 
 <!-- MODAL CONFIRMAR ELIMINAR -->
-<div class="modal-overlay" id="modalEliminar">
+<div class="modal-overlay" id="modalEliminar" style="display:none;">
   <div class="modal">
     <h3>⚠️ Eliminar cliente</h3>
     <p id="modalMsg">¿Seguro que quieres eliminar este cliente? Se borrarán todos sus reportes.</p>
@@ -1028,7 +1028,7 @@ async function agregarCliente(){
 function confirmDelete(id, nombre){
   pendingDeleteId = id;
   $('modalMsg').textContent = `¿Seguro que quieres eliminar a "${nombre}"? Se borrarán todos sus reportes.`;
-  $('modalEliminar').classList.add('open');
+  $('modalEliminar').style.display='flex';
   $('modalConfirmBtn').onclick = async ()=>{
     $('modalConfirmBtn').innerHTML='<span class="spinner"></span>';
     const { error } = await db.from('clientes').delete().eq('id', pendingDeleteId);
@@ -1038,7 +1038,7 @@ function confirmDelete(id, nombre){
     await loadAll();
   };
 }
-function closeModal(){ $('modalEliminar').classList.remove('open'); }
+function closeModal(){ $('modalEliminar').style.display='none'; }
 
 // ── EDITAR CONTRASEÑA ─────────────────────────────────────────────
 let editingClientId = null;
@@ -1047,7 +1047,7 @@ function openEditPass(id, nombre){
   editingClientId = id;
   $('editPassMsg').textContent = 'Nueva clave generada para ' + nombre + ':';
   $('editPassInput').textContent = generatePass();
-  $('modalEditPass').classList.add('open');
+  $('modalEditPass').style.display='flex';
 }
 
 function regeneratePassPreview(){
@@ -1055,7 +1055,7 @@ function regeneratePassPreview(){
 }
 
 function closeEditPass(){
-  $('modalEditPass').classList.remove('open');
+  $('modalEditPass').style.display='none';
   editingClientId = null;
 }
 
@@ -1301,7 +1301,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- MODAL EDITAR CONTRASEÑA -->
-<div class="modal-overlay" id="modalEditPass">
+<div class="modal-overlay" id="modalEditPass" style="display:none;">
   <div class="modal">
     <h3>🔑 Nueva clave de acceso</h3>
     <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
