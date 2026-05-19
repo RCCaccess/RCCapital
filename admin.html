@@ -257,7 +257,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <label>Contraseña</label>
       <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/>
     </div>
-    <button class="btn-primary" id="loginBtn">Entrar al panel</button>
+    <button class="btn-primary" id="loginBtn" onclick="login()">Entrar al panel</button>
     <div id="loginErr"></div>
   </div>
 </div>
@@ -1437,23 +1437,10 @@ function processAllLoaded(results, curMes){
 
         // Feed manager data to Mi Cuenta
         if(managerRows.length > 0){
-          // Reconstruct full CSV for manager
-          var header = r.text.split(/
-?
-/)[0];
-          var mgr_text = header + '
-' + managerRows.map(function(t){
-            return t.split(/
-?
-/).slice(1).join('
-');
-          }).join('
-');
-          lastConsolidatedCSV = r.text; // use full file for Mi Cuenta (includes all fees)
+          lastConsolidatedCSV = r.text;
           mcProcessCSV(r.text);
-          // Update Mi Cuenta nav indicator
           var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
-          if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
+          if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">&#9679;</span>';
         }
 
       }catch(ex){ /* skip silently */ }
