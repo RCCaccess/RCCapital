@@ -544,11 +544,64 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   </div><!-- /layout -->
 </div><!-- /appScreen -->
 
-<!-- MODAL CONFIRMAR ELIMINAR -->
+
+</div>
+
+<div id="toast"></div>
+
+
+</div>
+
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
+      <button class="pin-btn" onclick="adminPinTap('1')">1</button>
+      <button class="pin-btn" onclick="adminPinTap('2')">2</button>
+      <button class="pin-btn" onclick="adminPinTap('3')">3</button>
+      <button class="pin-btn" onclick="adminPinTap('4')">4</button>
+      <button class="pin-btn" onclick="adminPinTap('5')">5</button>
+      <button class="pin-btn" onclick="adminPinTap('6')">6</button>
+      <button class="pin-btn" onclick="adminPinTap('7')">7</button>
+      <button class="pin-btn" onclick="adminPinTap('8')">8</button>
+      <button class="pin-btn" onclick="adminPinTap('9')">9</button>
+      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button>
+      <button class="pin-btn" onclick="adminPinTap('0')">0</button>
+      <button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
+    </div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
+  </div>
+</div>
+
+
+
+</body>
+</html
+
+</div>
+
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
+      <button class="pin-btn" onclick="adminPinTap('1')">1</button>
+      <button class="pin-btn" onclick="adminPinTap('2')">2</button>
+      <button class="pin-btn" onclick="adminPinTap('3')">3</button>
+      <button class="pin-btn" onclick="adminPinTap('4')">4</button>
+      <button class="pin-btn" onclick="adminPinTap('5')">5</button>
+      <button class="pin-btn" onclick="adminPinTap('6')">6</button>
+      <button class="pin-btn" onclick="adminPinTap('7')">7</button>
+      <button class="pin-btn" onclick="adminPinTap('8')">8</button>
+      <button class="pin-btn" onclick="adminPinTap('9')">9</button>
+      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button>
+      <button class="pin-btn" onclick="adminPinTap('0')">0</button>
+      <button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
+    </div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
 <div class="modal-overlay" id="modalEliminar" style="display:none;">
   <div class="modal">
     <h3>⚠️ Eliminar cliente</h3>
-    <p id="modalMsg">¿Seguro que quieres eliminar este cliente? Se borrarán todos sus reportes.</p>
+    <p id="modalMsg">¿Seguro que quieres eliminar este cliente?</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancelar</button>
       <button class="btn danger" id="modalConfirmBtn">Eliminar</button>
@@ -556,9 +609,44 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   </div>
 </div>
 
+<!-- MODAL NUEVA CLAVE -->
+<div class="modal-overlay" id="modalEditPass" style="display:none;">
+  <div class="modal">
+    <h3>🔑 Nueva clave de acceso</h3>
+    <p id="editPassMsg">Nueva clave para el cliente:</p>
+    <div style="margin-top:14px;padding:16px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span id="editPassInput" style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:3px;">—</span>
+      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;" title="Generar otra">🔄</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Envíasela al cliente por WhatsApp.</p>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeEditPass()">Cancelar</button>
+      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PIN -->
+<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <div style="text-align:center;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
+    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
+      <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
+      <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
+      <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
+      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
+    </div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
+
 // ── CONFIG ────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
@@ -1260,54 +1348,10 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
 </script>
-<!-- MODAL EDITAR CONTRASEÑA -->
-<
-
-
-  <div class="modal">
-    <h3>🔑 Nueva clave de acceso</h3>
-    <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
-    <div style="margin-top:12px;padding:14px 16px;background:rgba(0,194,255,.06);border:1px solid rgba(0,194,255,.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-    </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Guarda esta clave — se la debes enviar al cliente.</p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditPass()">Cancelar</button>
-      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar y guardar</button>
-    </div>
-  </div>
-</div>
-
-<!-- ADMIN PIN ACCESS -->
-<div id="adminPinOverlay">
-  <div style="text-align:center;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
-    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
-      <div class="pin-dot"></div><div class="pin-dot"></div>
-      <div class="pin-dot"></div><div class="pin-dot"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
-      <button class="pin-btn" onclick="adminPinTap('1')">1</button>
-      <button class="pin-btn" onclick="adminPinTap('2')">2</button>
-      <button class="pin-btn" onclick="adminPinTap('3')">3</button>
-      <button class="pin-btn" onclick="adminPinTap('4')">4</button>
-      <button class="pin-btn" onclick="adminPinTap('5')">5</button>
-      <button class="pin-btn" onclick="adminPinTap('6')">6</button>
-      <button class="pin-btn" onclick="adminPinTap('7')">7</button>
-      <button class="pin-btn" onclick="adminPinTap('8')">8</button>
-      <button class="pin-btn" onclick="adminPinTap('9')">9</button>
-      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button>
-      <button class="pin-btn" onclick="adminPinTap('0')">0</button>
-      <button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
-    </div>
-    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
-
-<!-- MODAL CONFIRMAR ELIMINAR ya incluido arriba -->
-
-
-<div id="toast"></div>
-
 <script>
+
 // ── BULK UPLOAD ───────────────────────────────────────────────────
 var bulkFiles = [];
 var bulkMode = 'single'; // 'single' = consolidated CSV, 'multi' = multiple CSVs
@@ -1883,34 +1927,6 @@ function mcDrawChart(monthKeys, monthly){
   ctx.fillStyle='rgba(255,79,106,.8)'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='left';
   ctx.fillText('─ Retiros', W-118, 16);
 }
-
-
-<!-- MODAL EDITAR CONTRASEÑA -->
-
-
-
-
-</div>
-
-
-<!-- MODAL NUEVA CLAVE -->
-<div class="modal-overlay" id="modalEditPass" style="display:none;">
-  <div class="modal">
-    <h3>🔑 Nueva clave de acceso</h3>
-    <p id="editPassMsg">Se generará una nueva clave aleatoria segura.</p>
-    <div style="margin-top:14px;padding:16px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="editPassInput" style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:3px;">—</span>
-      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;" title="Otra">🔄</button>
-    </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Envíasela al cliente por WhatsApp.</p>
-    <div class="modal-actions">
-      <button class="btn" onclick="closeEditPass()">Cancelar</button>
-      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar</button>
-    </div>
-  </div>
-</div>
-</body>
-</html>
 </script>
 </body>
 </html>
