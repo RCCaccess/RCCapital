@@ -468,7 +468,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
               <div id="dropZoneTitle" style="font-size:15px;font-weight:700;color:var(--accent);">Arrastra el CSV consolidado de Vantage</div>
               <div id="dropZoneSub" style="font-size:12px;color:var(--muted);margin-top:6px;">Contiene todos los clientes — se separan automáticamente</div>
             </div>
-            <input type="file" id="bulkFileInput" accept=".csv" style="display:none;" onchange="handleBulkFiles(this.files)"/>
+            <input type="file" id="bulkFileInput" accept=".csv" style="display:none;" onchange="console.log('file input changed',this.files);handleBulkFiles(this.files)"/>
             <div id="bulkPreview" style="display:none;margin-top:16px;">
               <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Archivos detectados:</div>
               <div id="bulkList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
@@ -1332,12 +1332,14 @@ function handleDrop(e){
 }
 
 function handleBulkFiles(fileList){
-  if(!fileList||!fileList.length) return;
+  console.log('handleBulkFiles called, files:', fileList ? fileList.length : 'null');
+  if(!fileList||!fileList.length){ console.log('No files'); return; }
   bulkFiles=[];
   $('bulkList').innerHTML='<div style="color:var(--muted);font-size:12px;">⏳ Analizando...</div>';
   $('bulkPreview').style.display='block';
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+  console.log('Mode:', bulkMode, 'Mes:', curMes);
 
   // Read first file (consolidated mode) or all files (multi mode)
   var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
@@ -1361,6 +1363,7 @@ function handleBulkFiles(fileList){
 }
 
 function processAllLoaded(results, curMes){
+  console.log('processAllLoaded called, results:', results.length);
   bulkFiles = [];
   results.forEach(function(r){
     if(!r.text){
@@ -1421,6 +1424,7 @@ function findClientByInvestor(investorName){
 }
 
 function renderBulkList(){
+  console.log('renderBulkList called, bulkFiles:', bulkFiles.length);
   var list=$('bulkList'); list.innerHTML='';
   var ready=0,noMatch=0;
   bulkFiles.forEach(function(bf,idx){
