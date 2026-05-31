@@ -827,8 +827,7 @@ function renderClientesTable(){
     card.onmouseenter = function(){ card.style.borderColor='var(--border2)'; };
     card.onmouseleave = function(){ card.style.borderColor='var(--border)'; };
     card.onclick = function(e){
-      // Don't trigger if clicking buttons inside the card
-      if(e.target.closest('button')||e.target.closest('select')) return;
+      if(e.target.closest('button')||e.target.closest('select')||e.target.closest('input')) return;
       openDetalle(c.id, c.nombre);
     };
     const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
@@ -1339,7 +1338,7 @@ async function subirReporte(){
     let error;
     if(existing){
       // Update existing
-      ({ error } = await db.from('reportes').update({csv_data:text}).eq('id',existing.id));
+      ({ error } = await db.from('reportes').update({csv_data:text,created_at:new Date().toISOString()}).eq('id',existing.id));
     } else {
       // Insert new
       ({ error } = await db.from('reportes').insert({cliente_id:clienteId, mes, csv_data:text}));
@@ -1615,13 +1614,15 @@ async function uploadAllBulk(){
   for(var i=0;i<toUpload.length;i++){
     var bf=toUpload[i];
     try{
-      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).eq('mes',bf.mes).single();
+      // Replace existing or insert new — always store latest CSV
+      var now_iso=new Date().toISOString();
+      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).order('created_at',{ascending:false}).limit(1);
       var error;
-      if(res.data){
-        var u=await db.from('reportes').update({csv_data:bf.text}).eq('id',res.data.id);
+      if(res.data && res.data.length>0){
+        var u=await db.from('reportes').update({csv_data:bf.text,mes:bf.mes,created_at:now_iso}).eq('id',res.data[0].id);
         error=u.error;
       } else {
-        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text});
+        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text,created_at:now_iso});
         error=ins.error;
       }
       if(error){bf.status='error';fail++;}else{bf.status='ok';ok++;}
@@ -1999,29 +2000,35 @@ function mcDrawChart(monthKeys, monthly){
 function closeDetalle(){ $('modalDetalle').style.display='none'; }
 
 async function openDetalle(clienteId, nombre){
+  // Show modal immediately with loading state
   $('detNombre').textContent = nombre;
-  $('detROI').textContent = '—'; $('detEquity').textContent = '—';
+  $('detROI').textContent = '...';
+  $('detEquity').textContent = '...';
+  $('detSub').textContent = 'Cargando...';
+  $('detDep').textContent = '';
   $('detTableBody').innerHTML = '';
+  $('detPeriodo').textContent = '';
   $('modalDetalle').style.display = 'flex';
 
-  // Load latest report from Supabase
+  // Load latest report
   var res = await db.from('reportes').select('csv_data,mes,created_at')
-    .eq('cliente_id', clienteId).order('mes',{ascending:false}).limit(1).single();
-  if(!res.data || !res.data.csv_data){
-    $('detPeriodo').textContent = 'Sin reportes disponibles';
+    .eq('cliente_id', clienteId).order('created_at',{ascending:false}).limit(1);
+
+  if(!res.data || !res.data.length || !res.data[0].csv_data){
+    $('detROI').textContent = '—';
+    $('detSub').textContent = 'Sin reportes disponibles';
     return;
   }
 
-  var rep = res.data;
-  $('detPeriodo').textContent = 'Período: ' + rep.mes;
-
-  // Parse CSV and compute stats (reusing same logic as index.html)
+  var rep = res.data[0];
   try{
     var rows = parseCSVdet(rep.csv_data);
     var stats = computeStatsdet(rows);
     renderDetalle(stats, nombre);
+    // Draw the detail chart after a tick (so canvas has dimensions)
+    setTimeout(function(){ if(stats.es&&stats.es.length>1) drawDetChart(stats); }, 50);
   }catch(e){
-    $('detPeriodo').textContent = 'Error procesando datos: '+e.message;
+    $('detSub').textContent = 'Error: '+e.message;
   }
 }
 
@@ -2179,5 +2186,74 @@ function drawDetChart(stats){
 
 
 </script>
+
+<!-- MODAL DETALLE CLIENTE -->
+<div class="modal-overlay" id="modalDetalle" style="display:none;">
+  <div class="modal" style="max-width:900px;width:95vw;max-height:90vh;overflow-y:auto;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;">Estado de cuenta</div>
+        <div id="detNombre" style="font-size:22px;font-weight:600;letter-spacing:-.3px;">—</div>
+        <div id="detPeriodo" style="font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:3px;">—</div>
+      </div>
+      <button onclick="closeDetalle()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:6px;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+
+    <!-- Hero -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rm);padding:24px 28px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;">Rendimiento Total</div>
+        <div id="detROI" style="font-size:48px;font-weight:600;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;">—</div>
+        <div id="detSub" style="font-size:12px;color:var(--text2);margin-top:8px;">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:5px;">Valor de la cuenta</div>
+        <div id="detEquity" style="font-size:24px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums;">—</div>
+        <div id="detDep" style="font-size:12px;color:var(--text2);margin-top:5px;font-family:var(--mono);line-height:1.8;">—</div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Profit neto</div>
+        <div id="detProfit" style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Días activo</div>
+        <div id="detDias" style="font-size:16px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Mejor mes</div>
+        <div id="detBest" style="font-size:16px;font-weight:600;color:var(--good);font-variant-numeric:tabular-nums;">—</div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Meses positivos</div>
+        <div id="detPosM" style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;">—</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:14px;margin-bottom:10px;">
+      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
+      <canvas id="detChart" style="display:block;width:100%;height:180px;"></canvas>
+    </div>
+
+    <!-- Table -->
+    <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Resumen por período</div>
+    <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--r);max-height:240px;">
+      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+        <thead><tr>
+          <th style="padding:9px 14px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Mes</th>
+          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">P&L neto</th>
+          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Retorno %</th>
+          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Equity final</th>
+        </tr></thead>
+        <tbody id="detTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
