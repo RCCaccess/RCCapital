@@ -698,9 +698,17 @@ function toast(msg, type='good'){
   toast._t = setTimeout(()=> t.style.display='none', 3500);
 }
 
-function fmtDate(iso){
+function fmtDate(iso, showTime){
   if(!iso) return '—';
-  return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
+  var d = new Date(iso);
+  // Panama is UTC-5 always (no DST)
+  var panama = new Date(d.getTime() - (5*60*60*1000));
+  var dd = String(panama.getUTCDate()).padStart(2,'0');
+  var mm = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][panama.getUTCMonth()];
+  var yyyy = panama.getUTCFullYear();
+  var hh = String(panama.getUTCHours()).padStart(2,'0');
+  var min = String(panama.getUTCMinutes()).padStart(2,'0');
+  return dd+' '+mm+' '+yyyy+(showTime!==false?' · '+hh+':'+min+' PTY':'');
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
@@ -2103,7 +2111,7 @@ function renderDetalle(stats, nombre){
 
   // Deposit breakdown
   if(stats.depFeeAmt>0){
-    $('detDep').innerHTML='Depósito: '+fmt(stats.depGross)+' · Fee: <span style="color:var(--bad);">-'+fmt(stats.depFeeAmt)+'</span> · <span style="color:var(--accent);">Capital: '+fmt(stats.dep)+'</span>';
+    $('detDep').innerHTML='Depósito inicial: '+fmt(stats.depGross)+'<br>Activation fee: <span style="color:var(--bad);">-'+fmt(stats.depFeeAmt)+'</span><br><span style="color:var(--good);font-weight:600;">Capital inicial: '+fmt(stats.dep)+'</span>';
   } else {
     $('detDep').textContent='Depósito inicial: '+fmt(stats.depGross);
   }
