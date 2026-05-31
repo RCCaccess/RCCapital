@@ -3,165 +3,284 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RCCapital · Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>RC Capital · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
-  --bg:#f9f9f7;--surface:#ffffff;--surface2:#f3f3f0;
-  --border:#e8e8e4;--border2:#d4d4ce;
-  --text:#1a1a18;--muted:#8a8a82;
-  --accent:#1a1a18;--good:#1a7a4a;--bad:#c0392b;--warn:#b8770a;
-  --sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
-}
+
+  /* ── DARK THEME (default) ── */
+  :root, [data-theme="dark"]{
+    --sans:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --bg:#070a0f;--surface:#0d1219;--surface2:#111a24;
+    --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
+    --text:#e2eaf5;--muted:#6b809a;
+    --accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;
+    --card-bg:rgba(0,0,0,.25);--card-border:rgba(255,255,255,.08);
+    --card-hover-border:rgba(255,255,255,.16);--card-hover-bg:rgba(0,0,0,.25);
+    --input-bg:rgba(255,255,255,.05);--drop-border:rgba(0,194,255,.3);
+    --drop-bg:rgba(0,194,255,.04);--drop-over:rgba(0,194,255,.12);
+    --stat-bg:var(--surface);--tbl-head:rgba(255,255,255,.02);
+    --shadow:0 24px 64px rgba(0,0,0,.5);
+  }
+
+  /* ── LIGHT THEME ── */
+  [data-theme="light"]{
+    --bg:#f9f9f7;--surface:#ffffff;--surface2:#f3f3f0;
+    --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.14);
+    --text:#1a1a18;--muted:#8a8a82;
+    --accent:#0071e3;--good:#1a7a4a;--bad:#c0392b;--warn:#b8770a;
+    --card-bg:#f3f3f0;--card-border:rgba(0,0,0,.08);
+    --card-hover-border:rgba(0,0,0,.2);--card-hover-bg:#ffffff;
+    --input-bg:rgba(0,0,0,.04);--drop-border:rgba(0,113,227,.3);
+    --drop-bg:rgba(0,113,227,.04);--drop-over:rgba(0,113,227,.08);
+    --stat-bg:var(--surface);--tbl-head:rgba(0,0,0,.02);
+    --shadow:0 4px 24px rgba(0,0,0,.08);
+  }
+
+  /* Theme transition */
+  *, *::before, *::after{
+    transition:background-color .25s ease, border-color .25s ease, color .2s ease;
+  }
+  /* Except animations */
+  .spinner, canvas { transition: none !important; }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{font-family:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse 900px 500px at 80% -10%,rgba(0,194,255,.05),transparent);}
 
 /* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.login-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;width:100%;max-width:380px;box-shadow:0 4px 24px rgba(0,0,0,.06);}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--border);}
-.login-logo .lmark{width:32px;height:32px;background:var(--text);border-radius:7px;display:grid;place-items:center;flex-shrink:0;}
-.login-logo .lmark img{width:20px;height:20px;object-fit:contain;filter:invert(1);}
-.login-logo h1{font-size:16px;font-weight:600;letter-spacing:-.2px;}
-.login-logo span{font-size:10px;color:var(--muted);font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 6px;margin-left:auto;}
-.field{margin-bottom:14px;}
-.field label{display:block;font-size:10px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.field input{width:100%;padding:10px 12px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s;}
-.field input:focus{border-color:var(--text);}
-.btn-primary{width:100%;padding:11px;background:var(--text);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;border:none;border-radius:7px;cursor:pointer;transition:opacity .2s;margin-top:6px;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:40px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+.login-logo .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+.login-logo h1{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.login-logo span{font-size:11px;color:var(--muted);background:rgba(0,194,255,.1);
+  border:1px solid rgba(0,194,255,.2);border-radius:4px;padding:2px 6px;font-family:var(--mono);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.field input{width:100%;padding:12px 14px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:10px;color:var(--text);
+  font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--accent);}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#000;
+  font-family:var(--sans);font-size:14px;font-weight:700;border:none;
+  border-radius:10px;cursor:pointer;transition:opacity .2s;margin-top:8px;}
 .btn-primary:hover{opacity:.85;}
-.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
-#loginErr{font-size:12px;color:var(--bad);margin-top:8px;text-align:center;display:none;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+#loginErr{font-size:12px;color:var(--bad);margin-top:10px;text-align:center;display:none;}
 
-/* APP LAYOUT */
+/* MAIN APP */
 #appScreen{display:none;min-height:100vh;}
+
+/* SIDEBAR */
 .layout{display:flex;min-height:100vh;}
 
 /* SIDEBAR */
-.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:20px 12px;display:flex;flex-direction:column;flex-shrink:0;transition:width .2s,padding .2s;overflow:hidden;position:relative;}
-.sidebar.collapsed{width:48px;padding:20px 8px;}
-.sidebar.collapsed .sidebar-logo h2,.sidebar.collapsed .sidebar-logo .tag,.sidebar.collapsed .nav-label,.sidebar.collapsed .logout-btn span,.sidebar.collapsed .sidebar-bottom{display:none;}
-.sidebar.collapsed .nav-item{justify-content:center;padding:9px 6px;}
-.sidebar-toggle{position:absolute;top:16px;right:-13px;z-index:10;width:26px;height:26px;border-radius:50%;background:var(--surface);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;color:var(--muted);box-shadow:0 2px 6px rgba(0,0,0,.08);}
-.sidebar-toggle:hover{color:var(--text);}
-.sidebar-logo{display:flex;align-items:center;gap:8px;margin-bottom:24px;padding:0 4px;}
-.sidebar-logo img{width:22px;height:22px;object-fit:contain;border-radius:5px;background:var(--text);padding:3px;filter:invert(1) brightness(10);}
-.sidebar-logo h2{font-size:14px;font-weight:600;letter-spacing:-.2px;white-space:nowrap;}
-.sidebar-logo .tag{font-size:9px;color:var(--muted);font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:2px 5px;white-space:nowrap;}
-.sidebar-nav-group{display:flex;flex-direction:column;gap:1px;flex:1;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:13px;font-weight:400;color:var(--muted);cursor:pointer;transition:all .12s;border:none;background:transparent;width:100%;text-align:left;white-space:nowrap;}
-.nav-item:hover{background:var(--surface2);color:var(--text);}
-.nav-item.active{background:var(--text);color:#fff;}
-.nav-item .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
+.sidebar{
+  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  padding:20px 14px;display:flex;flex-direction:column;flex-shrink:0;
+  transition:width .25s ease, padding .25s ease;overflow:hidden;position:relative;
+}
+.sidebar.collapsed{width:56px;padding:20px 8px;}
+.sidebar.collapsed .sidebar-logo h2,
+.sidebar.collapsed .sidebar-logo .tag,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .logout-btn span,
+.sidebar.collapsed .sidebar-bottom{display:none;}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 6px;}
+.sidebar.collapsed .nav-item .icon{width:auto;}
+.sidebar-logo{display:flex;align-items:center;gap:8px;margin-bottom:28px;padding:0 4px;min-width:0;}
+.sidebar-logo h2{font-size:15px;font-weight:800;white-space:nowrap;}
+.sidebar-logo .tag{font-size:9px;color:var(--accent);font-family:var(--mono);
+  background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);
+  border-radius:4px;padding:2px 5px;white-space:nowrap;}
+.sidebar-toggle{position:absolute;top:18px;right:-14px;z-index:10;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.sidebar-toggle:hover{color:var(--accent);border-color:rgba(0,194,255,.3);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
+  transition:all .15s;border:none;background:transparent;width:100%;text-align:left;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nav-item.active{background:rgba(0,194,255,.1);color:var(--accent);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-label{overflow:hidden;text-overflow:ellipsis;}
 .sidebar-bottom{margin-top:auto;}
-.logout-btn{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;font-size:12px;color:var(--bad);cursor:pointer;background:transparent;border:1px solid transparent;width:100%;font-family:var(--sans);transition:all .12s;}
-.logout-btn:hover{background:#fff0ee;border-color:#fcccc4;}
-
-/* CONTENT */
-.content{flex:1;padding:28px;overflow-y:auto;}
-.page{display:none;}
-.page.active{display:block;}
-.page-title{font-size:22px;font-weight:300;letter-spacing:-.5px;margin-bottom:3px;}
-.page-sub{font-size:13px;color:var(--muted);margin-bottom:24px;font-weight:300;}
-
-/* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;}
-.card-hd{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:12px;}
-.card-hd h3{font-size:12px;font-weight:500;letter-spacing:.3px;text-transform:uppercase;color:var(--muted);}
-.card-bd{padding:18px;}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
-.stat-box .sl{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.stat-box .sv{font-size:24px;font-weight:300;font-family:var(--mono);color:var(--text);}
-.stat-box.accent .sv{color:var(--text);}
-.stat-box.good .sv{color:var(--good);}
-
-/* BUTTONS */
-.btn{font-family:var(--sans);font-size:12px;font-weight:400;padding:7px 12px;border-radius:6px;border:1px solid var(--border2);background:transparent;color:var(--text);cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:5px;}
-.btn:hover{background:var(--surface2);}
-.btn.accent{background:var(--text);border-color:var(--text);color:#fff;}
-.btn.accent:hover{opacity:.85;}
-.btn.danger{background:transparent;border-color:#fcccc4;color:var(--bad);}
-.btn.danger:hover{background:#fff0ee;}
-.btn.good{background:transparent;border-color:#b3e6c8;color:var(--good);}
-.btn:disabled{opacity:.35;cursor:not-allowed;}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto;border-radius:8px;border:1px solid var(--border);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
-th{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);background:var(--surface2);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--bg);}
-.mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
-.badge{font-size:10px;font-weight:500;padding:3px 8px;border-radius:20px;font-family:var(--mono);}
-.badge.good{background:#e8f8ef;color:var(--good);border:1px solid #b3e6c8;}
-.badge.warn{background:#fef8eb;color:var(--warn);border:1px solid #f5d87a;}
-.badge.bad{background:#fff0ee;color:var(--bad);border:1px solid #fcccc4;}
-
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-@media(max-width:580px){.form-grid{grid-template-columns:1fr;}}
-.form-field{display:flex;flex-direction:column;gap:5px;}
-.form-field label{font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
-.form-field input,.form-field select{padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s;}
-.form-field input:focus,.form-field select:focus{border-color:var(--text);}
-.file-input{padding:10px 12px;background:var(--bg);border:1.5px dashed var(--border2);border-radius:7px;color:var(--muted);font-family:var(--sans);font-size:13px;cursor:pointer;width:100%;display:block;}
-.form-full{grid-column:1/-1;}
-
-/* TOAST */
-#toast{position:fixed;right:20px;bottom:20px;z-index:999;background:var(--text);color:#fff;padding:11px 16px;border-radius:8px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.15);display:none;max-width:300px;}
-
-/* MODAL */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(26,26,24,.4);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px;backdrop-filter:blur(4px);}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:460px;box-shadow:0 16px 48px rgba(0,0,0,.12);}
-.modal h3{font-size:16px;font-weight:500;margin-bottom:6px;}
-.modal p{font-size:13px;color:var(--muted);margin-bottom:18px;font-weight:300;}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;}
-
-/* EMPTY */
-.empty{text-align:center;padding:40px 20px;color:var(--muted);}
-.empty .ei{font-size:32px;margin-bottom:10px;}
-.empty p{font-size:13px;font-weight:300;}
-
-/* PROGRESS */
-.progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px;}
-.progress-fill{height:100%;background:var(--text);border-radius:2px;transition:width .3s ease;width:0%;}
-
-/* SPINNER */
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--text);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* PIN */
-#adminPinOverlay{display:none;position:fixed;inset:0;background:rgba(249,249,247,.96);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
-.pin-dot{width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid var(--border2);transition:all .2s;}
-.pin-dot.filled{background:var(--text);border-color:var(--text);}
-.pin-dot.ok{background:var(--good);border-color:var(--good);}
-.pin-dot.err{background:var(--bad);border-color:var(--bad);}
-.pin-btn{font-family:var(--sans);font-size:20px;font-weight:300;width:60px;height:60px;border-radius:50%;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;transition:all .12s;-webkit-tap-highlight-color:transparent;}
-.pin-btn:hover{background:var(--surface2);border-color:var(--border2);}
-.pin-btn:active{transform:scale(.92);}
-.pin-del{background:transparent;border-color:transparent;color:var(--muted);}
-.pin-cancel{background:transparent;border-color:transparent;color:var(--muted);}
+.logout-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  font-size:12px;color:var(--bad);cursor:pointer;background:rgba(255,79,106,.08);
+  border:1px solid rgba(255,79,106,.15);width:100%;font-family:var(--sans);font-weight:600;
+  transition:all .15s;}
+.logout-btn:hover{background:rgba(255,79,106,.15);}
 
 /* MOBILE */
 @media(max-width:768px){
   .layout{flex-direction:column;}
-  .sidebar{width:100%!important;flex-direction:row;align-items:center;padding:10px 14px!important;border-right:none;border-bottom:1px solid var(--border);overflow-x:auto;gap:4px;}
+  .sidebar{
+    width:100% !important;flex-direction:row;align-items:center;
+    padding:10px 14px !important;border-right:none;
+    border-bottom:1px solid var(--border);flex-shrink:0;
+    overflow-x:auto;gap:4px;
+  }
+  .sidebar.collapsed{width:100% !important;}
   .sidebar-logo{margin-bottom:0;margin-right:8px;}
-  .sidebar-nav-group{flex-direction:row;}
-  .sidebar-toggle{position:static;margin-left:auto;}
+  .sidebar-logo h2{font-size:13px;}
+  .sidebar-logo .tag{display:none;}
+  .sidebar-toggle{position:static;margin-left:auto;flex-shrink:0;}
+  .sidebar.collapsed .sidebar-logo h2{display:block;}
   .sidebar.collapsed .nav-label{display:block;}
+  .sidebar.collapsed .nav-item{justify-content:flex-start;padding:8px 10px;}
   .sidebar-bottom{display:none;}
-  .content{padding:16px;}
+  .nav-item{padding:8px 10px;font-size:12px;margin-bottom:0;flex-shrink:0;border-radius:8px;}
+  .nav-item .icon{font-size:14px;}
+  .sidebar-nav-group{display:flex;gap:4px;flex:1;overflow-x:auto;}
 }
 
-/* BULK UPLOAD */
-.drop-zone{border:1.5px dashed var(--border2);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .2s;background:transparent;}
-.drop-zone:hover,.drop-zone.over{border-color:var(--text);background:var(--surface2);}
+/* CONTENT */
+.content{flex:1;padding:24px;overflow-y:auto;}
+@media(max-width:768px){
+  .content{padding:14px;}
+  .page-title{font-size:18px;}
+  .page-sub{font-size:12px;margin-bottom:16px;}
+  .stats-row{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .stat-box{padding:12px;}
+  .stat-box .sv{font-size:20px;}
+  .card-bd{padding:14px;}
+  .form-grid{grid-template-columns:1fr;}
+}
+.page{display:none;}
+.page.active{display:block;}
+.page-title{font-size:22px;font-weight:800;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card-hd{padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.card-hd h3{font-size:13px;font-weight:700;}
+.card-bd{padding:20px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-box .sl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-box .sv{font-size:26px;font-weight:800;font-family:var(--mono);}
+.stat-box.accent .sv{color:var(--accent);}
+.stat-box.good .sv{color:var(--good);}
+
+/* BUTTONS */
+.btn{font-family:var(--sans);font-size:12px;font-weight:700;padding:8px 14px;
+  border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,.06);
+  color:var(--text);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:rgba(255,255,255,.12);}
+.btn.accent{background:rgba(0,194,255,.12);border-color:rgba(0,194,255,.3);color:var(--accent);}
+.btn.accent:hover{background:rgba(0,194,255,.22);}
+.btn.danger{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.25);color:var(--bad);}
+.btn.danger:hover{background:rgba(255,79,106,.18);}
+.btn.good{background:rgba(34,214,138,.1);border-color:rgba(34,214,138,.25);color:var(--good);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);}
+th{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);background:rgba(255,255,255,.02);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  font-family:var(--mono);letter-spacing:.3px;}
+.badge.good{background:rgba(34,214,138,.12);color:var(--good);border:1px solid rgba(34,214,138,.2);}
+.badge.warn{background:rgba(245,166,35,.1);color:var(--warn);border:1px solid rgba(245,166,35,.2);}
+.badge.bad{background:rgba(255,79,106,.1);color:var(--bad);border:1px solid rgba(255,79,106,.2);}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.form-field{display:flex;flex-direction:column;gap:6px;}
+.form-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.form-field input,.form-field select{padding:10px 12px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-family:var(--sans);font-size:13px;outline:none;transition:border-color .2s;}
+.form-field input:focus,.form-field select:focus{border-color:var(--accent);}
+.form-field select option{background:#0d1219;}
+.file-input{padding:10px 12px;background:rgba(255,255,255,.05);
+  border:1.5px dashed var(--border2);border-radius:8px;color:var(--muted);
+  font-family:var(--sans);font-size:13px;cursor:pointer;width:100%;display:block;}
+.form-full{grid-column:1/-1;}
+
+/* TOAST */
+#toast{position:fixed;right:20px;bottom:20px;z-index:999;
+  background:var(--surface2);border:1px solid var(--border2);
+  padding:12px 18px;border-radius:12px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;max-width:320px;}
+#toast.good{border-color:rgba(34,214,138,.3);color:var(--good);}
+#toast.bad{border-color:rgba(255,79,106,.3);color:var(--bad);}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;
+  z-index:9999;padding:20px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  padding:28px;width:100%;max-width:480px;
+  box-shadow:0 24px 64px rgba(0,0,0,.8);
+  position:relative;z-index:501;
+}
+.modal h3{font-size:16px;font-weight:800;margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty .ei{font-size:40px;margin-bottom:12px;}
+.empty p{font-size:13px;}
+
+/* LOADER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* UPLOAD PROGRESS */
+.progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
+
+  /* PIN PAD */
+  #adminPinOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+  .pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);transition:all .2s;}
+  .pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(0,194,255,.5);}
+  .pin-dot.ok{background:var(--good);border-color:var(--good);}
+  .pin-dot.err{background:var(--bad);border-color:var(--bad);}
+  .pin-btn{font-family:var(--sans);font-size:22px;font-weight:700;width:68px;height:68px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+  .pin-btn:hover{background:rgba(255,255,255,.14);}
+  .pin-btn:active{background:rgba(255,255,255,.22);transform:scale(.9);}
+  .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
+  .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
+
+
+  /* Theme buttons */
+  .theme-btn{outline:none;-webkit-appearance:none;}
+  .theme-btn.active{border-color:var(--accent) !important;box-shadow:0 0 0 3px rgba(0,194,255,.15);}
+  [data-theme="light"] .theme-btn.active{box-shadow:0 0 0 3px rgba(0,113,227,.15);}
+  [data-theme="light"] .sidebar{background:var(--surface);border-right-color:var(--border);}
+  [data-theme="light"] .nav-item:hover{background:var(--surface2);}
+  [data-theme="light"] .nav-item.active{background:var(--text);color:#fff;}
+  [data-theme="light"] .login-box{box-shadow:var(--shadow);}
+  [data-theme="light"] .stat-box{border-color:var(--border);}
+  [data-theme="light"] table th{background:var(--surface2);}
+  [data-theme="light"] .logout-btn{color:var(--bad);}
+
 </style>
 </head>
 <body>
@@ -170,12 +289,18 @@ tr:hover td{background:var(--bg);}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
-      <div class="lmark"><img src="logo.png" alt="RCC"/></div>
-      <h1>RCCapital</h1>
+      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RC Capital"/>
+      <h1>RC Capital</h1>
       <span>ADMIN</span>
     </div>
-    <div class="field"><label>Email</label><input type="email" id="adminEmail" placeholder="admin@rccapital.com" autocomplete="email"/></div>
-    <div class="field"><label>Contraseña</label><input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/></div>
+    <div class="field">
+      <label>Email de administrador</label>
+      <input type="email" id="adminEmail" placeholder="tu@email.com" autocomplete="email"/>
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
     <button class="btn-primary" id="loginBtn" onclick="login()">Entrar al panel</button>
     <div id="loginErr"></div>
   </div>
@@ -184,24 +309,37 @@ tr:hover td{background:var(--bg);}
 <!-- APP -->
 <div id="appScreen">
   <div class="layout">
+    <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
-      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">◀</button>
+      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
       <div class="sidebar-logo">
-        <img src="logo.png" alt="RCC"/>
-        <h2>RCCapital</h2>
+        <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
+        <h2>RC Capital</h2>
         <span class="tag">ADMIN</span>
       </div>
       <div class="sidebar-nav-group">
-        <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)"><span class="icon">□</span><span class="nav-label"> Dashboard</span></button>
-        <button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)"><span class="icon">○</span><span class="nav-label"> Clientes</span></button>
-        <button class="nav-item" data-page="reportes" onclick="showPage('reportes',this)"><span class="icon">△</span><span class="nav-label"> Reportes</span></button>
-        <button class="nav-item" data-page="micuenta" onclick="showPage('micuenta',this)"><span class="icon">◇</span><span class="nav-label"> Mi Cuenta</span></button>
+        <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
+          <span class="icon">📊</span><span class="nav-label"> Dashboard</span>
+        </button>
+        <button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)">
+          <span class="icon">👥</span><span class="nav-label"> Clientes</span>
+        </button>
+        <button class="nav-item" data-page="reportes" onclick="showPage('reportes',this)">
+          <span class="icon">📁</span><span class="nav-label"> Reportes</span>
+        </button>
+        <button class="nav-item" data-page="micuenta" onclick="showPage('micuenta',this)">
+          <span class="icon">💰</span><span class="nav-label"> Mi Cuenta</span>
+        </button>
       </div>
       <div class="sidebar-bottom">
-        <button class="logout-btn" onclick="logout()"><span>↩</span><span> Cerrar sesión</span></button>
+        <button class="nav-item" data-page="settings" onclick="showPage('settings',this)" style="margin-bottom:6px;">
+          <span class="icon">⚙️</span><span class="nav-label"> Ajustes</span>
+        </button>
+        <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
 
+    <!-- CONTENT -->
     <div class="content">
 
       <!-- DASHBOARD -->
@@ -215,26 +353,122 @@ tr:hover td{background:var(--bg);}
         </div>
         <div class="card">
           <div class="card-hd"><h3>Actividad reciente</h3></div>
-          <div class="card-bd" id="actividadReciente"><div class="empty"><p>Cargando…</p></div></div>
+          <div class="card-bd" id="actividadReciente">
+            <div class="empty"><div class="ei">📋</div><p>Cargando...</p></div>
+          </div>
         </div>
       </div>
+
+      <!-- MI CUENTA -->
+      <div class="page" id="page-micuenta">
+        <div class="page-title">Mi Cuenta</div>
+        <div class="page-sub">Tus comisiones y retiros como gestor — desde el CSV consolidado</div>
+
+        <!-- Upload consolidated CSV -->
+        <div class="card" id="mcUploadCard" style="border-color:rgba(245,166,35,.2);background:linear-gradient(160deg,rgba(245,166,35,.04),rgba(0,0,0,.2));">
+          <div class="card-hd">
+            <h3>📤 Cargar CSV consolidado</h3>
+            <span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span>
+          </div>
+          <div class="card-bd">
+            <div id="mcDropZone"
+              style="border:2px dashed rgba(245,166,35,.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,166,35,.04);"
+              ondragover="event.preventDefault();this.style.borderColor='var(--warn)';this.style.background='rgba(245,166,35,.1)';"
+              ondragleave="this.style.borderColor='rgba(245,166,35,.3)';this.style.background='rgba(245,166,35,.04)';"
+              ondrop="mcHandleDrop(event)"
+              onclick="$('mcFileInput').click()">
+              <div style="font-size:32px;margin-bottom:8px;">📊</div>
+              <div style="font-size:14px;font-weight:700;color:var(--warn);">Arrastra el CSV consolidado de Vantage</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="mcDropSub">Se actualiza automáticamente al subir reportes · o carga aquí el CSV</div>
+            </div>
+            <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
+            <div id="mcFileStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
+          </div>
+        </div>
+
+        <!-- KPIs gestor -->
+        <div id="mcStats" style="display:none;">
+          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+            <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
+            <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
+            <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
+            <div class="stat-box" style="border-color:rgba(255,79,106,.2);">
+              <div class="sl">Total retirado</div>
+              <div class="sv" style="color:var(--bad);" id="mcWithdrawals">—</div>
+            </div>
+          </div>
+          <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:-4px;">
+            <div class="stat-box"><div class="sl">Deposit fees</div><div class="sv" id="mcDepFees">—</div></div>
+            <div class="stat-box good"><div class="sl">Balance disponible</div><div class="sv" id="mcBalance">—</div></div>
+            <div class="stat-box"><div class="sl">Meses operados</div><div class="sv" id="mcMeses">—</div></div>
+          </div>
+
+          <!-- Chart: comisiones mensuales -->
+          <div class="card" style="margin-top:4px;">
+            <div class="card-hd">
+              <h3>Comisiones mensuales</h3>
+              <div style="display:flex;gap:6px;">
+                <span id="mcLegPerf" style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(34,214,138,.12);color:var(--good);font-family:var(--mono);">● Performance</span>
+                <span id="mcLegMgmt" style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(0,194,255,.12);color:var(--accent);font-family:var(--mono);">● Management</span>
+                <span id="mcLegDep"  style="font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(245,166,35,.12);color:var(--warn);font-family:var(--mono);">● Deposit</span>
+              </div>
+            </div>
+            <div class="card-bd">
+              <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+                <canvas id="mcChart" style="display:block;width:100%;height:220px;"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desglose mensual tabla -->
+          <div class="card">
+            <div class="card-hd"><h3>Desglose mensual</h3></div>
+            <div class="card-bd" style="padding:0;">
+              <div style="overflow:auto;border-radius:10px;border:1px solid var(--border);">
+                <table>
+                  <thead><tr>
+                    <th>Mes</th>
+                    <th style="text-align:right">Performance</th>
+                    <th style="text-align:right">Management</th>
+                    <th style="text-align:right">Deposit</th>
+                    <th style="text-align:right">Total fees</th>
+                    <th style="text-align:right">Retiros</th>
+                    <th style="text-align:right">Neto mes</th>
+                  </tr></thead>
+                  <tbody id="mcTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div><!-- /mcStats -->
+      </div><!-- /page-micuenta -->
 
       <!-- CLIENTES -->
       <div class="page" id="page-clientes">
         <div class="page-title">Clientes</div>
         <div class="page-sub">Gestiona los accesos de tus inversores</div>
         <div class="card">
-          <div class="card-hd"><h3>Agregar nuevo cliente</h3></div>
+          <div class="card-hd">
+            <h3>Agregar nuevo cliente</h3>
+          </div>
           <div class="card-bd">
             <div class="form-grid">
-              <div class="form-field"><label>Nombre completo</label><input type="text" id="newNombre" placeholder="María González"/></div>
-              <div class="form-field"><label>Email</label><input type="email" id="newEmail" placeholder="maria@email.com"/></div>
               <div class="form-field">
-                <label>Contraseña <button type="button" onclick="autoFillPass()" style="margin-left:6px;font-family:var(--sans);font-size:10px;font-weight:500;padding:2px 7px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);cursor:pointer;">⚡ Generar</button></label>
-                <input type="text" id="newPass" placeholder="Auto-generada" readonly style="cursor:default;font-family:var(--mono);"/>
+                <label>Nombre completo</label>
+                <input type="text" id="newNombre" placeholder="María González"/>
+              </div>
+              <div class="form-field">
+                <label>Email</label>
+                <input type="email" id="newEmail" placeholder="maria@email.com"/>
+              </div>
+              <div class="form-field">
+                <label>Contraseña de acceso <button type="button" onclick="autoFillPass()" style="margin-left:8px;font-family:var(--sans);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid rgba(0,194,255,.3);background:rgba(0,194,255,.1);color:var(--accent);cursor:pointer;">⚡ Generar</button></label>
+                <input type="text" id="newPass" placeholder="Auto-generada al crear" readonly style="cursor:default;"/>
               </div>
               <div class="form-field" style="justify-content:flex-end;">
-                <button class="btn accent" id="btnAgregarCliente" onclick="agregarCliente()">+ Agregar cliente</button>
+                <button class="btn accent" id="btnAgregarCliente" onclick="agregarCliente()">
+                  ➕ Agregar cliente
+                </button>
               </div>
             </div>
           </div>
@@ -242,8 +476,23 @@ tr:hover td{background:var(--bg);}
         <div class="card">
           <div class="card-hd"><h3>Lista de clientes</h3><span id="clienteCount" class="badge warn">0</span></div>
           <div class="card-bd" style="padding:0;">
-            <div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Contraseña</th><th>Reportes</th><th>Creado</th><th>Acciones</th></tr></thead>
-            <tbody id="clientesBody"><tr><td colspan="6"><div class="empty"><p>Sin clientes aún</p></div></td></tr></tbody></table></div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Contraseña</th>
+                    <th>Reportes</th>
+                    <th>Creado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="clientesBody">
+                  <tr><td colspan="6"><div class="empty"><div class="ei">👥</div><p>Sin clientes aún</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -252,120 +501,154 @@ tr:hover td{background:var(--bg);}
       <div class="page" id="page-reportes">
         <div class="page-title">Reportes</div>
         <div class="page-sub">Sube el CSV de Vantage para cada cliente</div>
-        <div class="card" style="border-color:var(--border2);">
+
+        <!-- BULK UPLOAD -->
+        <div class="card" style="border-color:rgba(0,194,255,.25);background:linear-gradient(160deg,rgba(0,194,255,.05),rgba(0,0,0,.2));">
           <div class="card-hd">
-            <h3>Actualización masiva</h3>
-            <div style="display:flex;gap:6px;">
-              <button id="modeSingle" class="btn accent" onclick="setMode('single')" style="font-size:11px;">CSV consolidado</button>
-              <button id="modeMulti"  class="btn" onclick="setMode('multi')"  style="font-size:11px;">Múltiples CSVs</button>
-            </div>
+            <h3>⚡ Actualización masiva</h3>
+            <span style="font-size:11px;color:var(--muted);">Un solo CSV consolidado de Vantage — actualiza todos los clientes de una vez</span>
           </div>
           <div class="card-bd">
-            <div id="dropZone" class="drop-zone"
-              ondragover="event.preventDefault();this.classList.add('over');"
-              ondragleave="this.classList.remove('over');"
+            <!-- Mode toggle -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+              <button id="modeSingle" class="btn active" onclick="setMode('single')" style="font-size:12px;">📄 CSV consolidado</button>
+              <button id="modeMulti"  class="btn" onclick="setMode('multi')"  style="font-size:12px;">📂 Múltiples CSVs</button>
+            </div>
+            <div id="dropZone"
+              style="border:2px dashed rgba(0,194,255,.3);border-radius:14px;padding:36px 20px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(0,194,255,.04);"
+              ondragover="event.preventDefault();this.style.borderColor='var(--accent)';this.style.background='rgba(0,194,255,.12)';"
+              ondragleave="this.style.borderColor='rgba(0,194,255,.3)';this.style.background='rgba(0,194,255,.04)';"
               ondrop="handleDrop(event)"
               onclick="$('bulkFileInput').click()">
-              <div style="font-size:28px;margin-bottom:10px;color:var(--muted);">↑</div>
-              <div id="dropZoneTitle" style="font-size:14px;font-weight:500;color:var(--text);">Arrastra el CSV consolidado</div>
-              <div id="dropZoneSub" style="font-size:12px;color:var(--muted);margin-top:4px;">Se separa automáticamente por InvestorName</div>
+              <div style="font-size:40px;margin-bottom:12px;">📄</div>
+              <div id="dropZoneTitle" style="font-size:15px;font-weight:700;color:var(--accent);">Arrastra el CSV consolidado de Vantage</div>
+              <div id="dropZoneSub" style="font-size:12px;color:var(--muted);margin-top:6px;">Contiene todos los clientes — se separan automáticamente</div>
             </div>
             <input type="file" id="bulkFileInput" accept=".csv" style="display:none;" onchange="handleBulkFiles(this.files)"/>
-            <div id="bulkPreview" style="display:none;margin-top:14px;">
-              <div style="font-size:10px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Archivos detectados:</div>
-              <div id="bulkList" style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto;"></div>
-              <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap;">
-                <button class="btn accent" id="btnBulkUpload" onclick="uploadAllBulk()" style="font-size:12px;">↑ Subir todos</button>
-                <button class="btn" onclick="clearBulk()" style="font-size:12px;">✕ Limpiar</button>
+            <div id="bulkPreview" style="display:none;margin-top:16px;">
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">Archivos detectados:</div>
+              <div id="bulkList" style="display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;"></div>
+              <div style="display:flex;gap:12px;align-items:center;margin-top:16px;flex-wrap:wrap;">
+                <button class="btn accent" id="btnBulkUpload" onclick="uploadAllBulk()" style="font-size:13px;padding:10px 20px;">⬆️ Subir todos</button>
+                <button class="btn" onclick="clearBulk()">✕ Limpiar</button>
                 <span id="bulkStatus" style="font-size:12px;color:var(--muted);"></span>
               </div>
             </div>
           </div>
         </div>
+
         <div class="card">
           <div class="card-hd"><h3>Subir reporte individual</h3></div>
           <div class="card-bd">
             <div class="form-grid">
-              <div class="form-field"><label>Cliente</label><select id="repCliente"><option value="">— Selecciona —</option></select></div>
-              <div class="form-field form-full"><label>Archivo CSV de Vantage</label><input type="file" id="repCSV" accept=".csv" class="file-input"/><div class="progress-bar" id="uploadProgress" style="display:none;"><div class="progress-fill" id="uploadFill"></div></div></div>
-              <div class="form-field form-full" style="flex-direction:row;align-items:center;gap:10px;">
-                <button class="btn accent" id="btnSubirReporte" onclick="subirReporte()" style="font-size:12px;">↑ Subir reporte</button>
+              <div class="form-field">
+                <label>Cliente</label>
+                <select id="repCliente">
+                  <option value="">— Selecciona un cliente —</option>
+                </select>
+              </div>
+
+              <div class="form-field form-full">
+                <label>Archivo CSV de Vantage</label>
+                <input type="file" id="repCSV" accept=".csv,.xlsx" class="file-input"/>
+                <div class="progress-bar" id="uploadProgress" style="display:none;">
+                  <div class="progress-fill" id="uploadFill"></div>
+                </div>
+              </div>
+              <div class="form-field form-full" style="flex-direction:row;align-items:center;gap:12px;">
+                <button class="btn accent" id="btnSubirReporte" onclick="subirReporte()">
+                  ⬆️ Subir reporte
+                </button>
                 <span id="uploadStatus" style="font-size:12px;color:var(--muted);"></span>
               </div>
             </div>
           </div>
         </div>
         <div class="card">
-          <div class="card-hd"><h3>Historial</h3></div>
+          <div class="card-hd"><h3>Historial de reportes subidos</h3></div>
           <div class="card-bd" style="padding:0;">
-            <div class="tbl-wrap"><table><thead><tr><th>Cliente</th><th>Período</th><th>Fecha subida</th><th>Tamaño</th><th></th></tr></thead>
-            <tbody id="reportesBody"><tr><td colspan="5"><div class="empty"><p>Sin reportes</p></div></td></tr></tbody></table></div>
+            <div class="tbl-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Período</th>
+                    <th>Subido</th>
+                    <th>Tamaño</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="reportesBody">
+                  <tr><td colspan="5"><div class="empty"><div class="ei">📁</div><p>Sin reportes aún</p></div></td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- MI CUENTA -->
-      <div class="page" id="page-micuenta">
-        <div class="page-title">Mi Cuenta</div>
-        <div class="page-sub">Tus comisiones y retiros como gestor</div>
-        <div class="card" style="border-color:var(--border2);">
-          <div class="card-hd"><h3>Cargar CSV consolidado</h3><span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span></div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title">Ajustes</div>
+        <div class="page-sub">Personaliza tu panel de administración</div>
+
+        <!-- Theme selector -->
+        <div class="card" style="max-width:480px;">
+          <div class="card-hd"><h3>Apariencia</h3></div>
           <div class="card-bd">
-            <div id="mcDropZone" class="drop-zone"
-              ondragover="event.preventDefault();this.classList.add('over');"
-              ondragleave="this.classList.remove('over');"
-              ondrop="mcHandleDrop(event)"
-              onclick="$('mcFileInput').click()">
-              <div style="font-size:28px;margin-bottom:8px;color:var(--muted);">↑</div>
-              <div style="font-size:14px;font-weight:500;color:var(--text);">Arrastra el CSV consolidado de Vantage</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:4px;">Se actualiza automáticamente al subir reportes · o carga aquí el CSV</div>
-            </div>
-            <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
-            <div id="mcFileStatus" style="margin-top:8px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
-          </div>
-        </div>
-        <div id="mcStats" style="display:none;">
-          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
-            <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
-            <div class="stat-box"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
-            <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
-            <div class="stat-box" style="border-color:#fcccc4;"><div class="sl">Total retirado</div><div class="sv" style="color:var(--bad);" id="mcWithdrawals">—</div></div>
-          </div>
-          <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:-4px;">
-            <div class="stat-box"><div class="sl">Deposit fees</div><div class="sv" id="mcDepFees">—</div></div>
-            <div class="stat-box good"><div class="sl">Balance disponible</div><div class="sv" id="mcBalance">—</div></div>
-            <div class="stat-box"><div class="sl">Meses operados</div><div class="sv" id="mcMeses">—</div></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><h3>Comisiones mensuales</h3>
-              <div style="display:flex;gap:6px;">
-                <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#e8f8ef;color:var(--good);font-family:var(--mono);">● Perf.</span>
-                <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#e8f0fe;color:#1a56db;font-family:var(--mono);">● Mgmt.</span>
-                <span style="font-size:10px;padding:2px 7px;border-radius:4px;background:#fef8eb;color:var(--warn);font-family:var(--mono);">● Dep.</span>
-              </div>
-            </div>
-            <div class="card-bd"><div style="border:1px solid var(--border);border-radius:8px;padding:12px;"><canvas id="mcChart" style="display:block;width:100%;height:200px;"></canvas></div></div>
-          </div>
-          <div class="card">
-            <div class="card-hd"><h3>Desglose mensual</h3></div>
-            <div class="card-bd" style="padding:0;">
-              <div style="overflow:auto;border-radius:8px;border:1px solid var(--border);">
-                <table><thead><tr><th>Mes</th><th style="text-align:right">Performance</th><th style="text-align:right">Management</th><th style="text-align:right">Deposit</th><th style="text-align:right">Total fees</th><th style="text-align:right">Retiros</th><th style="text-align:right">Neto mes</th></tr></thead>
-                <tbody id="mcTableBody"></tbody></table>
-              </div>
+            <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige el tema visual del panel</div>
+            <div style="display:flex;gap:12px;">
+
+              <!-- Dark -->
+              <button class="theme-btn active" data-theme="dark" onclick="applyTheme('dark')"
+                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(0,0,0,.4);cursor:pointer;transition:all .2s;text-align:center;">
+                <div style="font-size:28px;margin-bottom:8px;">🌙</div>
+                <div style="font-size:13px;font-weight:600;color:#e2eaf5;">Dark</div>
+                <div style="font-size:11px;color:#6b809a;margin-top:3px;">Oscuro</div>
+              </button>
+
+              <!-- Light -->
+              <button class="theme-btn" data-theme="light" onclick="applyTheme('light')"
+                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(255,255,255,.9);cursor:pointer;transition:all .2s;text-align:center;">
+                <div style="font-size:28px;margin-bottom:8px;">☀️</div>
+                <div style="font-size:13px;font-weight:600;color:#1a1a18;">Light</div>
+                <div style="font-size:11px;color:#8a8a82;margin-top:3px;">Claro</div>
+              </button>
+
             </div>
           </div>
         </div>
-      </div>
+
+        <!-- Account info -->
+        <div class="card" style="max-width:480px;margin-top:0;">
+          <div class="card-hd"><h3>Cuenta</h3></div>
+          <div class="card-bd">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted);">Email admin</span>
+              <span style="font-size:13px;font-family:var(--mono);">admin@rccapital.com</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted);">PIN rápido</span>
+              <span style="font-size:13px;font-family:var(--mono);">•••• (5 toques al logo)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+              <span style="font-size:13px;color:var(--muted);">Versión</span>
+              <span style="font-size:13px;font-family:var(--mono);">v1.1 stable</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings -->
 
     </div><!-- /content -->
   </div><!-- /layout -->
 </div><!-- /appScreen -->
 
-<!-- MODALS -->
+<!-- MODAL ELIMINAR -->
 <div class="modal-overlay" id="modalEliminar" style="display:none;">
   <div class="modal">
-    <h3>Eliminar cliente</h3>
+    <h3>⚠️ Eliminar cliente</h3>
     <p id="modalMsg">¿Seguro que quieres eliminar este cliente?</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeModal()">Cancelar</button>
@@ -374,90 +657,68 @@ tr:hover td{background:var(--bg);}
   </div>
 </div>
 
+<!-- MODAL NUEVA CLAVE -->
 <div class="modal-overlay" id="modalEditPass" style="display:none;">
   <div class="modal">
-    <h3>Nueva clave de acceso</h3>
-    <p id="editPassMsg">Se generará una nueva clave aleatoria.</p>
-    <div style="margin-top:12px;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
-      <span id="editPassInput" style="font-family:var(--mono);font-size:18px;font-weight:500;color:var(--text);letter-spacing:2px;">—</span>
-      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;" title="Otra">↺</button>
+    <h3>🔑 Nueva clave de acceso</h3>
+    <p id="editPassMsg">Nueva clave para el cliente:</p>
+    <div style="margin-top:14px;padding:16px;background:rgba(0,194,255,.08);border:1px solid rgba(0,194,255,.25);border-radius:12px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <span id="editPassInput" style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);letter-spacing:3px;">—</span>
+      <button onclick="regeneratePassPreview()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:20px;" title="Generar otra">🔄</button>
     </div>
-    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Envíasela al cliente.</p>
+    <p style="font-size:11px;color:var(--muted);margin-top:8px;">Envíasela al cliente por WhatsApp.</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeEditPass()">Cancelar</button>
-      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">Confirmar</button>
+      <button class="btn accent" id="editPassConfirmBtn" onclick="saveNewPass()">✅ Confirmar</button>
     </div>
   </div>
 </div>
 
-<!-- DETALLE CLIENTE -->
-<div class="modal-overlay" id="modalDetalle" style="display:none;">
-  <div class="modal" style="max-width:880px;width:95%;max-height:90vh;overflow-y:auto;padding:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
-      <div>
-        <div style="font-size:10px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">Estado de cuenta</div>
-        <h3 id="detNombre" style="font-size:20px;font-weight:300;margin:0;letter-spacing:-.3px;">—</h3>
-        <div id="detPeriodo" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">—</div>
-      </div>
-      <button onclick="closeDetalle()" style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);width:30px;height:30px;border-radius:6px;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
-    </div>
-    <div style="background:var(--text);color:#fff;border-radius:12px;padding:24px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
-      <div>
-        <div style="font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:8px;">Rendimiento Total</div>
-        <div id="detROI" style="font-size:40px;font-weight:300;font-family:var(--mono);letter-spacing:-2px;line-height:1;">—</div>
-        <div id="detSub" style="font-size:11px;color:rgba(255,255,255,.45);margin-top:8px;">—</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.45);margin-bottom:6px;">Valor de la cuenta</div>
-        <div id="detEquity" style="font-size:22px;font-weight:400;font-family:var(--mono);color:#fff;">—</div>
-        <div id="detDep" style="font-size:11px;color:rgba(255,255,255,.4);margin-top:4px;font-family:var(--mono);">—</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;"><div style="font-size:9px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Profit neto</div><div id="detProfit" style="font-size:15px;font-weight:400;font-family:var(--mono);">—</div></div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;"><div style="font-size:9px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Días activo</div><div id="detDias" style="font-size:15px;font-weight:400;font-family:var(--mono);">—</div></div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;"><div style="font-size:9px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Mejor mes</div><div id="detBest" style="font-size:15px;font-weight:400;font-family:var(--mono);color:var(--good);">—</div></div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;"><div style="font-size:9px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Meses positivos</div><div id="detPosM" style="font-size:15px;font-weight:400;font-family:var(--mono);">—</div></div>
-    </div>
-    <div style="border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">
-      <div style="font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Evolución del Capital</div>
-      <canvas id="detChart" style="display:block;width:100%;height:150px;"></canvas>
-    </div>
-    <div style="font-size:10px;font-weight:500;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Resumen por período</div>
-    <div style="overflow:auto;border:1px solid var(--border);border-radius:8px;max-height:220px;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr>
-          <th style="padding:8px 12px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">Mes</th>
-          <th style="padding:8px 12px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">P&L neto</th>
-          <th style="padding:8px 12px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">Retorno %</th>
-          <th style="padding:8px 12px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);color:var(--muted);font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;">Equity final</th>
-        </tr></thead>
-        <tbody id="detTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- PIN -->
-<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(249,249,247,.96);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;">
+<!-- ADMIN PIN -->
+<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
   <div style="text-align:center;">
-    <div style="font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
-    <div id="adminPinDots" style="display:flex;gap:12px;justify-content:center;margin-bottom:28px;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
+    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:210px;margin:0 auto;">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
       <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
       <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
       <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
       <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
     </div>
-    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:16px;height:16px;"></div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
   </div>
 </div>
 
 <div id="toast"></div>
 
+
+
 <script>
+
+// ── THEME SYSTEM ──────────────────────────────────────────────────
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  try{ localStorage.setItem('rcTheme', theme); }catch(e){}
+  // Update toggle buttons
+  var btns = document.querySelectorAll('.theme-btn');
+  btns.forEach(function(b){ b.classList.toggle('active', b.dataset.theme === theme); });
+}
+
+function initTheme(){
+  var saved = 'light';
+  try{ saved = localStorage.getItem('rcTheme') || 'light'; }catch(e){}
+  applyTheme(saved);
+}
+
+// Init theme immediately
+(function(){ 
+  var t = 'light';
+  try{ t = localStorage.getItem('rcTheme') || 'light'; }catch(e){}
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
 
 
 
@@ -467,7 +728,7 @@ const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RCCapital2024Admin';
+const ADMIN_PASS  = 'RC Capital2024Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -598,7 +859,10 @@ function renderClientesTable(){
   const container = tbody.closest('.tbl-wrap');
   container.style.border = 'none';
   container.style.background = 'transparent';
-  container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
+  // Clear existing cards to force full re-render
+  const existingCards = container.querySelector('#clientCards');
+  if(existingCards) existingCards.innerHTML = '';
+  container.innerHTML = '<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>';
   const cards = $('clientCards');
 
   clientesCache.forEach(c => {
@@ -607,10 +871,10 @@ function renderClientesTable(){
     const eyeId  = 'eye-'+safeId;
     const card = document.createElement('div');
     card.id = 'card-'+safeId;
-    card.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;transition:all .15s;cursor:pointer;';
+    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;transition:border-color .2s;cursor:pointer;';
     card.title = 'Ver detalle de '+c.nombre;
-    card.onmouseenter = () => { card.style.borderColor='var(--border2)'; card.style.background='var(--surface)'; };
-    card.onmouseleave = () => { card.style.borderColor='var(--border)'; card.style.background='var(--surface2)'; };
+    card.onmouseenter = () => card.style.borderColor='rgba(255,255,255,.16)';
+    card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
     card.onclick = function(e){
       // Don't trigger if clicking buttons inside the card
       if(e.target.closest('button')||e.target.closest('select')) return;
@@ -622,9 +886,9 @@ function renderClientesTable(){
       '<div style="display:flex;align-items:center;gap:14px;">' +
         '<canvas id="spark-' + safeId + '" width="160" height="56" style="flex-shrink:0;border-radius:8px;display:block;"></canvas>' +
         '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:600;font-size:14px;margin-bottom:2px;color:var(--text);">' + c.nombre + '</div>' +
+          '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">' + c.nombre + '</div>' +
           '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">' +
-          '<span style="font-size:11px;color:var(--muted);font-family:var(--mono);font-weight:300;">' + c.email + '</span>' +
+          '<span style="font-size:11px;color:var(--muted);font-family:var(--mono);">' + c.email + '</span>' +
           '<button onclick="copyText(\'' + c.email + '\')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:1px;line-height:1;display:flex;align-items:center;transition:color .15s;" title="Copiar email" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--muted)\'">' +
             '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
           '</button>' +
@@ -782,7 +1046,7 @@ async function loadClientSparkline(c, safeId){
       // Format upload date
       const pad = x => String(x).padStart(2,'0');
       const d = data.created_at ? new Date(data.created_at) : null;
-      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear() : data.mes;
+      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()) : data.mes;
 
       let icon, color, label;
 
@@ -853,9 +1117,8 @@ async function loadClientSparkline(c, safeId){
   ctx.clearRect(0,0,W,H);
 
   // Background
-  ctx.fillStyle='rgba(0,0,0,.06)';
-  if(ctx.roundRect) ctx.roundRect(0,0,W,H,6); else ctx.rect(0,0,W,H);
-  ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.3)';
+  ctx.roundRect(0,0,W,H,6); ctx.fill();
 
   const n=equity.length;
   if(n<2) return;
@@ -867,13 +1130,13 @@ async function loadClientSparkline(c, safeId){
   const depY=pad.t+ih*(1-(dep-minV)/span);
 
   // Deposit baseline
-  ctx.strokeStyle='rgba(0,0,0,.2)';
+  ctx.strokeStyle='rgba(255,255,255,.15)';
   ctx.setLineDash([3,3]); ctx.lineWidth=0.8;
   ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();
   ctx.setLineDash([]);
 
   // Area fill
-  const color = isPos ? '26,122,74' : '192,57,43';
+  const color = isPos ? '34,214,138' : '255,79,106';
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x=pad.l+iw*(i/Math.max(1,n-1));
@@ -882,11 +1145,11 @@ async function loadClientSparkline(c, safeId){
   }
   ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();
   const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
-  grd.addColorStop(0,`rgba(${color},.2)`); grd.addColorStop(1,`rgba(${color},.01)`);
+  grd.addColorStop(0,`rgba(${color},.35)`); grd.addColorStop(1,`rgba(${color},.02)`);
   ctx.fillStyle=grd; ctx.fill();
 
   // Line
-  ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},1)`;
+  ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},.9)`;
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x=pad.l+iw*(i/Math.max(1,n-1));
@@ -1416,8 +1679,8 @@ async function uploadAllBulk(){
   }
   btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
   toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':'')+' · 💰 Mi Cuenta actualizada');
-  await loadReportes(); updateDashboard(); await loadClientes();
-  // Auto-feed Mi Cuenta from the same CSV data
+  await loadReportes(); updateDashboard();
+  await loadClientes(); // reloads cards + sparklines with fresh data
   autoFeedMiCuenta();
 }
 
@@ -1604,6 +1867,10 @@ function mcLoadFile(fileList){
       try{ localStorage.setItem('rcMiCuentaCSV', text); }catch(e){}
       mcProcessCSV(text);
       $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
+    // Debug: log all reasons found
+    if(typeof debugReasons !== 'undefined'){
+      console.log('Reasons found in CSV:', debugReasons);
+    }
       $('mcFileInput').value='';
     }catch(err){
       $('mcFileStatus').textContent='❌ Error: '+err.message;
@@ -1626,6 +1893,7 @@ function mcProcessCSV(text){
   var iInv=['investorname','investor','inversor','name','usuario'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
   function normStr(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
   var mgrNorm=normStr(MANAGER_CSV_NAME);
+  var debugReasons={};  // track all unique reasons for debugging
   var totalPerf=0,totalMgmt=0,totalDep=0,totalWith=0;
   var monthly={};
 
@@ -1639,13 +1907,14 @@ function mcProcessCSV(text){
     var mk=time.getFullYear()+'-'+String(time.getMonth()+1).padStart(2,'0');
     if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
 
+    if(!debugReasons[reason]) debugReasons[reason]=0; debugReasons[reason]++;
     if(reason==='performancefee'||reason==='performance fee'){
       var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
     } else if(reason==='managementfee'||reason==='management fee'){
       var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
     } else if(reason==='depositfee'||reason==='deposit fee'){
       var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
-    } else if(reason==='withdrawal'||reason==='retiro'){
+    } else if(reason==='withdrawal'||reason==='retiro'||reason==='withdraw'){
       // Only count withdrawals that belong to the manager
       var rowInv=iInv>=0?normStr(cols[iInv]):'';
       var isMgr=(rowInv===mgrNorm)||(rowInv.length>3&&mgrNorm.indexOf(rowInv)>=0)||(mgrNorm.length>3&&rowInv.indexOf(mgrNorm)>=0);
