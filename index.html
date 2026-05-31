@@ -744,7 +744,7 @@ async function generarPDF(){
   ctx.setTransform(2,0,0,2,0,0);
   // White bg
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,chartW,chartH);
-  var filteredData=CC.labels.length?{labels:CC.labels,equity:CC.equity,deposit:CC.deposit}:getFiltered();
+  var filteredData=getFiltered(); // always get current filtered data
   var labels=filteredData.labels,equity=filteredData.equity,dep=filteredData.deposit;
   var n=labels.length;
   if(n>1){
