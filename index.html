@@ -348,12 +348,16 @@ function applyThemeIdx(t){
 }
 function _updateThemeUI(t){
   var isDark = t==='dark';
-  var pill = $('themePill');
-  if(pill) pill.classList.toggle('light-mode', !isDark);
-  var icon = $('themeIcon');
-  if(icon) icon.textContent = isDark ? '🌙' : '☀️';
+  // Update all theme toggles
+  ['themePill','themePill2'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el) el.classList.toggle('light-mode',!isDark);
+  });
+  var icon=document.getElementById('themeIcon');
+  if(icon) icon.textContent=isDark?'🌙':'☀️';
 }
-(function(){ _updateThemeUI(getTheme()); })();
+// Init theme UI after DOM ready
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){_updateThemeUI(getTheme());});}else{_updateThemeUI(getTheme());}
 
 
 const SUPABASE_URL='https://oettmexxsohqudmshhip.supabase.co';
@@ -696,13 +700,7 @@ document.addEventListener('keydown', e=>{
 });
 
 
-// Sync second pill in app header
-var _origUpdateUI = _updateThemeUI;
-_updateThemeUI = function(t){
-  _origUpdateUI(t);
-  var p2 = document.getElementById('themePill2');
-  if(p2) p2.classList.toggle('light-mode', t==='light');
-};
+
 </script>
 </body>
 </html>
