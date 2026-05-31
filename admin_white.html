@@ -210,10 +210,14 @@ canvas.sparkline{display:block;border-radius:6px;}
       <h1>RC Capital</h1>
       <p>Panel de administración</p>
     </div>
-    <div class="login-card" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
+    <div class="login-card">
       <div class="lc-top">
-        <span class="admin-tag">ADMIN</span>
-        <button class="th-pill" id="adminLoginPill" onclick="event.stopPropagation();quickToggleTheme()"><div class="th-knob"></div></button>
+        <span class="admin-tag" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;padding:4px 8px;">ADMIN</span>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span style="font-size:13px;">🌙</span>
+          <button class="th-pill" id="adminLoginPill" onclick="quickToggleTheme()"><div class="th-knob"></div></button>
+          <span style="font-size:13px;">☀️</span>
+        </div>
       </div>
       <div class="fi">
         <label>Email de administrador</label>
@@ -240,9 +244,11 @@ canvas.sparkline{display:block;border-radius:6px;}
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RC Capital</h2>
         <span class="tag">ADMIN</span>
-        <button class="admin-th-pill" id="adminThemePill" onclick="quickToggleTheme()" title="Cambiar tema" style="margin-left:auto;flex-shrink:0;">
-          <div class="admin-th-knob"></div>
-        </button>
+      </div>
+      <div class="sidebar-th">
+        <span style="font-size:13px;">🌙</span>
+        <button class="th-pill" id="adminThemePill" onclick="quickToggleTheme()"><div class="th-knob"></div></button>
+        <span style="font-size:13px;">☀️</span>
       </div>
       <div class="sidebar-nav-group">
         <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
@@ -556,8 +562,12 @@ canvas.sparkline{display:block;border-radius:6px;}
               <span style="font-size:13px;font-family:var(--mono);">admin@rccapital.com</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:13px;color:var(--muted);">PIN rápido</span>
-              <span style="font-size:13px;font-family:var(--mono);">•••• (5 toques al logo)</span>
+              <span style="font-size:13px;color:var(--text2);">Contraseña admin</span>
+              <span style="font-size:13px;font-family:var(--mono);cursor:pointer;color:var(--text2);" onclick="this.textContent=this.textContent.includes('•')?'RCCapital2024Admin':'••••••••••••••'" title="Toca para revelar">••••••••••••••</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--text2);">PIN rápido</span>
+              <span style="font-size:13px;font-family:var(--mono);cursor:pointer;color:var(--text2);" onclick="this.textContent=this.textContent.includes('•')?'0180':'••••'" title="Toca para revelar">•••• (toca para revelar)</span>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
               <span style="font-size:13px;color:var(--muted);">Versión</span>
@@ -1637,9 +1647,9 @@ const ADMIN_PIN = '0180';
 let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
 
 function handleAdminTap(){
-  adminTapCount++;
+  adminTapCount = (adminTapCount||0) + 1;
   clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 2000);
+  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
   if(adminTapCount >= 5){
     adminTapCount = 0;
     adminPinOpen();
