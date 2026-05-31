@@ -464,11 +464,11 @@ function renderReporte(rep){
   $('heroEq').textContent=fmtUSD(stats.equity);
   if(stats.depFeeAmt>0){
     $('heroDep').innerHTML=
-      'Depósito: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span><br>'+
+      'Depósito inicial: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span><br>'+
       'Activation fee: <span class="hero-dep-fee">-'+fmtUSD(stats.depFeeAmt)+'</span><br>'+
-      '<span class="hero-dep-cap">Capital: '+fmtUSD(stats.dep)+'</span>';
+      '<span class="hero-dep-cap">Capital inicial: '+fmtUSD(stats.dep)+'</span>';
   } else {
-    $('heroDep').innerHTML='Depósito: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span>';
+    $('heroDep').innerHTML='Depósito inicial: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span>';
   }
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
@@ -564,243 +564,187 @@ $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range
 
 async function generarPDF(){
   if(!CC.labels||!CC.labels.length){alert('No hay datos para generar el PDF.');return;}
-  var s=CC.stats;
-  if(!s){alert('No hay datos para generar el PDF.');return;}
+  var s=CC.stats; if(!s){alert('Sin datos.');return;}
+  var nombre=CC.nombre||'—';
 
   var {jsPDF}=window.jspdf;
-  // A4 portrait (210 x 297 mm) - white always
-  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
-  var W=210,H=297;
-  var pad=18;
-  var y=pad;
+  // Letter 8.5x11 inches = 215.9 x 279.4 mm, portrait, always white
+  var doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
+  var PW=215.9, PH=279.4, M=16;
+  var y=M;
 
-  // ── Helpers ──
-  var fmtU=function(n){return(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
+  var fmt=function(n){return(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
   var fmtP=function(n){return(isFinite(n)?n:0).toFixed(2)+'%';};
+  var pad2=function(x){return String(x).padStart(2,'0');};
   var MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   var mLbl=function(k){var p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
+  var today=new Date();
+  // Panama time UTC-5
+  var pty=new Date(today.getTime()-5*3600000);
+  var todayStr=pad2(pty.getUTCDate())+'/'+pad2(pty.getUTCMonth()+1)+'/'+pty.getUTCFullYear();
 
-  // Colors (always light)
-  var C={
-    text:'#1f2328',text2:'#656d76',border:'#d0d7de',
-    good:'#1a7f37',bad:'#cf222e',accent:'#0969da',
-    bg2:'#f6f8fa',heroBg:'#1f2328',heroText:'#ffffff',
-    heroGreen:'#3fb950',heroBad:'#f85149',heroSub:'#8b949e'
-  };
+  var C={text:'#1f2328',text2:'#656d76',border:'#d0d7de',bg2:'#f6f8fa',
+         good:'#1a7f37',bad:'#cf222e',accent:'#0969da',
+         heroBg:'#1f2328',heroText:'#ffffff',heroGreen:'#3fb950',heroBad:'#f85149'};
 
-  function setFont(size,weight,color){
-    doc.setFontSize(size);
-    doc.setFont('helvetica', weight||'normal');
-    doc.setTextColor(color||C.text);
-  }
-  function line(x1,y1,x2,y2,color,width){
-    doc.setDrawColor(color||C.border);
-    doc.setLineWidth(width||0.3);
-    doc.line(x1,y1,x2,y2);
-  }
-  function rect(x,yy,w,h,fill,stroke){
-    if(fill){doc.setFillColor(fill);doc.roundedRect(x,yy,w,h,2,2,'F');}
-    if(stroke){doc.setDrawColor(stroke);doc.setLineWidth(0.3);doc.roundedRect(x,yy,w,h,2,2,'S');}
-  }
-  function newPageIfNeeded(needed){
-    if(y+needed>H-pad){doc.addPage();y=pad;return true;}
-    return false;
+  function sf(size,weight,color){doc.setFontSize(size);doc.setFont('helvetica',weight||'normal');doc.setTextColor(color||C.text);}
+  function ln(x1,y1,x2,y2,color,w){doc.setDrawColor(color||C.border);doc.setLineWidth(w||0.3);doc.line(x1,y1,x2,y2);}
+  function box(x,yy,w,h,fill,stroke,r){
+    if(fill){doc.setFillColor(fill);}
+    if(stroke){doc.setDrawColor(stroke);doc.setLineWidth(0.3);}
+    var mode=fill&&stroke?'FD':fill?'F':stroke?'S':'S';
+    if(r){doc.roundedRect(x,yy,w,h,r,r,mode);}else{doc.rect(x,yy,w,h,mode);}
   }
 
   // ── HEADER ──────────────────────────────────────────────────
   // Logo box
-  rect(pad,y,10,10,'#1f2328',null);
-  setFont(5,'bold','#ffffff');
-  doc.text('RC',pad+2.2,y+6.5);
-  // Brand
-  setFont(16,'bold',C.text);
-  doc.text('RC Capital',pad+13,y+7);
-  // Right side
-  setFont(9,'normal',C.text2);
-  doc.text('Estado de Cuenta',W-pad,y+4,{align:'right'});
-  var today=new Date();
-  doc.text(today.getDate()+'/'+(today.getMonth()+1)+'/'+today.getFullYear(),W-pad,y+9,{align:'right'});
-  y+=16;
-  line(pad,y,W-pad,y,C.border,0.5);
-  y+=10;
+  doc.setFillColor('#1f2328'); doc.roundedRect(M,y,10,10,2,2,'F');
+  sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8);
+  // Brand + date
+  sf(14,'bold',C.text); doc.text('RC Capital',M+13,y+7);
+  sf(9,'normal',C.text2); doc.text(todayStr,PW-M,y+4,{align:'right'});
+  doc.text('Estado de Cuenta',PW-M,y+9,{align:'right'});
+  y+=14; ln(M,y,PW-M,y,C.border,0.5); y+=8;
 
-  // Client name + period
-  setFont(10,'normal',C.text2);
-  doc.text('CLIENTE',pad,y);
-  setFont(18,'bold',C.text);
-  doc.text(s.nombre||CC.nombre||'—',pad,y+8);
-  setFont(9,'normal',C.text2);
+  // ── CLIENT NAME ──────────────────────────────────────────────
+  sf(9,'normal',C.text2); doc.text('INVERSOR',M,y);
+  y+=5;
+  sf(20,'bold',C.text); doc.text(nombre,M,y);
+  y+=5;
+  // Period
   if(s.firstDate&&s.lastDate){
-    var pad2=function(x){return String(x).padStart(2,'0');};
-    var fd=s.firstDate,ld=s.lastDate;
-    doc.text(fd.getFullYear()+'-'+pad2(fd.getMonth()+1)+'-'+pad2(fd.getDate())+
-      '  →  '+ld.getFullYear()+'-'+pad2(ld.getMonth()+1)+'-'+pad2(ld.getDate()), pad, y+14);
+    sf(9,'normal',C.text2);
+    doc.text(
+      s.firstDate.getFullYear()+'-'+pad2(s.firstDate.getMonth()+1)+'-'+pad2(s.firstDate.getDate())+
+      '  →  '+s.lastDate.getFullYear()+'-'+pad2(s.lastDate.getMonth()+1)+'-'+pad2(s.lastDate.getDate()),
+      M, y
+    );
   }
-  y+=22;
-  line(pad,y,W-pad,y,C.border,0.3);
-  y+=10;
+  y+=10; ln(M,y,PW-M,y,C.border,0.3); y+=8;
 
-  // ── HERO ────────────────────────────────────────────────────
-  var heroH=36;
-  rect(pad,y,W-pad*2,heroH,'#1f2328',null);
-  var roi=s.roi||0;
-  var isPos=roi>=0;
-  // ROI
-  setFont(8,'normal','#8b949e');
-  doc.text('RENDIMIENTO TOTAL',pad+6,y+8);
-  setFont(26,'bold',isPos?C.heroGreen:C.heroBad);
-  doc.text((isPos?'+':'')+fmtP(roi),pad+6,y+24);
-  setFont(8,'normal','#8b949e');
-  doc.text((s.days||0)+' días · Rendimiento neto',pad+6,y+31);
-  // Equity right
-  setFont(8,'normal','#8b949e');
-  doc.text('VALOR DE LA CUENTA',W-pad-6,y+8,{align:'right'});
-  setFont(16,'bold','#ffffff');
-  doc.text(fmtU(s.equity||0),W-pad-6,y+22,{align:'right'});
-  setFont(7,'normal','#8b949e');
+  // ── HERO ─────────────────────────────────────────────────────
+  var heroH=32; var heroW=PW-M*2;
+  box(M,y,heroW,heroH,'#1f2328',null,3);
+  var roi=s.roi||0; var isPos=roi>=0;
+  sf(7,'normal','#8b949e'); doc.text('RENDIMIENTO TOTAL',M+6,y+7);
+  sf(22,'bold',isPos?C.heroGreen:C.heroBad); doc.text((isPos?'+':'')+fmtP(roi),M+6,y+21);
+  sf(8,'normal','#8b949e'); doc.text((s.days||0)+' días · Rendimiento neto',M+6,y+28);
+  // Right
+  sf(7,'normal','#8b949e'); doc.text('VALOR DE LA CUENTA',PW-M-5,y+7,{align:'right'});
+  sf(15,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-5,y+19,{align:'right'});
+  sf(7,'normal','#8b949e');
   if(s.depFeeAmt>0){
-    doc.text('Depósito: '+fmtU(s.depGross),W-pad-6,y+28,{align:'right'});
-    doc.text('Activation fee: -'+fmtU(s.depFeeAmt),W-pad-6,y+33,{align:'right'});
+    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+25,{align:'right'});
+    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+30,{align:'right'});
   } else {
-    doc.text('Depósito: '+fmtU(s.dep),W-pad-6,y+28,{align:'right'});
+    doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+26,{align:'right'});
   }
-  y+=heroH+10;
+  y+=heroH+6;
 
-  // ── KPIs ───────────────────────────────────────────────────
+  // ── KPIs ─────────────────────────────────────────────────────
   var kpis=[
-    {l:'Profit neto',v:(s.runP+s.runF>=0?'+':'')+fmtU(s.runP+s.runF),c:s.runP+s.runF>=0?C.good:C.bad},
+    {l:'Profit neto',v:(s.runP+s.runF>=0?'+':'')+fmt(s.runP+s.runF),c:s.runP+s.runF>=0?C.good:C.bad},
     {l:'Días activo',v:String(s.days||0),c:C.text},
-    {l:'Mejor mes',v:s.best&&s.best[0]?'+'+fmtU(s.best[1]):'—',c:C.good},
+    {l:'Mejor mes',v:s.best&&s.best[0]?'+'+fmt(s.best[1]):'—',c:C.good},
     {l:'Meses positivos',v:(s.posM||0)+'/'+(s.me?s.me.length:0),c:C.text}
   ];
-  var kw=(W-pad*2-9)/4;
+  var kw=(PW-M*2-9)/4;
   kpis.forEach(function(k,i){
-    var kx=pad+i*(kw+3);
-    rect(kx,y,kw,20,C.bg2,C.border);
-    setFont(7,'bold',C.text2);
-    doc.text(k.l.toUpperCase(),kx+5,y+7);
-    setFont(11,'bold',k.c);
-    doc.text(k.v,kx+5,y+15);
+    var kx=M+i*(kw+3);
+    box(kx,y,kw,16,C.bg2,C.border,2);
+    sf(6.5,'bold',C.text2); doc.text(k.l.toUpperCase(),kx+4,y+6);
+    sf(10,'bold',k.c); doc.text(k.v,kx+4,y+13);
   });
-  y+=28;
-  line(pad,y,W-pad,y,C.border,0.3);
-  y+=10;
+  y+=22;
 
-  // ── EQUITY TABLE (monthly breakdown) ───────────────────────
-  setFont(12,'bold',C.text);
-  doc.text('Resumen por Período',pad,y);
-  y+=8;
+  // ── EQUITY CHART (compact, fits on page) ─────────────────────
+  sf(10,'bold',C.text); doc.text('Evolución del Capital',M,y); y+=5;
+  var cW=PW-M*2, cH=50; // compact height
+  box(M,y,cW,cH,'#ffffff',C.border,2);
 
-  // Table header
-  var cols=[
-    {l:'Mes',x:pad,w:28,align:'left'},
-    {l:'P&L neto',x:pad+30,w:36,align:'right'},
-    {l:'Retorno %',x:pad+68,w:32,align:'right'},
-    {l:'Equity final',x:pad+102,w:36,align:'right'},
-  ];
-  var tableW=W-pad*2;
-  rect(pad,y,tableW,9,C.bg2,C.border);
-  cols.forEach(function(c){
-    setFont(7,'bold',C.text2);
-    doc.text(c.l.toUpperCase(),c.align==='right'?c.x+c.w:c.x,y+6,{align:c.align});
-  });
-  y+=9;
-
-  if(s.me&&s.me.length){
-    s.me.forEach(function(entry,idx){
-      newPageIfNeeded(8);
-      var mk=entry[0],pnl=entry[1];
-      var eq=s.mEq&&s.mEq[mk]?s.mEq[mk]:s.dep;
-      var prev=eq-pnl;
-      var pct=prev>0?(pnl/Math.abs(prev)*100):0;
-      // Alternating row bg
-      if(idx%2===0) rect(pad,y,tableW,8,C.bg2,null);
-      line(pad,y+8,W-pad,y+8,C.border,0.2);
-      setFont(9,'normal',C.text);
-      doc.text(mLbl(mk),pad+2,y+6);
-      setFont(9,'bold',pnl>=0?C.good:C.bad);
-      doc.text((pnl>=0?'+':'')+fmtU(pnl),cols[1].x+cols[1].w,y+6,{align:'right'});
-      setFont(9,'normal',pct>=0?C.good:C.bad);
-      doc.text((pct>=0?'+':'')+fmtP(pct),cols[2].x+cols[2].w,y+6,{align:'right'});
-      setFont(9,'normal',C.text);
-      doc.text(fmtU(eq),cols[3].x+cols[3].w,y+6,{align:'right'});
-      y+=8;
-    });
-  }
-  y+=10;
-
-  // ── EQUITY CHART ──────────────────────────────────────────
-  newPageIfNeeded(70);
-  setFont(12,'bold',C.text);
-  doc.text('Evolución del Capital',pad,y);
-  y+=8;
-
-  // Draw chart on an offscreen canvas
-  var tmpCanvas=document.createElement('canvas');
-  var chartW=580,chartH=200;
-  tmpCanvas.width=chartW*2;tmpCanvas.height=chartH*2;
-  tmpCanvas.style.width=chartW+'px';tmpCanvas.style.height=chartH+'px';
-  var ctx=tmpCanvas.getContext('2d');
+  var tmp=document.createElement('canvas');
+  var RES=600, RES_H=200;
+  tmp.width=RES*2; tmp.height=RES_H*2;
+  tmp.style.width=RES+'px'; tmp.style.height=RES_H+'px';
+  var ctx=tmp.getContext('2d');
   ctx.setTransform(2,0,0,2,0,0);
-  // White bg
-  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,chartW,chartH);
-  var filteredData=getFiltered(); // always get current filtered data
-  var labels=filteredData.labels,equity=filteredData.equity,dep=filteredData.deposit;
-  var n=labels.length;
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,RES,RES_H);
+  var fd=getFiltered(); var labels=fd.labels,equity=fd.equity,dep=fd.deposit,n=labels.length;
   if(n>1){
-    var pdfPad={l:60,r:14,t:14,b:32},iw=chartW-pdfPad.l-pdfPad.r,ih=chartH-pdfPad.t-pdfPad.b;
+    var pp={l:52,r:10,t:12,b:28}, iw2=RES-pp.l-pp.r, ih2=RES_H-pp.t-pp.b;
     var ext=equity.concat([dep]);
     var minV=Math.min.apply(null,ext),maxV=Math.max.apply(null,ext);
-    var mg=(maxV-minV)*0.08||5;minV-=mg;maxV+=mg;
-    var span=maxV-minV;
-    // Grid
-    ctx.strokeStyle='rgba(0,0,0,.08)';ctx.lineWidth=1;
-    for(var i=0;i<=5;i++){var gy=pdfPad.t+ih*(i/5);ctx.beginPath();ctx.moveTo(pdfPad.l,gy);ctx.lineTo(pdfPad.l+iw,gy);ctx.stroke();}
-    // Y labels
-    ctx.fillStyle='#656d76';ctx.font='11px sans-serif';ctx.textAlign='right';
-    for(var i=0;i<=5;i++){
-      var v=maxV-span*(i/5),gy=pdfPad.t+ih*(i/5);
-      ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pdfPad.l-6,gy+4);
+    var mg=(maxV-minV)*0.1||2; minV-=mg; maxV+=mg; var span=maxV-minV||1;
+    ctx.strokeStyle='rgba(0,0,0,.07)'; ctx.lineWidth=1;
+    for(var i=0;i<=4;i++){var gy=pp.t+ih2*(i/4);ctx.beginPath();ctx.moveTo(pp.l,gy);ctx.lineTo(pp.l+iw2,gy);ctx.stroke();}
+    ctx.fillStyle='#656d76'; ctx.font='11px sans-serif'; ctx.textAlign='right';
+    for(var i=0;i<=4;i++){
+      var v=maxV-span*(i/4),gy=pp.t+ih2*(i/4);
+      ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v),pp.l-4,gy+4);
     }
-    // Deposit line
-    var depY2=pdfPad.t+ih*(1-(dep-minV)/span);
-    ctx.strokeStyle='rgba(0,0,0,.2)';ctx.setLineDash([5,5]);ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(pdfPad.l,depY2);ctx.lineTo(pdfPad.l+iw,depY2);ctx.stroke();
-    ctx.setLineDash([]);
-    // Area
-    var posChart=equity[n-1]>=dep;
-    var grd=ctx.createLinearGradient(0,pdfPad.t,0,pdfPad.t+ih);
-    if(posChart){grd.addColorStop(0,'rgba(26,127,55,.15)');grd.addColorStop(1,'rgba(26,127,55,.01)');}
+    var depY2=pp.t+ih2*(1-(dep-minV)/span);
+    ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.setLineDash([4,4]); ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pp.l,depY2);ctx.lineTo(pp.l+iw2,depY2);ctx.stroke();ctx.setLineDash([]);
+    var posC=equity[n-1]>=dep;
+    var grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih2);
+    if(posC){grd.addColorStop(0,'rgba(26,127,55,.15)');grd.addColorStop(1,'rgba(26,127,55,.01)');}
     else{grd.addColorStop(0,'rgba(207,34,46,.1)');grd.addColorStop(1,'rgba(207,34,46,.01)');}
     ctx.beginPath();
-    for(var i=0;i<n;i++){var ex2=pdfPad.l+iw*(i/Math.max(1,n-1)),ey2=pdfPad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
-    ctx.lineTo(pdfPad.l+iw,depY2);ctx.lineTo(pdfPad.l,depY2);ctx.closePath();
-    ctx.fillStyle=grd;ctx.fill();
-    // Line
-    ctx.lineWidth=2;ctx.strokeStyle=posChart?'#1a7f37':'#cf222e';ctx.lineJoin='round';
+    for(var i=0;i<n;i++){var ex2=pp.l+iw2*(i/Math.max(1,n-1)),ey2=pp.t+ih2*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
+    ctx.lineTo(pp.l+iw2,depY2);ctx.lineTo(pp.l,depY2);ctx.closePath();
+    ctx.fillStyle=grd; ctx.fill();
+    ctx.lineWidth=2; ctx.strokeStyle=posC?'#1a7f37':'#cf222e'; ctx.lineJoin='round';
     ctx.beginPath();
-    for(var i=0;i<n;i++){var ex2=pdfPad.l+iw*(i/Math.max(1,n-1)),ey2=pdfPad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
+    for(var i=0;i<n;i++){var ex2=pp.l+iw2*(i/Math.max(1,n-1)),ey2=pp.t+ih2*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
     ctx.stroke();
-    // X labels
-    ctx.fillStyle='#656d76';ctx.font='10px sans-serif';ctx.textAlign='center';
+    // x labels
+    ctx.fillStyle='#656d76'; ctx.font='10px sans-serif'; ctx.textAlign='center';
     var step=Math.max(1,Math.ceil(n/8));
-    for(var i=0;i<n;i+=step){var ex2=pdfPad.l+iw*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),ex2,pdfPad.t+ih+22);}
+    for(var i=0;i<n;i+=step){var ex2=pp.l+iw2*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),ex2,pp.t+ih2+20);}
   }
-  var chartImg=tmpCanvas.toDataURL('image/png');
-  var chartH_mm=55,chartW_mm=W-pad*2;
-  rect(pad,y,chartW_mm,chartH_mm,'#ffffff',C.border);
-  doc.addImage(chartImg,'PNG',pad+1,y+1,chartW_mm-2,chartH_mm-2);
-  y+=chartH_mm+10;
+  doc.addImage(tmp.toDataURL('image/png'),'PNG',M+1,y+1,cW-2,cH-2);
+  y+=cH+6;
 
-  // ── FOOTER ────────────────────────────────────────────────
-  newPageIfNeeded(16);
-  line(pad,y,W-pad,y,C.border,0.3);
-  y+=6;
-  setFont(8,'normal',C.text2);
-  doc.text('Reporte informativo · Rendimientos pasados no garantizan resultados futuros · RC Capital',pad,y);
+  // ── TABLE ────────────────────────────────────────────────────
+  sf(10,'bold',C.text); doc.text('Resumen por Período',M,y); y+=5;
+  var cols2=[
+    {l:'MES',x:M,w:22,a:'left'},
+    {l:'P&L NETO',x:M+24,w:38,a:'right'},
+    {l:'RETORNO',x:M+64,w:28,a:'right'},
+    {l:'EQUITY FINAL',x:M+94,w:38,a:'right'},
+  ];
+  var tW=PW-M*2;
+  box(M,y,tW,8,C.bg2,C.border,0);
+  cols2.forEach(function(cl){
+    sf(6.5,'bold',C.text2);
+    doc.text(cl.l,cl.a==='right'?cl.x+cl.w:cl.x+3,y+5.5,{align:cl.a});
+  });
+  y+=8;
+  var rowH=7.5;
+  if(s.me&&s.me.length){
+    s.me.forEach(function(entry,idx){
+      if(y+rowH>PH-M){doc.addPage();y=M;}
+      var mk=entry[0],pnl=entry[1];
+      var eq2=s.mEq&&s.mEq[mk]?s.mEq[mk]:s.dep;
+      var prev=eq2-pnl, pct=prev>0?(pnl/Math.abs(prev)*100):0;
+      if(idx%2===0){doc.setFillColor(C.bg2);doc.rect(M,y,tW,rowH,'F');}
+      ln(M,y+rowH,M+tW,y+rowH,C.border,0.2);
+      sf(8,'normal',C.text); doc.text(mLbl(mk),M+3,y+5.5);
+      sf(8,'bold',pnl>=0?C.good:C.bad); doc.text((pnl>=0?'+':'')+fmt(pnl),cols2[1].x+cols2[1].w,y+5.5,{align:'right'});
+      sf(8,'normal',pct>=0?C.good:C.bad); doc.text((pct>=0?'+':'')+fmtP(pct),cols2[2].x+cols2[2].w,y+5.5,{align:'right'});
+      sf(8,'normal',C.text); doc.text(fmt(eq2),cols2[3].x+cols2[3].w,y+5.5,{align:'right'});
+      y+=rowH;
+    });
+  }
+  y+=8;
 
-  // Save
-  var fname='RC_Capital_'+((s.nombre||'reporte').replace(/\s+/g,'_'))+'_'+today.getFullYear()+'.pdf';
+  // ── FOOTER ───────────────────────────────────────────────────
+  if(y+10>PH-M){doc.addPage();y=M;}
+  ln(M,y,PW-M,y,C.border,0.3); y+=5;
+  sf(7,'normal',C.text2);
+  doc.text('Reporte informativo · Rendimientos pasados no garantizan resultados futuros · RC Capital',PW/2,y,{align:'center'});
+
+  var fname='RC_Capital_'+(nombre.replace(/\s+/g,'_'))+'_'+pty.getUTCFullYear()+'.pdf';
   doc.save(fname);
 }
 
