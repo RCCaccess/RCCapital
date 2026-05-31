@@ -206,13 +206,15 @@ canvas.sparkline{display:block;border-radius:6px;}
 <div id="loginScreen">
   <div class="login-wrap">
     <div class="login-brand">
-      <div class="lb-logo"><img src="logo.png" alt="RC Capital"/></div>
+      <div class="lb-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
+        <img src="logo.png" alt="RC Capital"/>
+      </div>
       <h1>RC Capital</h1>
       <p>Panel de administración</p>
     </div>
     <div class="login-card">
       <div class="lc-top">
-        <span class="admin-tag" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;padding:4px 8px;">ADMIN</span>
+        <span class="admin-tag">ADMIN</span>
         <div style="display:flex;align-items:center;gap:5px;">
           <span style="font-size:13px;">🌙</span>
           <button class="th-pill" id="adminLoginPill" onclick="quickToggleTheme()"><div class="th-knob"></div></button>
@@ -677,7 +679,7 @@ const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RC Capital2024Admin';
+const ADMIN_PASS  = 'RCCapital2024Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1652,6 +1654,7 @@ function handleAdminTap(){
   adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
   if(adminTapCount >= 5){
     adminTapCount = 0;
+    clearTimeout(adminTapTimer);
     adminPinOpen();
   }
 }
