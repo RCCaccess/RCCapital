@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RCCapital · Mi Reporte</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<title>RC Capital · Mi Reporte</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root{--bg:#070a0f;--surface:#0d1219;--surface2:#111a24;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);--text:#e2eaf5;--muted:#6b809a;--accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;--sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;}
+:root{--bg:#070a0f;--surface:#0d1219;--surface2:#111a24;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);--text:#e2eaf5;--muted:#6b809a;--accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;--sans:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;--mono:'JetBrains Mono',monospace;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;background-image:radial-gradient(ellipse 900px 500px at 20% -10%,rgba(0,194,255,.05),transparent 70%),radial-gradient(ellipse 600px 400px at 80% 100%,rgba(34,214,138,.03),transparent 70%);}
 #loginScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
@@ -125,8 +125,8 @@ tr:hover td{background:rgba(255,255,255,.02);}
 <div id="loginScreen">
   <div class="login-wrap">
     <div class="login-brand">
-      <div class="logo-box" id="secretLogo" onclick="handleSecretTap()" style="cursor:pointer;user-select:none;"><img src="logo.png" style="width:52px;height:52px;object-fit:contain;border-radius:8px;" alt="RCCapital"/></div>
-      <h1>RCCapital</h1>
+      <div class="logo-box" id="secretLogo" onclick="handleSecretTap()" style="cursor:pointer;user-select:none;"><img src="logo.png" style="width:52px;height:52px;object-fit:contain;border-radius:8px;" alt="RC Capital"/></div>
+      <h1>RC Capital</h1>
       <p>Portal de inversores · Acceso seguro</p>
     </div>
     <div class="login-card">
@@ -141,7 +141,7 @@ tr:hover td{background:rgba(255,255,255,.02);}
 
 <div id="appScreen">
   <div class="action-bar">
-    <div class="ab-brand"><div class="dot"></div><span>RCCapital</span></div>
+    <div class="ab-brand"><div class="dot"></div><span>RC Capital</span></div>
     <div class="ab-user">Bienvenido, <strong id="abNombre">—</strong></div>
     <div class="ab-actions">
       <button class="ab-btn accent" id="btnPDF" onclick="generarPDF()">⬇️ Guardar PDF</button>
@@ -151,13 +151,13 @@ tr:hover td{background:rgba(255,255,255,.02);}
   <div class="report-wrap" id="reportWrap">
     <div class="period-bar" id="periodBar" style="display:none;"><label>Período:</label><div id="periodBtns"></div></div>
     <div id="loadingState" style="text-align:center;padding:80px 20px;color:var(--muted);"><span class="spinner"></span><p style="margin-top:16px;font-size:14px;">Cargando tu reporte...</p></div>
-    <div id="emptyState" class="empty-report" style="display:none;"><div class="ei">📊</div><h3>Sin reporte disponible</h3><p>Tu gestor aún no ha subido el reporte de este período.<br/>Contacta a RCCapital para más información.</p></div>
+    <div id="emptyState" class="empty-report" style="display:none;"><div class="ei">📊</div><h3>Sin reporte disponible</h3><p>Tu gestor aún no ha subido el reporte de este período.<br/>Contacta a RC Capital para más información.</p></div>
     <div id="reportContent" style="display:none;">
       <div class="report-header fu">
         <div><div class="rh-eyebrow">Estado de cuenta</div><div class="rh-name" id="rhName">—</div><div class="rh-period" id="rhPeriod">—</div></div>
         <div class="rh-right">
-          <div class="rh-logo"><img src="logo.png" style="width:48px;height:48px;object-fit:contain;border-radius:8px;" alt="RCCapital"/></div>
-          <div class="rh-brand">RCCapital</div>
+          <div class="rh-logo"><img src="logo.png" style="width:48px;height:48px;object-fit:contain;border-radius:8px;" alt="RC Capital"/></div>
+          <div class="rh-brand">RC Capital</div>
           <div class="rh-date" id="rhDate">—</div>
         </div>
       </div>
@@ -409,7 +409,7 @@ async function generarPDF(){
     pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(0,194,255);pdf.text('ESTADO DE CUENTA',M,y+5);
     pdf.setFontSize(16);pdf.setTextColor(226,234,245);pdf.text($('rhName').textContent||'—',M,y+14);
     pdf.setFont('helvetica','normal');pdf.setFontSize(7);pdf.setTextColor(107,128,154);pdf.text($('rhPeriod').textContent||'—',M,y+20);
-    pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(226,234,245);pdf.text('RCCapital',W-M,y+9,{align:'right'});
+    pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(226,234,245);pdf.text('RC Capital',W-M,y+9,{align:'right'});
     pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('rhDate').textContent||'—',W-M,y+15,{align:'right'});
     y+=24;pdf.setDrawColor(40,55,75);pdf.setLineWidth(0.3);pdf.line(M,y,W-M,y);y+=6;
     const colL=M,colR=M+iW*0.38+4,colLW=iW*0.38,colRW=iW*0.60;
@@ -445,7 +445,7 @@ async function generarPDF(){
     pdf.setDrawColor(40,55,75);pdf.line(M,H-13,W-M,H-13);
     pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);
     pdf.text('Este reporte es de carácter informativo. Rendimientos pasados no garantizan resultados futuros.',M,H-8);
-    pdf.text('RCCapital · '+($('footerDate').textContent||'—'),W-M,H-8,{align:'right'});
+    pdf.text('RC Capital · '+($('footerDate').textContent||'—'),W-M,H-8,{align:'right'});
     const name=(currentCliente.nombre||'Cliente').replace(/\s+/g,'_');
     pdf.save('RCCapital_'+name+'_'+new Date().toISOString().slice(0,10)+'.pdf');
   }catch(err){alert('Error PDF: '+err.message);}
