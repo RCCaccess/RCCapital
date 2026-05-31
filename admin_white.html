@@ -88,6 +88,7 @@ body{font-family:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', '
 .sidebar.collapsed .sidebar-logo .tag,
 .sidebar.collapsed .nav-label,
 .sidebar.collapsed .logout-btn span,
+.sidebar.collapsed .admin-th-pill,
 .sidebar.collapsed .sidebar-bottom{display:none;}
 .sidebar.collapsed .nav-item{justify-content:center;padding:10px 6px;}
 .sidebar.collapsed .nav-item .icon{width:auto;}
@@ -281,6 +282,12 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   [data-theme="light"] table th{background:var(--surface2);}
   [data-theme="light"] .logout-btn{color:var(--bad);}
 
+
+  /* Quick theme toggle pill */
+  .admin-th-pill{width:36px;height:20px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
+  [data-theme="light"] .admin-th-pill{background:var(--accent);border-color:var(--accent);}
+  .admin-th-knob{width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s;}
+  [data-theme="light"] .admin-th-knob{transform:translateX(16px);background:#fff;}
 </style>
 </head>
 <body>
@@ -316,6 +323,9 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RC Capital</h2>
         <span class="tag">ADMIN</span>
+        <button class="admin-th-pill" id="adminThemePill" onclick="quickToggleTheme()" title="Cambiar tema" style="margin-left:auto;flex-shrink:0;">
+          <div class="admin-th-knob"></div>
+        </button>
       </div>
       <div class="sidebar-nav-group">
         <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
@@ -701,9 +711,15 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 function applyTheme(theme){
   document.documentElement.setAttribute('data-theme', theme);
   try{ localStorage.setItem('rcTheme', theme); }catch(e){}
-  // Update toggle buttons
+  // Update settings page toggle buttons
   var btns = document.querySelectorAll('.theme-btn');
   btns.forEach(function(b){ b.classList.toggle('active', b.dataset.theme === theme); });
+  // Sidebar pill already handled by CSS [data-theme] selector
+}
+
+function quickToggleTheme(){
+  var cur = document.documentElement.getAttribute('data-theme')||'dark';
+  applyTheme(cur==='dark'?'light':'dark');
 }
 
 function initTheme(){
