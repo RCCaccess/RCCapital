@@ -3,18 +3,49 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RCCapital · Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<title>RC Capital · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{
+
+  /* ── DARK THEME (default) ── */
+  :root, [data-theme="dark"]{
+    --sans:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
   --bg:#070a0f;--surface:#0d1219;--surface2:#111a24;
-  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
-  --text:#e2eaf5;--muted:#6b809a;--accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;
-  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
-}
+    --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
+    --text:#e2eaf5;--muted:#6b809a;
+    --accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;
+    --card-bg:rgba(0,0,0,.25);--card-border:rgba(255,255,255,.08);
+    --card-hover-border:rgba(255,255,255,.16);--card-hover-bg:rgba(0,0,0,.25);
+    --input-bg:rgba(255,255,255,.05);--drop-border:rgba(0,194,255,.3);
+    --drop-bg:rgba(0,194,255,.04);--drop-over:rgba(0,194,255,.12);
+    --stat-bg:var(--surface);--tbl-head:rgba(255,255,255,.02);
+    --shadow:0 24px 64px rgba(0,0,0,.5);
+  }
+
+  /* ── LIGHT THEME ── */
+  [data-theme="light"]{
+    --bg:#f9f9f7;--surface:#ffffff;--surface2:#f3f3f0;
+    --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.14);
+    --text:#1a1a18;--muted:#8a8a82;
+    --accent:#0071e3;--good:#1a7a4a;--bad:#c0392b;--warn:#b8770a;
+    --card-bg:#f3f3f0;--card-border:rgba(0,0,0,.08);
+    --card-hover-border:rgba(0,0,0,.2);--card-hover-bg:#ffffff;
+    --input-bg:rgba(0,0,0,.04);--drop-border:rgba(0,113,227,.3);
+    --drop-bg:rgba(0,113,227,.04);--drop-over:rgba(0,113,227,.08);
+    --stat-bg:var(--surface);--tbl-head:rgba(0,0,0,.02);
+    --shadow:0 4px 24px rgba(0,0,0,.08);
+  }
+
+  /* Theme transition */
+  *, *::before, *::after{
+    transition:background-color .25s ease, border-color .25s ease, color .2s ease;
+  }
+  /* Except animations */
+  .spinner, canvas { transition: none !important; }
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
+body{font-family:-apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;background:var(--bg);color:var(--text);min-height:100vh;
   background-image:radial-gradient(ellipse 900px 500px at 80% -10%,rgba(0,194,255,.05),transparent);}
 
 /* LOGIN */
@@ -237,6 +268,19 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
   .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
 
+
+  /* Theme buttons */
+  .theme-btn{outline:none;-webkit-appearance:none;}
+  .theme-btn.active{border-color:var(--accent) !important;box-shadow:0 0 0 3px rgba(0,194,255,.15);}
+  [data-theme="light"] .theme-btn.active{box-shadow:0 0 0 3px rgba(0,113,227,.15);}
+  [data-theme="light"] .sidebar{background:var(--surface);border-right-color:var(--border);}
+  [data-theme="light"] .nav-item:hover{background:var(--surface2);}
+  [data-theme="light"] .nav-item.active{background:var(--text);color:#fff;}
+  [data-theme="light"] .login-box{box-shadow:var(--shadow);}
+  [data-theme="light"] .stat-box{border-color:var(--border);}
+  [data-theme="light"] table th{background:var(--surface2);}
+  [data-theme="light"] .logout-btn{color:var(--bad);}
+
 </style>
 </head>
 <body>
@@ -245,8 +289,8 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
-      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RCCapital"/>
-      <h1>RCCapital</h1>
+      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RC Capital"/>
+      <h1>RC Capital</h1>
       <span>ADMIN</span>
     </div>
     <div class="field">
@@ -270,7 +314,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
       <div class="sidebar-logo">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
-        <h2>RCCapital</h2>
+        <h2>RC Capital</h2>
         <span class="tag">ADMIN</span>
       </div>
       <div class="sidebar-nav-group">
@@ -288,6 +332,9 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         </button>
       </div>
       <div class="sidebar-bottom">
+        <button class="nav-item" data-page="settings" onclick="showPage('settings',this)" style="margin-bottom:6px;">
+          <span class="icon">⚙️</span><span class="nav-label"> Ajustes</span>
+        </button>
         <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
@@ -540,6 +587,60 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         </div>
       </div>
 
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-title">Ajustes</div>
+        <div class="page-sub">Personaliza tu panel de administración</div>
+
+        <!-- Theme selector -->
+        <div class="card" style="max-width:480px;">
+          <div class="card-hd"><h3>Apariencia</h3></div>
+          <div class="card-bd">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige el tema visual del panel</div>
+            <div style="display:flex;gap:12px;">
+
+              <!-- Dark -->
+              <button class="theme-btn active" data-theme="dark" onclick="applyTheme('dark')"
+                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(0,0,0,.4);cursor:pointer;transition:all .2s;text-align:center;">
+                <div style="font-size:28px;margin-bottom:8px;">🌙</div>
+                <div style="font-size:13px;font-weight:600;color:#e2eaf5;">Dark</div>
+                <div style="font-size:11px;color:#6b809a;margin-top:3px;">Oscuro</div>
+              </button>
+
+              <!-- Light -->
+              <button class="theme-btn" data-theme="light" onclick="applyTheme('light')"
+                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(255,255,255,.9);cursor:pointer;transition:all .2s;text-align:center;">
+                <div style="font-size:28px;margin-bottom:8px;">☀️</div>
+                <div style="font-size:13px;font-weight:600;color:#1a1a18;">Light</div>
+                <div style="font-size:11px;color:#8a8a82;margin-top:3px;">Claro</div>
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Account info -->
+        <div class="card" style="max-width:480px;margin-top:0;">
+          <div class="card-hd"><h3>Cuenta</h3></div>
+          <div class="card-bd">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted);">Email admin</span>
+              <span style="font-size:13px;font-family:var(--mono);">admin@rccapital.com</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--muted);">PIN rápido</span>
+              <span style="font-size:13px;font-family:var(--mono);">•••• (5 toques al logo)</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+              <span style="font-size:13px;color:var(--muted);">Versión</span>
+              <span style="font-size:13px;font-family:var(--mono);">v1.1 stable</span>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /settings -->
+
     </div><!-- /content -->
   </div><!-- /layout -->
 </div><!-- /appScreen -->
@@ -596,6 +697,30 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 <script>
 
+// ── THEME SYSTEM ──────────────────────────────────────────────────
+function applyTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  try{ localStorage.setItem('rcTheme', theme); }catch(e){}
+  // Update toggle buttons
+  var btns = document.querySelectorAll('.theme-btn');
+  btns.forEach(function(b){ b.classList.toggle('active', b.dataset.theme === theme); });
+}
+
+function initTheme(){
+  var saved = 'dark';
+  try{ saved = localStorage.getItem('rcTheme') || 'dark'; }catch(e){}
+  applyTheme(saved);
+}
+
+// Init theme immediately
+(function(){ 
+  var t = 'dark';
+  try{ t = localStorage.getItem('rcTheme') || 'dark'; }catch(e){}
+  document.documentElement.setAttribute('data-theme', t);
+})();
+
+
+
 
 // ── CONFIG ────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
@@ -603,7 +728,7 @@ const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RCCapital2024Admin';
+const ADMIN_PASS  = 'RC Capital2024Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -734,7 +859,10 @@ function renderClientesTable(){
   const container = tbody.closest('.tbl-wrap');
   container.style.border = 'none';
   container.style.background = 'transparent';
-  container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
+  // Clear existing cards to force full re-render
+  const existingCards = container.querySelector('#clientCards');
+  if(existingCards) existingCards.innerHTML = '';
+  container.innerHTML = '<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>';
   const cards = $('clientCards');
 
   clientesCache.forEach(c => {
@@ -918,7 +1046,7 @@ async function loadClientSparkline(c, safeId){
       // Format upload date
       const pad = x => String(x).padStart(2,'0');
       const d = data.created_at ? new Date(data.created_at) : null;
-      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear() : data.mes;
+      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()) : data.mes;
 
       let icon, color, label;
 
@@ -1551,8 +1679,8 @@ async function uploadAllBulk(){
   }
   btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
   toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':'')+' · 💰 Mi Cuenta actualizada');
-  await loadReportes(); updateDashboard(); await loadClientes();
-  // Auto-feed Mi Cuenta from the same CSV data
+  await loadReportes(); updateDashboard();
+  await loadClientes(); // reloads cards + sparklines with fresh data
   autoFeedMiCuenta();
 }
 
@@ -1739,6 +1867,10 @@ function mcLoadFile(fileList){
       try{ localStorage.setItem('rcMiCuentaCSV', text); }catch(e){}
       mcProcessCSV(text);
       $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
+    // Debug: log all reasons found
+    if(typeof debugReasons !== 'undefined'){
+      console.log('Reasons found in CSV:', debugReasons);
+    }
       $('mcFileInput').value='';
     }catch(err){
       $('mcFileStatus').textContent='❌ Error: '+err.message;
@@ -1761,6 +1893,7 @@ function mcProcessCSV(text){
   var iInv=['investorname','investor','inversor','name','usuario'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
   function normStr(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
   var mgrNorm=normStr(MANAGER_CSV_NAME);
+  var debugReasons={};  // track all unique reasons for debugging
   var totalPerf=0,totalMgmt=0,totalDep=0,totalWith=0;
   var monthly={};
 
@@ -1774,13 +1907,14 @@ function mcProcessCSV(text){
     var mk=time.getFullYear()+'-'+String(time.getMonth()+1).padStart(2,'0');
     if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
 
+    if(!debugReasons[reason]) debugReasons[reason]=0; debugReasons[reason]++;
     if(reason==='performancefee'||reason==='performance fee'){
       var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
     } else if(reason==='managementfee'||reason==='management fee'){
       var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
     } else if(reason==='depositfee'||reason==='deposit fee'){
       var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
-    } else if(reason==='withdrawal'||reason==='retiro'){
+    } else if(reason==='withdrawal'||reason==='retiro'||reason==='withdraw'){
       // Only count withdrawals that belong to the manager
       var rowInv=iInv>=0?normStr(cols[iInv]):'';
       var isMgr=(rowInv===mgrNorm)||(rowInv.length>3&&mgrNorm.indexOf(rowInv)>=0)||(mgrNorm.length>3&&rowInv.indexOf(mgrNorm)>=0);
@@ -2087,75 +2221,7 @@ function drawDetChart(stats){
   ctx.fillStyle=isPos?'#22d68a':'#ff4f6a'; ctx.beginPath(); ctx.arc(ex,ey,3.5,0,Math.PI*2); ctx.fill();
 }
 
+
 </script>
-
-<!-- MODAL DETALLE CLIENTE -->
-<div class="modal-overlay" id="modalDetalle" style="display:none;">
-  <div class="modal" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;padding:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Estado de cuenta</div>
-        <h3 id="detNombre" style="font-size:20px;font-weight:800;margin:0;">—</h3>
-        <div id="detPeriodo" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">—</div>
-      </div>
-      <button onclick="closeDetalle()" style="background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>
-    </div>
-
-    <!-- ROI Hero -->
-    <div style="background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Rendimiento Total</div>
-        <div id="detROI" style="font-size:40px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1;">—</div>
-        <div id="detSub" style="font-size:11px;color:var(--muted);margin-top:8px;">—</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Valor de la cuenta</div>
-        <div id="detEquity" style="font-size:22px;font-weight:800;font-family:var(--mono);">—</div>
-        <div id="detDep" style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);">—</div>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
-      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Profit neto</div>
-        <div id="detProfit" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
-      </div>
-      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Días activo</div>
-        <div id="detDias" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent);">—</div>
-      </div>
-      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Mejor mes</div>
-        <div id="detBest" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--good);">—</div>
-      </div>
-      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Meses positivos</div>
-        <div id="detPosM" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
-      </div>
-    </div>
-
-    <!-- Chart -->
-    <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
-      <canvas id="detChart" style="display:block;width:100%;height:160px;"></canvas>
-    </div>
-
-    <!-- Table -->
-    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">Resumen por período</div>
-    <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:240px;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr>
-          <th style="padding:8px 12px;text-align:left;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Mes</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">P&L neto</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Retorno %</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Equity final</th>
-        </tr></thead>
-        <tbody id="detTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
