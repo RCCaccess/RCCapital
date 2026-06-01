@@ -297,32 +297,16 @@ canvas.sparkline{display:block;border-radius:6px;}
       <!-- MI CUENTA -->
       <div class="page" id="page-micuenta">
         <div class="page-title">Mi Cuenta</div>
-        <div class="page-sub">Tus comisiones y retiros como gestor — desde el CSV consolidado</div>
-
-        <!-- Upload consolidated CSV -->
-        <div class="card" id="mcUploadCard" style="border-color:rgba(245,166,35,.2);background:linear-gradient(160deg,rgba(245,166,35,.04),rgba(0,0,0,.2));">
-          <div class="card-hd">
-            <h3>📤 Cargar CSV consolidado</h3>
-            <span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span>
-          </div>
-          <div class="card-bd">
-            <div id="mcDropZone" class="drop-zone"
-              ondragover="event.preventDefault();this.classList.add('over');"
-              ondragleave="this.classList.remove('over');"
-              ondrop="mcHandleDrop(event)"
-              onclick="$('mcFileInput').click()">
-              <div style="font-size:28px;margin-bottom:8px;color:var(--text2);">↑</div>
-              <div style="font-size:14px;font-weight:500;color:var(--text);">Arrastra el CSV consolidado de Vantage</div>
-              <div style="font-size:12px;color:var(--text2);margin-top:4px;">Se actualiza automáticamente al subir reportes · o haz clic para seleccionar</div>
-            </div>
-            <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
-            <div id="mcFileStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
-          </div>
+        <div class="page-sub">Tus comisiones y retiros como gestor</div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--text2);">
+          💡 Se actualiza automáticamente al subir el CSV consolidado en <strong style="color:var(--text);">Reportes</strong>
+          <span id="mcFileStatus" style="display:block;margin-top:4px;font-family:var(--mono);font-size:12px;"></span>
         </div>
 
+        <!-- Mi Cuenta status — data comes automatically from Reportes -->
         <!-- KPIs gestor -->
         <div id="mcStats" style="display:none;">
-          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
             <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
             <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
             <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
@@ -348,7 +332,7 @@ canvas.sparkline{display:block;border-radius:6px;}
               </div>
             </div>
             <div class="card-bd">
-              <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;">
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:12px;">
                 <canvas id="mcChart" style="display:block;width:100%;height:220px;"></canvas>
               </div>
             </div>
@@ -700,25 +684,18 @@ function toast(msg, type='good'){
 function fmtDate(iso, showTime){
   if(!iso) return '—';
   var d = new Date(iso);
-  // Use Intl to get Panama time correctly (America/Panama = UTC-5, no DST)
-  var opts = {timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true};
-  try{
-    var parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
-    var map = {}; parts.forEach(function(p){ map[p.type]=p.value; });
-    var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-    var mmn = months[parseInt(map.month,10)-1];
-    var dateStr = map.day+' '+mmn+' '+map.year;
-    if(showTime===false) return dateStr;
-    var h = map.hour.replace(/^0/,''); // remove leading zero
-    return dateStr+' · '+h+':'+map.minute+' '+(map.dayPeriod||'').replace('AM','AM').replace('PM','PM')+' PTY';
-  }catch(e){
-    // Fallback: manual UTC-5
-    var pty = new Date(d.getTime() - 5*3600000);
-    var dd = String(pty.getUTCDate()).padStart(2,'0');
-    var mmn2 = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][pty.getUTCMonth()];
-    var raw_h = pty.getUTCHours(); var ampm = raw_h>=12?'PM':'AM'; var hh12 = raw_h%12||12;
-    return dd+' '+mmn2+' '+pty.getUTCFullYear()+(showTime!==false?' · '+hh12+':'+String(pty.getUTCMinutes()).padStart(2,'0')+' '+ampm+' PTY':'');
-  }
+  // Manual UTC-5 conversion (Bogota/Lima/Quito/Panama — no DST ever)
+  var bog = new Date(d.getTime() - 5*3600000);
+  var dd = String(bog.getUTCDate()).padStart(2,'0');
+  var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var mmn = months[bog.getUTCMonth()];
+  var yyyy = bog.getUTCFullYear();
+  var raw_h = bog.getUTCHours();
+  var ampm = raw_h >= 12 ? 'PM' : 'AM';
+  var hh12 = raw_h % 12; if(hh12===0) hh12=12;
+  var min = String(bog.getUTCMinutes()).padStart(2,'0');
+  if(showTime===false) return dd+' '+mmn+' '+yyyy;
+  return dd+' '+mmn+' '+yyyy+' · '+hh12+':'+min+' '+ampm;
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
