@@ -578,12 +578,23 @@ async function generarPDF(){
   var pad2=function(x){return String(x).padStart(2,'0');};
   var MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   var mLbl=function(k){var p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
-  // Panama time UTC-5, 12hr
+  // Bogota/Lima/Quito time (UTC-5, same as Panama, no DST)
   var today=new Date();
-  var pty=new Date(today.getTime()-5*3600000);
-  var raw_h=pty.getUTCHours(); var ampm=raw_h>=12?'PM':'AM'; var h12=raw_h%12||12;
-  var todayStr=pad2(pty.getUTCDate())+'/'+pad2(pty.getUTCMonth()+1)+'/'+pty.getUTCFullYear()+
-    ' · '+h12+':'+String(pty.getUTCMinutes()).padStart(2,'0')+' '+ampm+' PTY';
+  var todayStr=(function(){
+    try{
+      var opts2={timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true};
+      var parts=new Intl.DateTimeFormat('en-US',opts2).formatToParts(today);
+      var m2={}; parts.forEach(function(p){m2[p.type]=p.value;});
+      var months2=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      var mn=months2[parseInt(m2.month,10)-1];
+      var h2=m2.hour.replace(/^0/,'');
+      return m2.day+' '+mn+' '+m2.year+' · '+h2+':'+m2.minute+' '+(m2.dayPeriod||'')+' BOG';
+    }catch(e){
+      var pty=new Date(today.getTime()-5*3600000);
+      var rh=pty.getUTCHours(); var ap=rh>=12?'PM':'AM'; var h12=rh%12||12;
+      return pad2(pty.getUTCDate())+'/'+pad2(pty.getUTCMonth()+1)+'/'+pty.getUTCFullYear()+' · '+h12+':'+String(pty.getUTCMinutes()).padStart(2,'0')+' '+ap;
+    }
+  })();
 
   var C={text:'#1f2328',text2:'#656d76',border:'#d0d7de',bg2:'#f6f8fa',
          good:'#1a7f37',bad:'#cf222e',heroBg:'#1f2328',
