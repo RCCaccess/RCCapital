@@ -995,10 +995,16 @@ async function loadClientSparkline(c, safeId){
       // Parse report month (format: YYYY-MM)
       const [repYear, repMonth] = data.mes.split('-').map(Number);
 
-      // Format upload date
+      // Format upload date — UTC-5 (Bogota/Lima/Quito)
       const pad = x => String(x).padStart(2,'0');
-      const d = data.created_at ? new Date(data.created_at) : null;
-      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear()+' '+pad(d.getHours())+':'+pad(d.getMinutes()) : data.mes;
+      let uploadStr = data.mes;
+      if(data.created_at){
+        const raw = String(data.created_at).replace('+00:00','Z').replace(' ','T');
+        const safe = raw.endsWith('Z')||/[+-]\d{2}:\d{2}$/.test(raw) ? raw : raw+'Z';
+        const bog = new Date(new Date(safe).getTime() - 5*3600*1000);
+        const rh=bog.getUTCHours(); const ap=rh>=12?'PM':'AM'; const h12=rh%12||12;
+        uploadStr = pad(bog.getUTCDate())+'/'+pad(bog.getUTCMonth()+1)+'/'+bog.getUTCFullYear()+' · '+h12+':'+pad(bog.getUTCMinutes())+' '+ap;
+      }
 
       let icon, color, label;
 
