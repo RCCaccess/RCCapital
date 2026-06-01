@@ -683,19 +683,23 @@ function toast(msg, type='good'){
 
 function fmtDate(iso, showTime){
   if(!iso) return '—';
-  var d = new Date(iso);
-  // Manual UTC-5 conversion (Bogota/Lima/Quito/Panama — no DST ever)
-  var bog = new Date(d.getTime() - 5*3600000);
+  // Supabase returns "2026-06-01T06:19:00+00:00" — parse as UTC explicitly
+  var s = String(iso).replace('+00:00','Z').replace(' ','T');
+  if(!s.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(s)) s += 'Z';
+  var d = new Date(s);
+  if(isNaN(d.getTime())) d = new Date(iso);
+  // UTC-5 manually (Bogota/Lima/Quito — no DST)
+  var bog = new Date(d.getTime() - 5*3600*1000);
+  var MO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
   var dd = String(bog.getUTCDate()).padStart(2,'0');
-  var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  var mmn = months[bog.getUTCMonth()];
+  var mo = MO[bog.getUTCMonth()];
   var yyyy = bog.getUTCFullYear();
-  var raw_h = bog.getUTCHours();
-  var ampm = raw_h >= 12 ? 'PM' : 'AM';
-  var hh12 = raw_h % 12; if(hh12===0) hh12=12;
-  var min = String(bog.getUTCMinutes()).padStart(2,'0');
-  if(showTime===false) return dd+' '+mmn+' '+yyyy;
-  return dd+' '+mmn+' '+yyyy+' · '+hh12+':'+min+' '+ampm;
+  var rh = bog.getUTCHours();
+  var ap = rh >= 12 ? 'PM' : 'AM';
+  var h12 = rh % 12 || 12;
+  var mn = String(bog.getUTCMinutes()).padStart(2,'0');
+  if(showTime===false) return dd+' '+mo+' '+yyyy;
+  return dd+' '+mo+' '+yyyy+' · '+h12+':'+mn+' '+ap;
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
