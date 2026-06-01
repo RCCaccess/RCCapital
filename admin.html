@@ -306,15 +306,14 @@ canvas.sparkline{display:block;border-radius:6px;}
             <span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span>
           </div>
           <div class="card-bd">
-            <div id="mcDropZone"
-              style="border:2px dashed rgba(245,166,35,.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,166,35,.04);"
-              ondragover="event.preventDefault();this.style.borderColor='var(--warn)';this.style.background='rgba(245,166,35,.1)';"
-              ondragleave="this.style.borderColor='rgba(245,166,35,.3)';this.style.background='rgba(245,166,35,.04)';"
+            <div id="mcDropZone" class="drop-zone"
+              ondragover="event.preventDefault();this.classList.add('over');"
+              ondragleave="this.classList.remove('over');"
               ondrop="mcHandleDrop(event)"
               onclick="$('mcFileInput').click()">
-              <div style="font-size:32px;margin-bottom:8px;">📊</div>
-              <div style="font-size:14px;font-weight:700;color:var(--warn);">Arrastra el CSV consolidado de Vantage</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="mcDropSub">Se actualiza automáticamente al subir reportes · o carga aquí el CSV</div>
+              <div style="font-size:28px;margin-bottom:8px;color:var(--text2);">↑</div>
+              <div style="font-size:14px;font-weight:500;color:var(--text);">Arrastra el CSV consolidado de Vantage</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:4px;">Se actualiza automáticamente al subir reportes · o haz clic para seleccionar</div>
             </div>
             <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
             <div id="mcFileStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
@@ -701,14 +700,15 @@ function toast(msg, type='good'){
 function fmtDate(iso, showTime){
   if(!iso) return '—';
   var d = new Date(iso);
-  // Panama is UTC-5 always (no DST)
-  var panama = new Date(d.getTime() - (5*60*60*1000));
-  var dd = String(panama.getUTCDate()).padStart(2,'0');
-  var mm = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][panama.getUTCMonth()];
-  var yyyy = panama.getUTCFullYear();
-  var hh = String(panama.getUTCHours()).padStart(2,'0');
-  var min = String(panama.getUTCMinutes()).padStart(2,'0');
-  return dd+' '+mm+' '+yyyy+(showTime!==false?' · '+hh+':'+min+' PTY':'');
+  var pty = new Date(d.getTime() - (5*60*60*1000)); // Panama UTC-5
+  var dd = String(pty.getUTCDate()).padStart(2,'0');
+  var mmn = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][pty.getUTCMonth()];
+  var yyyy = pty.getUTCFullYear();
+  var raw_h = pty.getUTCHours();
+  var ampm = raw_h >= 12 ? 'PM' : 'AM';
+  var hh12 = raw_h % 12 || 12;
+  var min = String(pty.getUTCMinutes()).padStart(2,'0');
+  return dd+' '+mmn+' '+yyyy+(showTime!==false?' · '+hh12+':'+min+' '+ampm+' PTY':'');
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
@@ -1503,10 +1503,19 @@ var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
 function processAllLoaded(results, curMes){
   bulkFiles = [];
   var managerRows = []; // collect manager's own CSV rows
+  var rawFullCSV = (results.length > 0 && results[0].text) ? results[0].text : null;
 
   results.forEach(function(r){
     if(!r.text) return; // skip errors silently
     if(bulkMode==='single'){
+      // Feed Mi Cuenta with the full raw CSV immediately
+      if(r.text && r.text.length > 100){
+        lastConsolidatedCSV = r.text;
+        try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
+        setTimeout(function(){ mcProcessCSV(r.text); }, 200);
+        var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
+        if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
+      }
       try{
         var split = splitConsolidatedCSV(r.text);
         split.forEach(function(inv){
@@ -1811,8 +1820,9 @@ function autoFeedMiCuenta(){
 
 function mcHandleDrop(e){
   e.preventDefault();
+  e.stopPropagation();
   var dz=$('mcDropZone');
-  dz.style.borderColor='rgba(245,166,35,.3)';dz.style.background='rgba(245,166,35,.04)';
+  if(dz){ dz.classList.remove('over'); }
   mcLoadFile(e.dataTransfer.files);
 }
 
@@ -1820,26 +1830,30 @@ function mcLoadFile(fileList){
   if(!fileList||!fileList.length) return;
   var file=fileList[0];
   if(!file) return;
-  $('mcFileStatus').textContent='⏳ Analizando...';
+  var st=$('mcFileStatus');
+  if(st){ st.textContent='⏳ Cargando '+file.name+'...'; st.style.color='var(--text2)'; }
   var reader=new FileReader();
   reader.onload=function(ev){
     try{
       var text=ev.target.result;
+      if(!text||text.trim().length<20){
+        if(st){ st.textContent='❌ Archivo vacío o inválido'; st.style.color='var(--bad)'; }
+        return;
+      }
       lastConsolidatedCSV=text;
       try{ localStorage.setItem('rcMiCuentaCSV', text); }catch(e){}
       mcProcessCSV(text);
-      $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
-    // Debug: log all reasons found
-    if(typeof debugReasons !== 'undefined'){
-      console.log('Reasons found in CSV:', debugReasons);
-    }
-      $('mcFileInput').value='';
+      var now=new Date(); var pty=new Date(now.getTime()-5*3600000);
+      var hh=pty.getUTCHours(); var ampm=hh>=12?'PM':'AM'; hh=hh%12||12;
+      var mm=String(pty.getUTCMinutes()).padStart(2,'0');
+      if(st){ st.textContent='✅ Cargado · '+hh+':'+mm+' '+ampm+' PTY'; st.style.color='var(--good)'; }
+      if($('mcFileInput')) $('mcFileInput').value='';
     }catch(err){
-      $('mcFileStatus').textContent='❌ Error: '+err.message;
+      if(st){ st.textContent='❌ Error: '+err.message; st.style.color='var(--bad)'; }
     }
   };
   reader.onerror=function(){
-    $('mcFileStatus').textContent='❌ No se pudo leer el archivo';
+    if(st){ st.textContent='❌ No se pudo leer el archivo'; st.style.color='var(--bad)'; }
   };
   reader.readAsText(file);
 }
@@ -1870,11 +1884,11 @@ function mcProcessCSV(text){
     if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
 
     if(!debugReasons[reason]) debugReasons[reason]=0; debugReasons[reason]++;
-    if(reason==='performancefee'||reason==='performance fee'){
+    if(reason==='performancefee'||reason==='performance fee'||reason==='performancefees'||reason==='performance_fee'){
       var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
-    } else if(reason==='managementfee'||reason==='management fee'){
+    } else if(reason==='managementfee'||reason==='management fee'||reason==='managementfees'||reason==='management_fee'){
       var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
-    } else if(reason==='depositfee'||reason==='deposit fee'){
+    } else if(reason==='depositfee'||reason==='deposit fee'||reason==='depositfees'||reason==='deposit_fee'){
       var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
     } else if(reason==='withdrawal'||reason==='retiro'||reason==='withdraw'){
       // Only count withdrawals that belong to the manager
@@ -1921,7 +1935,13 @@ function mcProcessCSV(text){
 
   // Draw chart
   mcDrawChart(monthKeys, monthly);
+  // Show stats regardless, even if no fees yet
   $('mcStats').style.display='block';
+  var statusEl=$('mcFileStatus');
+  if(statusEl && totalFees===0){
+    statusEl.textContent='⚠️ No se encontraron comisiones. Verifica que el CSV sea el correcto.';
+    statusEl.style.color='var(--warn)';
+  }
 }
 
 function mcDrawChart(monthKeys, monthly){
