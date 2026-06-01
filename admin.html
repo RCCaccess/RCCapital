@@ -700,15 +700,25 @@ function toast(msg, type='good'){
 function fmtDate(iso, showTime){
   if(!iso) return '—';
   var d = new Date(iso);
-  var pty = new Date(d.getTime() - (5*60*60*1000)); // Panama UTC-5
-  var dd = String(pty.getUTCDate()).padStart(2,'0');
-  var mmn = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][pty.getUTCMonth()];
-  var yyyy = pty.getUTCFullYear();
-  var raw_h = pty.getUTCHours();
-  var ampm = raw_h >= 12 ? 'PM' : 'AM';
-  var hh12 = raw_h % 12 || 12;
-  var min = String(pty.getUTCMinutes()).padStart(2,'0');
-  return dd+' '+mmn+' '+yyyy+(showTime!==false?' · '+hh12+':'+min+' '+ampm+' PTY':'');
+  // Use Intl to get Panama time correctly (America/Panama = UTC-5, no DST)
+  var opts = {timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true};
+  try{
+    var parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
+    var map = {}; parts.forEach(function(p){ map[p.type]=p.value; });
+    var months = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    var mmn = months[parseInt(map.month,10)-1];
+    var dateStr = map.day+' '+mmn+' '+map.year;
+    if(showTime===false) return dateStr;
+    var h = map.hour.replace(/^0/,''); // remove leading zero
+    return dateStr+' · '+h+':'+map.minute+' '+(map.dayPeriod||'').replace('AM','AM').replace('PM','PM')+' PTY';
+  }catch(e){
+    // Fallback: manual UTC-5
+    var pty = new Date(d.getTime() - 5*3600000);
+    var dd = String(pty.getUTCDate()).padStart(2,'0');
+    var mmn2 = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'][pty.getUTCMonth()];
+    var raw_h = pty.getUTCHours(); var ampm = raw_h>=12?'PM':'AM'; var hh12 = raw_h%12||12;
+    return dd+' '+mmn2+' '+pty.getUTCFullYear()+(showTime!==false?' · '+hh12+':'+String(pty.getUTCMinutes()).padStart(2,'0')+' '+ampm+' PTY':'');
+  }
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
@@ -756,9 +766,15 @@ async function loadAll(){
   await loadClientes();
   await loadReportes();
   updateDashboard();
-  // Restore Mi Cuenta from localStorage
+  // Restore Mi Cuenta from localStorage after all rendering is done
   if(lastConsolidatedCSV){
-    setTimeout(function(){ mcProcessCSV(lastConsolidatedCSV); }, 100);
+    setTimeout(function(){
+      try{
+        var mcEl = document.getElementById('mcStats');
+        if(mcEl){ mcProcessCSV(lastConsolidatedCSV); }
+        else{ setTimeout(function(){ mcProcessCSV(lastConsolidatedCSV); }, 500); }
+      }catch(e){}
+    }, 400);
   }
 }
 
