@@ -701,7 +701,7 @@ function fmtDate(iso, showTime){
   if(!iso) return '—';
   var d = new Date(iso);
   // Use Intl to get Panama time correctly (America/Panama = UTC-5, no DST)
-  var opts = {timeZone:'America/Panama',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true};
+  var opts = {timeZone:'America/Bogota',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:true};
   try{
     var parts = new Intl.DateTimeFormat('en-US', opts).formatToParts(d);
     var map = {}; parts.forEach(function(p){ map[p.type]=p.value; });
@@ -766,15 +766,12 @@ async function loadAll(){
   await loadClientes();
   await loadReportes();
   updateDashboard();
-  // Restore Mi Cuenta from localStorage after all rendering is done
+  // Restore Mi Cuenta from localStorage
   if(lastConsolidatedCSV){
+    var _csv = lastConsolidatedCSV;
     setTimeout(function(){
-      try{
-        var mcEl = document.getElementById('mcStats');
-        if(mcEl){ mcProcessCSV(lastConsolidatedCSV); }
-        else{ setTimeout(function(){ mcProcessCSV(lastConsolidatedCSV); }, 500); }
-      }catch(e){}
-    }, 400);
+      try{ mcProcessCSV(_csv); }catch(e){}
+    }, 600);
   }
 }
 
@@ -1559,7 +1556,14 @@ function processAllLoaded(results, curMes){
       if(r.text && r.text.length > 100){
         lastConsolidatedCSV = r.text;
         try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
-        setTimeout(function(){ mcProcessCSV(r.text); }, 200);
+        // Feed Mi Cuenta immediately - use full raw CSV
+        var _fullCsv = r.text;
+        setTimeout(function(){
+          try{
+            var mcEl=document.getElementById('mcStats');
+            if(mcEl){ mcProcessCSV(_fullCsv); }
+          }catch(ex){}
+        }, 300);
         var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
         if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
       }
@@ -2001,6 +2005,8 @@ function mcDrawChart(monthKeys, monthly){
   var ctx=canvas.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
+  var _isDkMC=document.documentElement.getAttribute('data-theme')!=='light';
+  if(!_isDkMC){ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);}
 
   var pad={l:64,r:16,t:16,b:52};
   var iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
@@ -2016,7 +2022,7 @@ function mcDrawChart(monthKeys, monthly){
   maxV=maxV||1;
 
   // Grid
-  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+  ctx.strokeStyle=_isDkMC?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)'; ctx.lineWidth=1;
   for(var i=0;i<=4;i++){var y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
   ctx.fillStyle=_isDkMC?'#8b949e':'#656d76'; ctx.font='11px -apple-system,monospace'; ctx.textAlign='right';
   for(var i=0;i<=4;i++){var v=maxV*(1-i/4);ctx.fillText('$'+(v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)),pad.l-6,pad.t+ih*(i/4)+4);}
