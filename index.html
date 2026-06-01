@@ -452,7 +452,7 @@ function computeStats(rows){
 function renderReporte(rep){
   let rows;try{rows=parseCSV(rep.csv_data);}catch(e){$('emptyState').style.display='block';return;}
   const stats=computeStats(rows);
-  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats};
+  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats,nombre:currentCliente.nombre};
   $('reportContent').style.display='block';
   const today=new Date(),ts=`${pad2(today.getDate())}/${pad2(today.getMonth()+1)}/${today.getFullYear()}`;
   $('rhName').textContent=currentCliente.nombre;
