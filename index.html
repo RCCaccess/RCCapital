@@ -66,8 +66,8 @@ canvas,.spinner{transition:none!important;}
 /* APP */
 #appScreen{display:none;}
 .app-nav{background:var(--surface2);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100;}
-.an-logo{display:flex;align-items:center;gap:7px;}
-.an-logo img{width:20px;height:20px;object-fit:contain;border-radius:4px;}
+.an-logo{display:flex;align-items:center;gap:7px;flex-shrink:0;min-width:0;}
+.an-logo img{width:20px;height:20px;object-fit:contain;border-radius:4px;flex-shrink:0;}
 .an-brand{font-size:14px;font-weight:600;}
 .an-sep{color:var(--border2);}
 .an-user{font-size:13px;color:var(--text2);}
@@ -108,6 +108,59 @@ canvas,.spinner{transition:none!important;}
 /* hero */
 .hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--rm);padding:24px 28px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;}
 @media(max-width:500px){.hero{grid-template-columns:1fr;}}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:768px){
+  /* Nav: stack logo + user, hide sep, shrink buttons */
+  .app-nav{padding:0 12px;gap:6px;flex-wrap:nowrap;height:auto;min-height:48px;}
+  .an-logo img{width:18px;height:18px;}
+  .an-brand{font-size:13px;}
+  .an-sep{display:none;}
+  .an-user{font-size:12px;flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+  .an-right{gap:5px;flex-shrink:0;}
+  .th-wrap{gap:3px;}
+  .th-icon{font-size:12px;padding:2px;}
+  .gh-btn{font-size:12px;padding:4px 10px;}
+  /* Content */
+  .rw{padding:16px 12px 60px;}
+  .report-wrap{padding:16px 12px 60px;}
+  /* Report header */
+  .rh{flex-direction:column;gap:8px;}
+  .rh-rt{text-align:left;display:flex;align-items:center;gap:10px;}
+  .rh-lg{margin-left:0;margin-bottom:0;}
+  .rh-nm{font-size:20px;}
+  /* Hero */
+  .hero{grid-template-columns:1fr;gap:12px;padding:18px;}
+  .hero-val{font-size:36px;letter-spacing:-1px;}
+  .hero-r{text-align:left;}
+  .hero-eq{font-size:20px;}
+  /* KPIs */
+  .kpis{grid-template-columns:repeat(2,1fr);gap:6px;}
+  /* Risk card */
+  .risk-card{padding:12px 14px;}
+  /* Chart */
+  .cb{padding:10px;}
+  #chartEquity{height:180px;}
+  .cs{grid-template-columns:repeat(2,1fr);}
+  /* Table */
+  .tb table{font-size:12px;}
+  .tb th,.tb td{padding:8px 10px;}
+  /* Period bar */
+  .pb{margin-bottom:14px;}
+  .pbt{font-size:11px;padding:3px 8px;}
+  /* Welcome */
+  .welcome-logo{width:72px;height:72px;}
+  .welcome-logo img{width:44px;height:44px;}
+  .welcome-title{font-size:24px;}
+  .welcome-card{margin:0 8px;}
+  .welcome-features{grid-template-columns:1fr;}
+}
+@media(max-width:380px){
+  .rh-nm{font-size:17px;}
+  .hero-val{font-size:28px;}
+  .kpis{grid-template-columns:1fr;}
+  .gh-btn.primary span{display:none;}
+}
 .hero-lbl{font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;}
 .hero-val{font-size:52px;font-weight:600;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;}
 .hero-val.pos{color:var(--good);}
@@ -206,11 +259,103 @@ canvas{display:block;width:100%!important;}
 /* period buttons get different id in new design */
 #periodBtns .period-btn{font-family:var(--sans);font-size:12px;padding:3px 10px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;}
 #periodBtns .period-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── WELCOME SCREEN ── */
+#welcomeScreen{
+  position:fixed;inset:0;z-index:500;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:24px;
+  animation:fadeIn .4s ease;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.welcome-wrap{width:100%;max-width:480px;text-align:center;}
+.welcome-logo{
+  width:80px;height:80px;border-radius:22px;
+  background:var(--text);
+  display:grid;place-items:center;
+  margin:0 auto 20px;
+  box-shadow:0 8px 32px rgba(0,0,0,.2);
+}
+.welcome-logo img{width:48px;height:48px;object-fit:contain;filter:invert(1);}
+[data-theme="light"] .welcome-logo img{filter:none;}
+.welcome-title{font-size:28px;font-weight:600;letter-spacing:-.5px;margin-bottom:6px;}
+.welcome-sub{font-size:15px;color:var(--text2);margin-bottom:28px;font-weight:300;}
+.welcome-card{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:16px;padding:24px;margin-bottom:20px;text-align:left;
+}
+.welcome-features{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.wf{display:flex;align-items:flex-start;gap:10px;}
+.wf-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.wf-text h4{font-size:13px;font-weight:600;margin-bottom:2px;}
+.wf-text p{font-size:12px;color:var(--text2);line-height:1.4;}
+.welcome-msg{font-size:13px;color:var(--text2);line-height:1.6;border-top:1px solid var(--border);padding-top:16px;margin-top:4px;}
+.welcome-msg strong{color:var(--text);}
+.btn-welcome{
+  width:100%;padding:13px;
+  background:var(--accent);color:#fff;
+  font-family:var(--sans);font-size:15px;font-weight:500;
+  border:none;border-radius:10px;cursor:pointer;
+  transition:filter .15s;letter-spacing:-.1px;
+}
+.btn-welcome:hover{filter:brightness(1.1);}
+.welcome-footer{font-size:11px;color:var(--text2);margin-top:14px;opacity:.6;}
+
 </style>
 </head>
 <body>
 
 <!-- LOGIN -->
+<!-- WELCOME SCREEN (shown once after login) -->
+<div id="welcomeScreen" style="display:none;">
+  <div class="welcome-wrap">
+    <div class="welcome-logo"><img src="logo.png" alt="RC Capital"/></div>
+    <div class="welcome-title">Bienvenido a RC Capital</div>
+    <div class="welcome-sub">Tu capital en manos expertas</div>
+
+    <div class="welcome-card">
+      <div class="welcome-features">
+        <div class="wf">
+          <div class="wf-icon">📈</div>
+          <div class="wf-text">
+            <h4>Gestión Activa</h4>
+            <p>Estrategias probadas para maximizar tu rentabilidad con control de riesgo.</p>
+          </div>
+        </div>
+        <div class="wf">
+          <div class="wf-icon">🔒</div>
+          <div class="wf-text">
+            <h4>Total Seguridad</h4>
+            <p>Tu capital opera en cuentas segregadas bajo tu nombre en Vantage Markets.</p>
+          </div>
+        </div>
+        <div class="wf">
+          <div class="wf-icon">📊</div>
+          <div class="wf-text">
+            <h4>Transparencia</h4>
+            <p>Accede a tu estado de cuenta en tiempo real con datos directos de la plataforma.</p>
+          </div>
+        </div>
+        <div class="wf">
+          <div class="wf-icon">🤝</div>
+          <div class="wf-text">
+            <h4>Apoyo Continuo</h4>
+            <p>Nuestro equipo está disponible para resolver cualquier duda sobre tu inversión.</p>
+          </div>
+        </div>
+      </div>
+      <div class="welcome-msg">
+        Estás en el lugar correcto. En <strong>RC Capital</strong> gestionamos tu dinero con la misma dedicación y cuidado con el que gestionaríamos el nuestro. Cada decisión está respaldada por análisis técnico riguroso y una estrategia clara orientada a la preservación y crecimiento de tu capital.
+      </div>
+    </div>
+
+    <button class="btn-welcome" onclick="closeWelcome()">Ver mi reporte →</button>
+    <div class="welcome-footer">RC Capital · Portal seguro de inversores</div>
+  </div>
+</div>
+
 <div id="loginScreen">
   <div class="lw">
     <div class="lb">
@@ -428,8 +573,25 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
+function closeWelcome(){
+  $('welcomeScreen').style.display='none';
+  $('appScreen').style.display='block';
+  loadReportes();
+}
+
 function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
-function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;loadReportes();}
+function showApp(){
+  $('loginScreen').style.display='none';
+  $('abNombre').textContent=currentCliente.nombre;
+  // Show welcome screen once per session
+  if(!sessionStorage.getItem('rcWelcomed')){
+    sessionStorage.setItem('rcWelcomed','1');
+    $('welcomeScreen').style.display='flex';
+  } else {
+    $('appScreen').style.display='block';
+    loadReportes();
+  }
+}
 
 async function loadReportes(){
   $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
