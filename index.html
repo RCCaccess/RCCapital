@@ -291,7 +291,7 @@ canvas{display:block;width:100%!important;}
       </div>
 
       <div class="kpis fu fu2">
-        <div class="kpi"><div class="kpi-l">Profit neto</div><div class="kpi-v" id="kpiProfit">—</div><div class="kpi-s">Después de comisiones</div></div>
+        <div class="kpi"><div class="kpi-l">Beneficio Actual</div><div class="kpi-v" id="kpiProfit">—</div><div class="kpi-s"></div></div>
         <div class="kpi"><div class="kpi-l">Días activo</div><div class="kpi-v neu" id="kpiDays">—</div><div class="kpi-s" id="kpiDaysSub">—</div></div>
         <div class="kpi"><div class="kpi-l">Mejor mes</div><div class="kpi-v pos" id="kpiBest">—</div><div class="kpi-s" id="kpiBestLbl">—</div></div>
         <div class="kpi"><div class="kpi-l">Meses positivos</div><div class="kpi-v neu" id="kpiPosM">—</div><div class="kpi-s">De los meses operados</div></div>
@@ -328,7 +328,7 @@ canvas{display:block;width:100%!important;}
         <div class="cb"><canvas id="chartEquity"></canvas></div>
         <div class="cs">
           <div class="cst"><div class="cst-l">Capital inicial</div><div class="cst-v" id="cstOpen">—</div></div>
-          <div class="cst"><div class="cst-l">Valor actual</div><div class="cst-v" id="cstClose">—</div></div>
+          <div class="cst"><div class="cst-l">Capital actual en gestión</div><div class="cst-v" id="cstClose">—</div></div>
           <div class="cst"><div class="cst-l">Máximo</div><div class="cst-v pos" id="cstHigh">—</div></div>
           <div class="cst"><div class="cst-l">Mínimo</div><div class="cst-v neg" id="cstLow">—</div></div>
         </div>
@@ -513,7 +513,7 @@ function renderReporte(rep){
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
-  $('kpiDays').textContent=fmtNum(stats.days);
+  $('kpiDays').textContent=fmtNum(Math.max(1,Math.round(stats.days/30)));
   $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'—';
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
