@@ -292,7 +292,7 @@ canvas{display:block;width:100%!important;}
 
       <div class="kpis fu fu2">
         <div class="kpi"><div class="kpi-l">Beneficio Actual</div><div class="kpi-v" id="kpiProfit">—</div><div class="kpi-s"></div></div>
-        <div class="kpi"><div class="kpi-l">Días activo</div><div class="kpi-v neu" id="kpiDays">—</div><div class="kpi-s" id="kpiDaysSub">—</div></div>
+        <div class="kpi"><div class="kpi-l">Meses en gestión</div><div class="kpi-v neu" id="kpiDays">—</div><div class="kpi-s" id="kpiDaysSub">—</div></div>
         <div class="kpi"><div class="kpi-l">Mejor mes</div><div class="kpi-v pos" id="kpiBest">—</div><div class="kpi-s" id="kpiBestLbl">—</div></div>
         <div class="kpi"><div class="kpi-l">Meses positivos</div><div class="kpi-v neu" id="kpiPosM">—</div><div class="kpi-s">De los meses operados</div></div>
       </div>
@@ -500,7 +500,7 @@ function renderReporte(rep){
   $('rhDate').textContent='Última actualización: '+ts;$('footerDate').textContent=footTs;
   $('heroROI').textContent=(stats.roi>=0?'+':'')+fmtPct(stats.roi);
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
-  $('heroSub').textContent=stats.days+' días · Rendimiento neto';
+  $('heroSub').textContent=stats.me.length+' meses bajo gestión · Rendimiento neto';
   $('heroEq').textContent=fmtUSD(stats.equity);
   if(stats.depFeeAmt>0){
     $('heroDep').innerHTML=
@@ -513,7 +513,7 @@ function renderReporte(rep){
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
-  $('kpiDays').textContent=fmtNum(Math.max(1,Math.round(stats.days/30)));
+  $('kpiDays').textContent=fmtNum(stats.me.length);
   $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'—';
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
