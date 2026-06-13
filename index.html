@@ -104,6 +104,11 @@ canvas,.spinner{transition:none!important;}
 .rh-lg img{width:22px;height:22px;object-fit:contain;}
 .rh-br{font-size:13px;font-weight:600;}
 .rh-dt{font-size:11px;color:var(--text2);font-family:var(--mono);}
+.rh-logo-big{display:flex;align-items:center;gap:10px;justify-content:flex-end;}
+.rh-lg-icon{width:44px;height:44px;border-radius:11px;background:var(--text);display:grid;place-items:center;flex-shrink:0;}
+.rh-lg-icon img{width:28px;height:28px;object-fit:contain;filter:invert(1);}
+[data-theme="light"] .rh-lg-icon{background:var(--text);}
+[data-theme="light"] .rh-lg-icon img{filter:none;}
 
 /* hero */
 .hero{background:var(--hero-bg);border:1px solid var(--border);border-radius:var(--rm);padding:24px 28px;margin-bottom:8px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;}
@@ -137,8 +142,7 @@ canvas,.spinner{transition:none!important;}
   /* KPIs */
   .kpis{grid-template-columns:repeat(2,1fr);gap:6px;}
   /* Risk card */
-  .risk-card{padding:12px 14px;}
-  /* Chart */
+    /* Chart */
   .cb{padding:10px;}
   #chartEquity{height:180px;}
   .cs{grid-template-columns:repeat(2,1fr);}
@@ -188,22 +192,12 @@ canvas,.spinner{transition:none!important;}
 .sep{height:1px;background:var(--border);margin:20px 0;}
 
 /* Risk thermometer */
-.risk-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:16px 18px;margin-bottom:8px;}
-.risk-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;flex-wrap:wrap;gap:6px;}
-.risk-title{font-size:13px;font-weight:600;color:var(--text);}
-.risk-badge{font-size:11px;font-weight:600;padding:2px 10px;border-radius:20px;font-family:var(--mono);letter-spacing:.3px;}
 .risk-badge.low{background:rgba(63,185,80,.15);color:var(--good);border:1px solid rgba(63,185,80,.3);}
 .risk-badge.med{background:rgba(210,153,34,.15);color:var(--warn);border:1px solid rgba(210,153,34,.3);}
 .risk-badge.high{background:rgba(248,81,73,.12);color:var(--bad);border:1px solid rgba(248,81,73,.25);}
 [data-theme="light"] .risk-badge.low{background:rgba(26,127,55,.1);}
 [data-theme="light"] .risk-badge.med{background:rgba(154,103,0,.1);}
 [data-theme="light"] .risk-badge.high{background:rgba(207,34,46,.08);}
-.risk-bar-track{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;position:relative;border:1px solid var(--border);}
-.risk-bar-grad{position:absolute;inset:0;background:linear-gradient(90deg,var(--good) 0%,var(--warn) 50%,var(--bad) 100%);opacity:.25;}
-.risk-bar-fill{position:absolute;top:0;left:0;height:100%;border-radius:4px;transition:width .6s cubic-bezier(.16,1,.3,1);}
-.risk-marker{position:absolute;top:-3px;width:2px;height:14px;background:var(--text);border-radius:1px;transition:left .6s cubic-bezier(.16,1,.3,1);}
-.risk-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-top:5px;font-family:var(--mono);}
-.risk-sub{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5;}
 
 /* sections */
 .sec{margin-bottom:20px;}
@@ -261,14 +255,7 @@ canvas{display:block;width:100%!important;}
 #periodBtns .period-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ── WELCOME SCREEN ── */
-#welcomeScreen{
-  position:fixed;inset:0;z-index:500;
-  background:var(--bg);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:24px;
-  animation:fadeIn .4s ease;
-}
+
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .welcome-wrap{width:100%;max-width:480px;text-align:center;}
 .welcome-logo{
@@ -308,53 +295,6 @@ canvas{display:block;width:100%!important;}
 <body>
 
 <!-- LOGIN -->
-<!-- WELCOME SCREEN (shown once after login) -->
-<div id="welcomeScreen" style="display:none;">
-  <div class="welcome-wrap">
-    <div class="welcome-logo"><img src="logo.png" alt="RC Capital"/></div>
-    <div class="welcome-title">Bienvenido a RC Capital</div>
-    <div class="welcome-sub">Tu capital en manos expertas</div>
-
-    <div class="welcome-card">
-      <div class="welcome-features">
-        <div class="wf">
-          <div class="wf-icon">📈</div>
-          <div class="wf-text">
-            <h4>Gestión Activa</h4>
-            <p>Estrategias probadas para maximizar tu rentabilidad con control de riesgo.</p>
-          </div>
-        </div>
-        <div class="wf">
-          <div class="wf-icon">🔒</div>
-          <div class="wf-text">
-            <h4>Total Seguridad</h4>
-            <p>Tu capital opera en cuentas segregadas bajo tu nombre en Vantage Markets.</p>
-          </div>
-        </div>
-        <div class="wf">
-          <div class="wf-icon">📊</div>
-          <div class="wf-text">
-            <h4>Transparencia</h4>
-            <p>Accede a tu estado de cuenta en tiempo real con datos directos de la plataforma.</p>
-          </div>
-        </div>
-        <div class="wf">
-          <div class="wf-icon">🤝</div>
-          <div class="wf-text">
-            <h4>Apoyo Continuo</h4>
-            <p>Nuestro equipo está disponible para resolver cualquier duda sobre tu inversión.</p>
-          </div>
-        </div>
-      </div>
-      <div class="welcome-msg">
-        Estás en el lugar correcto. En <strong>RC Capital</strong> gestionamos tu dinero con la misma dedicación y cuidado con el que gestionaríamos el nuestro. Cada decisión está respaldada por análisis técnico riguroso y una estrategia clara orientada a la preservación y crecimiento de tu capital.
-      </div>
-    </div>
-
-    <button class="btn-welcome" onclick="closeWelcome()">Ver mi reporte →</button>
-    <div class="welcome-footer">RC Capital · Portal seguro de inversores</div>
-  </div>
-</div>
 
 <div id="loginScreen">
   <div class="lw">
@@ -391,7 +331,7 @@ canvas{display:block;width:100%!important;}
         <button class="th-pill" id="themePill2" onclick="toggleTheme()"><div class="t-knob"></div></button>
         <span class="th-icon" onclick="toggleTheme()">☀️</span>
       </div>
-      <button class="gh-btn primary" id="btnPDF" onclick="generarPDF()">↓ PDF</button>
+      <button class="gh-btn primary" id="btnPDF" onclick="tryPDF()">↓ PDF</button>
       <button class="gh-btn" onclick="logout()">Salir</button>
     </div>
   </nav>
@@ -416,9 +356,13 @@ canvas{display:block;width:100%!important;}
           <div class="rh-pe" id="rhPeriod">—</div>
         </div>
         <div class="rh-rt">
-          <div class="rh-lg"><img src="logo.png" alt="RC"/></div>
-          <div class="rh-br">RC Capital</div>
-          <div class="rh-dt" id="rhDate">—</div>
+          <div class="rh-logo-big">
+            <div class="rh-lg-icon"><img src="logo.png" alt="RC Capital"/></div>
+            <div>
+              <div class="rh-br">RC Capital</div>
+              <div class="rh-dt" id="rhDate">—</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -442,21 +386,6 @@ canvas{display:block;width:100%!important;}
         <div class="kpi"><div class="kpi-l">Meses positivos</div><div class="kpi-v neu" id="kpiPosM">—</div><div class="kpi-s">De los meses operados</div></div>
       </div>
 
-      <!-- RISK THERMOMETER -->
-      <div class="risk-card fu fu2">
-        <div class="risk-hd">
-          <div class="risk-title">Nivel de Riesgo Tomado</div>
-          <div class="risk-badge" id="riskBadge">—</div>
-        </div>
-        <div class="risk-bar-track">
-          <div class="risk-bar-grad"></div>
-          <div class="risk-marker" id="riskMarker" style="left:0%;"></div>
-        </div>
-        <div class="risk-scale">
-          <span>Bajo</span><span>Moderado</span><span>Alto</span>
-        </div>
-        <div class="risk-sub" id="riskSub">—</div>
-      </div>
 
       <div class="sep"></div>
 
@@ -573,24 +502,12 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
-function closeWelcome(){
-  $('welcomeScreen').style.display='none';
-  $('appScreen').style.display='block';
-  loadReportes();
-}
-
 function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
 function showApp(){
   $('loginScreen').style.display='none';
+  $('appScreen').style.display='block';
   $('abNombre').textContent=currentCliente.nombre;
-  // Show welcome screen once per session
-  if(!sessionStorage.getItem('rcWelcomed')){
-    sessionStorage.setItem('rcWelcomed','1');
-    $('welcomeScreen').style.display='flex';
-  } else {
-    $('appScreen').style.display='block';
-    loadReportes();
-  }
+  loadReportes();
 }
 
 async function loadReportes(){
@@ -681,32 +598,7 @@ function renderReporte(rep){
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
   $('kpiPosM').textContent=stats.posM+' / '+stats.me.length;
 
-  // ── RISK THERMOMETER ──
-  // Based on max drawdown % vs initial capital
-  const dd = stats.maxDD||0;
-  // Scale: 0-10% = low, 10-25% = moderate, 25%+ = high (marker position 0-100%)
-  let riskPct, riskLabel, riskClass, riskDesc;
-  if(dd <= 10){
-    riskPct = (dd/10)*33;
-    riskLabel='BAJO'; riskClass='low';
-    riskDesc=`Drawdown máximo de ${dd.toFixed(1)}% sobre el capital inicial. Volatilidad controlada.`;
-  } else if(dd <= 25){
-    riskPct = 33 + ((dd-10)/15)*34;
-    riskLabel='MODERADO'; riskClass='med';
-    riskDesc=`Drawdown máximo de ${dd.toFixed(1)}% sobre el capital inicial. Volatilidad dentro de rangos esperados para estrategias activas.`;
-  } else {
-    riskPct = 67 + Math.min(33, ((dd-25)/25)*33);
-    riskLabel='ALTO'; riskClass='high';
-    riskDesc=`Drawdown máximo de ${dd.toFixed(1)}% sobre el capital inicial. Se registraron caídas significativas durante el período.`;
-  }
-  riskPct = Math.max(1, Math.min(99, riskPct));
-  const badge=$('riskBadge');
-  badge.textContent=riskLabel;
-  badge.className='risk-badge '+riskClass;
-  const marker=$('riskMarker');
-  marker.style.left=riskPct+'%';
-  marker.style.background = riskClass==='low'?'var(--good)':riskClass==='med'?'var(--warn)':'var(--bad)';
-  $('riskSub').textContent=riskDesc;
+
 
   activeRange='ALL';updateRangeUI();drawEquityChart();buildTable(stats);
 }
@@ -758,7 +650,18 @@ function drawEquityChart(){
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-async function generarPDF(){
+async function tryPDF(){
+  if(typeof window.jspdf === 'undefined'){
+    alert('Generando PDF, por favor espera un momento...');
+    // jsPDF not loaded yet, wait and retry
+    setTimeout(function(){ if(typeof window.jspdf!=='undefined') generarPDF(); else alert('Error: no se pudo cargar el generador de PDF. Recarga la página.'); }, 1500);
+    return;
+  }
+  if(!CC.labels||!CC.labels.length){ alert('No hay datos para generar el PDF.'); return; }
+  generarPDF();
+}
+
+function generarPDF(){
   if(!CC.labels||!CC.labels.length){alert('No hay datos para generar el PDF.');return;}
   var s=CC.stats; if(!s){alert('Sin datos.');return;}
   var nombre=CC.nombre||'—';
@@ -869,10 +772,12 @@ async function generarPDF(){
   doc.roundedRect(M,y,cW,cH,2,2,'FD');
 
   var tmp=document.createElement('canvas');
-  tmp.width=1200; tmp.height=280;
+  var isLowMem = /iPad|iPhone|iPod|Android/.test(navigator.userAgent);
+  var RW = isLowMem ? 800 : 1200;
+  var RH = isLowMem ? 200 : 280;
+  tmp.width=RW; tmp.height=RH;
   var ctx=tmp.getContext('2d');
-  ctx.scale(1,1);
-  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,1200,280);
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,RW,RH);
   var fd=getFiltered(); var labels=fd.labels,equity=fd.equity,dep=fd.deposit,n=labels.length;
   if(n>1){
     var pp={l:72,r:12,t:16,b:36}, iw2=1200-pp.l-pp.r, ih2=280-pp.t-pp.b;
@@ -909,7 +814,7 @@ async function generarPDF(){
     // X labels
     ctx.fillStyle='#656d76'; ctx.font='20px sans-serif'; ctx.textAlign='center';
     var step=Math.max(1,Math.ceil(n/8));
-    for(var i=0;i<n;i+=step){var ex2=pp.l+iw2*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),ex2,pp.t+ih2+30);}
+    for(var i=0;i<n;i+=step){var ex2=pp.l+iw2*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),ex2,pp.t+ih2+(isLowMem?22:30));}
   }
   doc.addImage(tmp.toDataURL('image/png'),'PNG',M+1,y+1,cW-2,cH-2);
   y+=cH+5;
@@ -942,7 +847,29 @@ async function generarPDF(){
 
   // Save — no footer disclaimer
   var fname='RC_Capital_'+(nombre.replace(/\s+/g,'_'))+'_'+pty.getUTCFullYear()+'.pdf';
-  doc.save(fname);
+  // iOS Safari: doc.save() may not work — use output + blob URL as fallback
+  try{
+    var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if(isIOS || isSafari){
+      var pdfData = doc.output('blob');
+      var url = URL.createObjectURL(pdfData);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1000);
+    } else {
+      doc.save(fname);
+    }
+  }catch(e){
+    // Last resort: open as data URI
+    var pdfUri = doc.output('datauristring');
+    var w = window.open();
+    if(w){ w.document.write('<iframe width="100%" height="100%" src="'+pdfUri+'"></iframe>'); }
+  }
 }
 
 
