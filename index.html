@@ -1,4 +1,4 @@
- <!doctype html>
+<!doctype html>
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
@@ -284,7 +284,7 @@ canvas{display:block;width:100%!important;}
           <div class="hero-sub" id="heroSub">—</div>
         </div>
         <div class="hero-r">
-          <div class="hero-eq-lbl">Valor de la cuenta</div>
+          <div class="hero-eq-lbl">Capital actual en gestión</div>
           <div class="hero-eq" id="heroEq">—</div>
           <div class="hero-dep" id="heroDep">—</div>
         </div>
@@ -334,15 +334,10 @@ canvas{display:block;width:100%!important;}
         </div>
       </div>
 
-      <div class="sec fu fu4">
-        <div class="sch"><div class="sct">Resultado Mensual</div></div>
-        <div class="cb"><canvas id="chartMonthly"></canvas></div>
-      </div>
-
       <div class="sep"></div>
 
       <div class="sec">
-        <div class="sch"><div class="sct">Resumen por Período</div></div>
+        <div class="sch"><div class="sct">Resultado Mensual</div></div>
         <div class="tb">
           <table>
             <thead><tr>
@@ -378,7 +373,7 @@ function applyThemeIdx(t){
   document.documentElement.setAttribute('data-theme', t);
   try{ localStorage.setItem('rcIdxTheme', t); }catch(e){}
   _updateThemeUI(t);
-  if(CC.labels&&CC.labels.length){ drawEquityChart(); if(CC.stats) drawMonthlyChart(CC.stats); }
+  if(CC.labels&&CC.labels.length){ drawEquityChart(); }
 }
 function _updateThemeUI(t){
   var isDark = t==='dark';
@@ -505,7 +500,7 @@ function renderReporte(rep){
   $('rhDate').textContent='Última actualización: '+ts;$('footerDate').textContent=footTs;
   $('heroROI').textContent=(stats.roi>=0?'+':'')+fmtPct(stats.roi);
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
-  $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
+  $('heroSub').textContent=stats.days+' días · Rendimiento neto';
   $('heroEq').textContent=fmtUSD(stats.equity);
   if(stats.depFeeAmt>0){
     $('heroDep').innerHTML=
@@ -551,7 +546,7 @@ function renderReporte(rep){
   marker.style.background = riskClass==='low'?'var(--good)':riskClass==='med'?'var(--warn)':'var(--bad)';
   $('riskSub').textContent=riskDesc;
 
-  activeRange='ALL';updateRangeUI();drawEquityChart();drawMonthlyChart(stats);buildTable(stats);
+  activeRange='ALL';updateRangeUI();drawEquityChart();buildTable(stats);
 }
 
 function buildTable(stats){
@@ -597,39 +592,6 @@ function drawEquityChart(){
   $('cstLow').textContent=fmtUSD(low);
   
 }
-
-function drawMonthlyChart(stats){
-  if(!stats.me.length)return;const canvas=$('chartMonthly');
-  const{ctx,W,H}=hiDPI(canvas,160);ctx.clearRect(0,0,W,H);
-  const labels=stats.me.map(([k])=>mLabel(k)),values=stats.me.map(([,v])=>v);
-  const pad={l:62,r:10,t:12,b:48},iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
-  const minV=Math.min(0,...values),maxV=Math.max(0,...values),span=(maxV-minV)||1,zero=pad.t+ih*(1-(0-minV)/span);
-  var _dkM=getTheme()==='dark';
-  ctx.strokeStyle=_dkM?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle=_dkM?'#8b949e':'#656d76';ctx.font='11px -apple-system,monospace';ctx.textAlign='right';
-  for(let i=0;i<=4;i++){const v=maxV-span*(i/4),y=pad.t+ih*(i/4);ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-6,y+4);}
-  const n=labels.length,slot=iw/Math.max(1,n),bw=Math.max(6,slot*0.65);
-  for(let i=0;i<n;i++){const v=values[i],barH=Math.max(2,Math.abs(ih*(v/span))),x=pad.l+slot*(i+0.5)-bw/2,y=v>=0?zero-barH:zero;
-    const grd=ctx.createLinearGradient(0,y,0,y+barH);
-    if(v>=0){grd.addColorStop(0,_dkM?'rgba(63,185,80,.85)':'rgba(26,127,55,.8)');grd.addColorStop(1,_dkM?'rgba(63,185,80,.2)':'rgba(26,127,55,.15)');}else{grd.addColorStop(0,_dkM?'rgba(248,81,73,.8)':'rgba(207,34,46,.75)');grd.addColorStop(1,_dkM?'rgba(248,81,73,.15)':'rgba(207,34,46,.1)');}
-    ctx.fillStyle=grd;if(ctx.roundRect)ctx.roundRect(x,y,bw,barH,3);else ctx.rect(x,y,bw,barH);ctx.fill();}
-  ctx.textAlign='center';
-  for(let i=0;i<n;i++){const x=pad.l+slot*(i+0.5);ctx.save();ctx.translate(x,pad.t+ih+10);ctx.rotate(-Math.PI/5);ctx.fillText(labels[i],0,0);ctx.restore();}
-}
-
-$('chartEquity').addEventListener('mousemove',e=>{
-  const canvas=$('chartEquity');if(!canvas._d)return;
-  const{labels,equity,pad,iw}=canvas._d;
-  const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left;
-  const n=labels.length,i=Math.max(0,Math.min(n-1,Math.round((mx-pad.l)/iw*(n-1))));
-  const prev=i>0?equity[i-1]:equity[0],chg=equity[i]-prev,pct=prev?(chg/Math.abs(prev)*100):0;
-  $('ttDate').textContent=labels[i];$('ttVal').textContent=fmtUSD(equity[i]);
-  $('ttChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chg>=0?'+':'')+fmtPct(pct)+')';
-  $('ttChg').style.color=chg>=0?'var(--good)':'var(--bad)';
-  const tt=$('tooltip');tt.style.display='block';tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-44)+'px';
-});
-$('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');
 
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
@@ -708,7 +670,7 @@ async function generarPDF(){
   sf(8,'normal','#8b949e');
   doc.text((s.days||0)+' días · Rendimiento neto',M+6,y+28);
   // Right: equity + deposit breakdown
-  sf(7,'bold','#8b949e'); doc.text('VALOR DE LA CUENTA',PW-M-6,y+7,{align:'right'});
+  sf(7,'bold','#8b949e'); doc.text('CAPITAL EN GESTIÓN',PW-M-6,y+7,{align:'right'});
   sf(16,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-6,y+19,{align:'right'});
   sf(7,'normal','#8b949e');
   if(s.depFeeAmt>0){
