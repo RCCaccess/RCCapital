@@ -740,6 +740,10 @@ function showPage(name, el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   $('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
+  // Re-render Mi Cuenta when navigating to it
+  if(name==='micuenta' && lastConsolidatedCSV){
+    setTimeout(function(){ try{ mcProcessCSV(lastConsolidatedCSV); }catch(e){} }, 80);
+  }
 }
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
