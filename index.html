@@ -2,7 +2,19 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="RC Capital"/>
+<meta name="application-name" content="RC Capital"/>
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)"/>
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
+<meta name="description" content="Portal de inversores RC Capital — consulta tu estado de cuenta y rendimiento."/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-180.png"/>
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
 <title>RC Capital · Mi Reporte</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <script>
@@ -32,6 +44,9 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{color-scheme:dark;}[data-theme="light"]{color-scheme:light;}
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
+/* iOS safe area (notch/Dynamic Island) */
+.app-nav{padding-left:max(20px, env(safe-area-inset-left));padding-right:max(20px, env(safe-area-inset-right));}
+.rw{padding-bottom:max(80px, calc(60px + env(safe-area-inset-bottom)));}
 body *{transition:background-color .18s,border-color .18s,color .15s;}
 canvas,.spinner{transition:none!important;}
 
@@ -950,6 +965,26 @@ document.addEventListener('keydown', e=>{
 
 
 
+</script>
+
+<script>
+// Register Service Worker for PWA
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('service-worker.js')
+      .then(function(reg){ console.log('SW registered:', reg.scope); })
+      .catch(function(err){ console.log('SW error:', err); });
+  });
+}
+// PWA install prompt
+var deferredPrompt;
+window.addEventListener('beforeinstallprompt', function(e){
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install button if it exists
+  var btn = document.getElementById('installBtn');
+  if(btn) btn.style.display='flex';
+});
 </script>
 </body>
 </html>
