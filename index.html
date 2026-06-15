@@ -557,6 +557,21 @@ const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 let currentCliente=null,activeRange='ALL',CC={};
+// Preload logo for PDF
+var _logoB64 = null;
+(function(){
+  var img = new Image();
+  img.crossOrigin='anonymous';
+  img.onload = function(){
+    try{
+      var cv=document.createElement('canvas');
+      cv.width=img.width; cv.height=img.height;
+      var cx=cv.getContext('2d'); cx.drawImage(img,0,0);
+      _logoB64 = cv.toDataURL('image/png');
+    }catch(e){ _logoB64=null; }
+  };
+  img.src='logo.png';
+})();
 const pad2=x=>String(x).padStart(2,'0');
 const dayKey=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 const mKey=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
@@ -773,9 +788,14 @@ function generarPDF(){
   function sf(sz,wt,col){doc.setFontSize(sz);doc.setFont('helvetica',wt||'normal');doc.setTextColor(col||C.text);}
   function ln(x1,y1,x2,y2,col,w){doc.setDrawColor(col||C.border);doc.setLineWidth(w||0.25);doc.line(x1,y1,x2,y2);}
 
-  // HEADER
+  // HEADER — use preloaded logo
   doc.setFillColor('#1f2328'); doc.roundedRect(M,y,10,10,2,2,'F');
-  sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8);
+  if(_logoB64){
+    try{ doc.addImage(_logoB64,'PNG',M+1,y+1,8,8); }
+    catch(e){ sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8); }
+  } else {
+    sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8);
+  }
   sf(13,'bold',C.text); doc.text('RC Capital',M+13,y+7);
   sf(8,'normal',C.text2); doc.text(todayStr,PW-M,y+4,{align:'right'});
   doc.text('Estado de Cuenta',PW-M,y+9,{align:'right'});
@@ -791,7 +811,7 @@ function generarPDF(){
   y+=9; ln(M,y,PW-M,y,C.border,0.3); y+=6;
 
   // HERO
-  var heroW=PW-M*2,heroH=34;
+  var heroW=PW-M*2,heroH=s.depFeeAmt>0?38:34;
   doc.setFillColor('#1f2328'); doc.roundedRect(M,y,heroW,heroH,3,3,'F');
   var roi=s.roi||0; var isPos=roi>=0;
   sf(7,'bold','#8b949e'); doc.text('RENDIMIENTO TOTAL',M+5,y+7);
@@ -801,9 +821,15 @@ function generarPDF(){
   sf(14,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-5,y+19,{align:'right'});
   sf(7,'normal','#8b949e');
   if(s.depFeeAmt>0){
-    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+25,{align:'right'});
-    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+31,{align:'right'});
-  } else { doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+26,{align:'right'}); }
+    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+24,{align:'right'});
+    sf(7,'normal','#f85149');
+    doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+29,{align:'right'});
+    sf(7,'bold','#3fb950');
+    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+34,{align:'right'});
+  } else {
+    sf(7,'normal','#8b949e');
+    doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+26,{align:'right'});
+  }
   y+=heroH+5;
 
   // KPIS
