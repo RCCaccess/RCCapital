@@ -305,6 +305,64 @@ canvas{display:block;width:100%!important;}
 .btn-welcome:hover{filter:brightness(1.1);}
 .welcome-footer{font-size:11px;color:var(--text2);margin-top:14px;opacity:.6;}
 
+
+
+/* ── BOTTOM ACTION BAR — mobile only ── */
+.bottom-bar{display:none;}
+@media(max-width:768px){
+  /* Hide top nav entirely on mobile */
+  .app-nav{display:none !important;}
+
+  /* Bottom bar */
+  .bottom-bar{
+    display:flex;
+    position:fixed;
+    bottom:0;left:0;right:0;
+    z-index:200;
+    background:var(--surface2);
+    border-top:1px solid var(--border);
+    padding:8px 16px;
+    padding-bottom:max(8px, env(safe-area-inset-bottom));
+    gap:8px;
+    align-items:center;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+  }
+  .bottom-bar .bb-brand{
+    display:flex;align-items:center;gap:6px;flex:1;min-width:0;
+  }
+  .bottom-bar .bb-brand img{width:22px;height:22px;object-fit:contain;border-radius:5px;flex-shrink:0;}
+  .bottom-bar .bb-brand span{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
+  .bottom-bar .bb-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  .bb-btn{
+    font-family:var(--sans);font-size:13px;font-weight:500;
+    padding:8px 14px;border-radius:8px;
+    border:1px solid var(--border);
+    background:var(--surface);color:var(--text);
+    cursor:pointer;display:inline-flex;align-items:center;gap:5px;
+    -webkit-tap-highlight-color:transparent;
+    min-height:38px;
+  }
+  .bb-btn.primary{background:var(--good);border-color:transparent;color:#fff;}
+  [data-theme="light"] .bb-btn.primary{background:var(--accent);}
+  .bb-btn:active{opacity:.7;}
+  /* Theme pill in bottom bar */
+  .bb-pill{
+    width:38px;height:22px;border-radius:11px;
+    background:var(--surface);border:1px solid var(--border);
+    cursor:pointer;padding:3px;display:flex;align-items:center;
+    flex-shrink:0;
+  }
+  .bb-pill.light-mode{background:var(--accent);border-color:var(--accent);}
+  .bb-pill .bp-knob{width:14px;height:14px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s;}
+  .bb-pill.light-mode .bp-knob{transform:translateX(16px);background:#fff;}
+
+  /* Extra padding so content doesn't hide behind bottom bar */
+  .rw{padding-bottom:max(90px, calc(70px + env(safe-area-inset-bottom))) !important;}
+
+  /* Login screen: also needs no nav shift */
+  #loginScreen{padding-top:max(48px, env(safe-area-inset-top, 48px));}
+}
 </style>
 </head>
 <body>
@@ -334,6 +392,21 @@ canvas{display:block;width:100%!important;}
 
 <!-- APP -->
 <div id="appScreen">
+  <!-- BOTTOM BAR — mobile only -->
+  <div class="bottom-bar">
+    <div class="bb-brand">
+      <img src="logo.png" alt="RC Capital"/>
+      <span id="bbNombre">—</span>
+    </div>
+    <div class="bb-actions">
+      <span style="font-size:14px;">🌙</span>
+      <button class="bb-pill" id="bbThemePill" onclick="toggleTheme()"><div class="bp-knob"></div></button>
+      <span style="font-size:14px;">☀️</span>
+      <button class="bb-btn primary" onclick="tryPDF()">↓ PDF</button>
+      <button class="bb-btn" onclick="logout()">Salir</button>
+    </div>
+  </div>
+
   <nav class="app-nav">
     <div class="an-logo">
       <img src="logo.png" alt="RC"/><span class="an-brand">RC Capital</span>
@@ -522,6 +595,8 @@ function showApp(){
   $('loginScreen').style.display='none';
   $('appScreen').style.display='block';
   $('abNombre').textContent=currentCliente.nombre;
+  // Sync bottom bar
+  var bb=$('bbNombre'); if(bb) bb.textContent=currentCliente.nombre;
   loadReportes();
 }
 
