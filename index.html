@@ -802,8 +802,8 @@ function generarPDF(){
   y+=13; ln(M,y,PW-M,y,C.border,0.4); y+=6;
 
   // CLIENT NAME
-  sf(8,'bold',C.text2); doc.text('INVERSOR',M,y); y+=5;
-  sf(20,'bold',C.text); doc.text(nombre,M,y); y+=5;
+  sf(7,'bold',C.text2); doc.text('INVERSOR',M,y); y+=6;
+  sf(15,'bold',C.text); doc.text(nombre,M,y); y+=6;
   if(s.firstDate&&s.lastDate){
     sf(8,'normal',C.text2);
     doc.text(s.firstDate.getFullYear()+'-'+pad2(s.firstDate.getMonth()+1)+'-'+pad2(s.firstDate.getDate())+' → '+s.lastDate.getFullYear()+'-'+pad2(s.lastDate.getMonth()+1)+'-'+pad2(s.lastDate.getDate()),M,y);
@@ -817,18 +817,18 @@ function generarPDF(){
   sf(7,'bold','#8b949e'); doc.text('RENDIMIENTO TOTAL',M+5,y+7);
   sf(20,'bold',isPos?C.heroGreen:C.heroBad); doc.text((isPos?'+':'')+fmtP(roi),M+5,y+20);
   sf(7,'normal','#8b949e'); doc.text(s.me.length+' meses bajo gestión',M+5,y+28);
-  sf(7,'bold','#8b949e'); doc.text('CAPITAL ACTUAL EN GESTIÓN',PW-M-5,y+7,{align:'right'});
-  sf(14,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-5,y+19,{align:'right'});
-  sf(7,'normal','#8b949e');
+  sf(6.5,'bold','#8b949e'); doc.text('CAPITAL ACTUAL EN GESTIÓN',PW-M-5,y+7,{align:'right'});
+  sf(15,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-5,y+16,{align:'right'});
+  sf(6.5,'normal','#8b949e');
   if(s.depFeeAmt>0){
-    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+24,{align:'right'});
-    sf(7,'normal','#f85149');
-    doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+29,{align:'right'});
-    sf(7,'bold','#3fb950');
-    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+34,{align:'right'});
+    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+22,{align:'right'});
+    sf(6.5,'normal','#f85149');
+    doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+27,{align:'right'});
+    sf(6.5,'bold','#3fb950');
+    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+32,{align:'right'});
   } else {
-    sf(7,'normal','#8b949e');
-    doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+26,{align:'right'});
+    sf(6.5,'normal','#8b949e');
+    doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+23,{align:'right'});
   }
   y+=heroH+5;
 
