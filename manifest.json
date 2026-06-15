@@ -1,0 +1,58 @@
+{
+  "name": "RC Capital",
+  "short_name": "RC Capital",
+  "description": "Portal de inversores RC Capital — consulta tu estado de cuenta y rendimiento.",
+  "start_url": "/RCCapital/index.html",
+  "scope": "/RCCapital/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "icons/screenshot.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "categories": [
+    "finance",
+    "business"
+  ],
+  "shortcuts": [
+    {
+      "name": "Mi Reporte",
+      "short_name": "Reporte",
+      "description": "Ver mi estado de cuenta",
+      "url": "/RCCapital/index.html",
+      "icons": [
+        {
+          "src": "icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}
