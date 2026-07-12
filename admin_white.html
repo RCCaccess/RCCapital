@@ -1,238 +1,288 @@
 <!doctype html>
-<html lang="es" data-theme="dark">
+<html lang="es">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>RC Capital · Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<script>(function(){var t=localStorage.getItem('rcTheme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
+<title>RCCapital · Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* ── SAME TOKENS AS INDEX.HTML ── */
+/* ── TOKENS ── */
 :root,[data-theme="dark"]{
-  --bg:#0d1117;--bg2:#161b22;--surface:#161b22;--surface2:#21262d;
+  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;
   --border:#30363d;--border2:#484f58;
   --text:#e6edf3;--text2:#8b949e;
   --accent:#2f81f7;--good:#3fb950;--bad:#f85149;--warn:#d29922;
+  --muted:#8b949e;
   --sans:-apple-system,BlinkMacSystemFont,'Inter','SF Pro Text','Helvetica Neue',sans-serif;
   --mono:'SFMono-Regular','Consolas','Liberation Mono',monospace;
   --r:6px;--rm:12px;
 }
 [data-theme="light"]{
-  --bg:#ffffff;--bg2:#f6f8fa;--surface:#ffffff;--surface2:#f6f8fa;
+  --bg:#ffffff;--surface:#ffffff;--surface2:#f6f8fa;
   --border:#d0d7de;--border2:#afb8c1;
   --text:#1f2328;--text2:#656d76;
   --accent:#0969da;--good:#1a7f37;--bad:#cf222e;--warn:#9a6700;
+  --muted:#656d76;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+/* Theme */
 html{color-scheme:dark;}[data-theme="light"]{color-scheme:light;}
-body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;}
 body *{transition:background-color .18s,border-color .18s,color .15s;}
 canvas,.spinner{transition:none!important;}
+/* Theme pill */
+.th-pill-wrap{display:flex;align-items:center;gap:5px;margin-bottom:12px;}
+.th-pill-wrap span{font-size:11px;color:var(--text2);}
+.admin-th-pill{width:36px;height:20px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
+.admin-th-pill.light-mode{background:var(--accent);border-color:var(--accent);}
+.admin-th-knob{width:14px;height:14px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s;}
+.admin-th-pill.light-mode .admin-th-knob{transform:translateX(16px);background:#fff;}
 
-/* ── LOGIN — identical to index.html ── */
-#loginScreen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;}
-.login-wrap{width:100%;max-width:320px;}
-.login-brand{text-align:center;margin-bottom:20px;}
-.lb-logo{width:44px;height:44px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);display:grid;place-items:center;margin:0 auto 12px;}
-.lb-logo img{width:26px;height:26px;object-fit:contain;}
-.login-brand h1{font-size:18px;font-weight:600;}
-.login-brand p{font-size:13px;color:var(--text2);margin-top:3px;}
-.login-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:20px;}
-.lc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
-.lc-top .admin-tag{font-size:10px;color:var(--accent);font-family:var(--mono);background:rgba(47,129,247,.1);border:1px solid rgba(47,129,247,.25);border-radius:4px;padding:2px 6px;}
-.th-pill{width:34px;height:18px;border-radius:9px;background:var(--surface);border:1px solid var(--border);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
-.th-pill.light-mode{background:var(--accent);border-color:var(--accent);}
-.th-pill .th-knob{width:12px;height:12px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s;}
-.th-pill.light-mode .th-knob{transform:translateX(16px);background:#fff;}
-.fi{margin-bottom:8px;}
-.fi label{display:block;font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;}
-.fi input{width:100%;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--sans);font-size:14px;outline:none;transition:border-color .15s,box-shadow .15s;}
-.fi input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,129,247,.2);}
-[data-theme="light"] .fi input:focus{box-shadow:0 0 0 3px rgba(9,105,218,.15);}
-.fi input::placeholder{color:var(--text2);}
-.btn-primary{width:100%;padding:7px 16px;background:var(--accent);color:#fff;font-family:var(--sans);font-size:14px;font-weight:500;border:none;border-radius:var(--r);cursor:pointer;margin-top:4px;transition:filter .15s;}
-.btn-primary:hover{filter:brightness(1.1);}
-.btn-primary:disabled{opacity:.45;}
-#loginErr{font-size:12px;color:var(--bad);text-align:center;margin-top:6px;display:none;}
-.login-footer{text-align:center;margin-top:14px;font-size:12px;color:var(--text2);}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
+  background-image:radial-gradient(ellipse 900px 500px at 80% -10%,rgba(0,194,255,.05),transparent);}
 
-/* ── APP LAYOUT ── */
+/* LOGIN */
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:40px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
+.login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
+.login-logo .dot{width:10px;height:10px;border-radius:50%;background:var(--accent);}
+.login-logo h1{font-size:20px;font-weight:800;letter-spacing:-.3px;}
+.login-logo span{font-size:11px;color:var(--muted);background:rgba(0,194,255,.1);
+  border:1px solid rgba(0,194,255,.2);border-radius:4px;padding:2px 6px;font-family:var(--mono);}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:11px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.field input{width:100%;padding:12px 14px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:10px;color:var(--text);
+  font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s;}
+.field input:focus{border-color:var(--accent);}
+.btn-primary{width:100%;padding:13px;background:var(--accent);color:#000;
+  font-family:var(--sans);font-size:14px;font-weight:700;border:none;
+  border-radius:10px;cursor:pointer;transition:opacity .2s;margin-top:8px;}
+.btn-primary:hover{opacity:.85;}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;}
+#loginErr{font-size:12px;color:var(--bad);margin-top:10px;text-align:center;display:none;}
+
+/* MAIN APP */
 #appScreen{display:none;min-height:100vh;}
+
+/* SIDEBAR */
 .layout{display:flex;min-height:100vh;}
 
 /* SIDEBAR */
-.sidebar{width:220px;background:var(--surface2);border-right:1px solid var(--border);padding:14px 10px;display:flex;flex-direction:column;flex-shrink:0;transition:width .2s,padding .2s;overflow:hidden;position:relative;}
-.sidebar.collapsed{width:48px;padding:14px 6px;}
-.sidebar.collapsed .sidebar-logo h2,.sidebar.collapsed .admin-tag,.sidebar.collapsed .nav-label,.sidebar.collapsed .logout-btn span,.sidebar.collapsed .sidebar-bottom,.sidebar.collapsed .th-pill{display:none;}
-.sidebar.collapsed .nav-item{justify-content:center;padding:7px 6px;}
-.sidebar-toggle{position:absolute;top:14px;right:-12px;z-index:10;width:24px;height:24px;border-radius:50%;background:var(--surface2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;color:var(--text2);}
-.sidebar-toggle:hover{color:var(--text);}
-.sidebar-logo{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:0 4px;}
-.sidebar-logo img{width:20px;height:20px;object-fit:contain;border-radius:4px;flex-shrink:0;}
-.sidebar-logo h2{font-size:14px;font-weight:600;white-space:nowrap;}
-.admin-tag{font-size:9px;color:var(--accent);font-family:var(--mono);background:rgba(47,129,247,.1);border:1px solid rgba(47,129,247,.25);border-radius:4px;padding:1px 5px;white-space:nowrap;}
-.sidebar-th{display:flex;align-items:center;gap:6px;padding:0 4px;margin-bottom:14px;}
-.sidebar-th span{font-size:11px;color:var(--text2);}
-.nav-group{display:flex;flex-direction:column;gap:1px;flex:1;}
-.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);font-size:13px;color:var(--text2);cursor:pointer;transition:all .12s;border:none;background:transparent;width:100%;text-align:left;white-space:nowrap;}
-.nav-item:hover{background:var(--bg);color:var(--text);}
-.nav-item.active{background:var(--accent);color:#fff;}
-.nav-item .icon{font-size:14px;width:18px;text-align:center;flex-shrink:0;}
-.nav-label{font-size:13px;}
+.sidebar{
+  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  padding:20px 14px;display:flex;flex-direction:column;flex-shrink:0;
+  transition:width .25s ease, padding .25s ease;overflow:hidden;position:relative;
+}
+.sidebar.collapsed{width:56px;padding:20px 8px;}
+.sidebar.collapsed .sidebar-logo h2,
+.sidebar.collapsed .sidebar-logo .tag,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .logout-btn span,
+.sidebar.collapsed .sidebar-bottom{display:none;}
+.sidebar.collapsed .nav-item{justify-content:center;padding:10px 6px;}
+.sidebar.collapsed .nav-item .icon{width:auto;}
+.sidebar-logo{display:flex;align-items:center;gap:8px;margin-bottom:28px;padding:0 4px;min-width:0;}
+.sidebar-logo h2{font-size:15px;font-weight:800;white-space:nowrap;}
+.sidebar-logo .tag{font-size:9px;color:var(--accent);font-family:var(--mono);
+  background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);
+  border-radius:4px;padding:2px 5px;white-space:nowrap;}
+.sidebar-toggle{position:absolute;top:18px;right:-14px;z-index:10;
+  width:28px;height:28px;border-radius:50%;
+  background:var(--surface);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s;
+  box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.sidebar-toggle:hover{color:var(--accent);border-color:rgba(0,194,255,.3);}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
+  transition:all .15s;border:none;background:transparent;width:100%;text-align:left;margin-bottom:2px;
+  white-space:nowrap;overflow:hidden;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text);}
+.nav-item.active{background:rgba(0,194,255,.1);color:var(--accent);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-label{overflow:hidden;text-overflow:ellipsis;}
 .sidebar-bottom{margin-top:auto;}
-.logout-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r);font-size:13px;color:var(--bad);cursor:pointer;background:transparent;border:none;width:100%;font-family:var(--sans);}
-.logout-btn:hover{background:rgba(248,81,73,.08);}
-
-/* CONTENT */
-.content{flex:1;padding:24px;overflow-y:auto;background:var(--bg);}
-.page{display:none;}
-.page.active{display:block;}
-.page-title{font-size:22px;font-weight:600;letter-spacing:-.4px;margin-bottom:3px;}
-.page-sub{font-size:13px;color:var(--text2);margin-bottom:20px;}
-
-/* BUTTONS */
-.btn{font-family:var(--sans);font-size:13px;font-weight:500;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:background .12s,border-color .12s;display:inline-flex;align-items:center;gap:5px;}
-.btn:hover{background:var(--surface2);border-color:var(--border2);}
-.btn.accent{background:var(--accent);border-color:transparent;color:#fff;}
-.btn.accent:hover{filter:brightness(1.08);}
-.btn.good{background:var(--good);border-color:transparent;color:#fff;}
-.btn.danger{color:var(--bad);background:var(--bg);}
-.btn.danger:hover{background:rgba(248,81,73,.08);}
-.btn:disabled{opacity:.4;cursor:not-allowed;}
-
-/* CARDS — no grey backgrounds */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);overflow:hidden;margin-bottom:14px;}
-.card-hd{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;}
-.card-hd h3{font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);}
-.card-bd{padding:16px;}
-
-/* STATS */
-.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:16px;}
-.stat-box .sl{font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;}
-.stat-box .sv{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;}
-.stat-box.good .sv{color:var(--good);}
-.stat-box.accent .sv{color:var(--accent);}
-
-/* TABLE */
-.tbl-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r);}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--border);}
-th{font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);background:var(--surface2);}
-tr:last-child td{border-bottom:none;}
-tr:hover td{background:var(--surface2);}
-.mono{font-family:var(--mono);font-size:12px;color:var(--text2);}
-.badge{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;font-family:var(--mono);}
-.badge.good{background:rgba(63,185,80,.15);color:var(--good);border:1px solid rgba(63,185,80,.3);}
-[data-theme="light"] .badge.good{background:rgba(26,127,55,.1);border-color:rgba(26,127,55,.3);}
-.badge.warn{background:rgba(210,153,34,.15);color:var(--warn);border:1px solid rgba(210,153,34,.3);}
-.badge.bad{background:rgba(248,81,73,.12);color:var(--bad);border:1px solid rgba(248,81,73,.25);}
-
-/* FORM */
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-@media(max-width:580px){.form-grid{grid-template-columns:1fr;}}
-.form-field{display:flex;flex-direction:column;gap:4px;}
-.form-field label{font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);}
-.form-field input,.form-field select{padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;}
-.form-field input:focus,.form-field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,129,247,.15);}
-.file-input{padding:8px 10px;background:var(--bg);border:1.5px dashed var(--border2);border-radius:var(--r);color:var(--text2);font-family:var(--sans);font-size:13px;cursor:pointer;width:100%;display:block;}
-.form-full{grid-column:1/-1;}
-
-/* TOAST */
-#toast{position:fixed;right:20px;bottom:20px;z-index:999;background:var(--surface2);border:1px solid var(--border2);color:var(--text);padding:10px 16px;border-radius:var(--rm);font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:none;max-width:320px;}
-
-/* MODAL */
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px;backdrop-filter:blur(4px);}
-.modal{background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:24px;width:100%;max-width:460px;box-shadow:0 16px 48px rgba(0,0,0,.3);}
-.modal h3{font-size:15px;font-weight:600;margin-bottom:6px;}
-.modal p{font-size:13px;color:var(--text2);margin-bottom:16px;}
-.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
-
-/* DROP ZONE */
-.drop-zone{border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg);}
-.drop-zone:hover,.drop-zone.over{border-color:var(--accent);background:rgba(47,129,247,.04);}
-
-/* PROGRESS */
-.progress-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:6px;}
-.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
-
-/* EMPTY */
-.empty{text-align:center;padding:36px 20px;color:var(--text2);}
-.empty p{font-size:13px;}
-
-/* SPINNER */
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-
-/* CLIENT CARDS — no grey bg */
-.client-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:14px 18px;display:grid;grid-template-columns:160px 1fr auto;gap:16px;align-items:center;transition:border-color .15s;cursor:pointer;}
-.client-card:hover{border-color:var(--border2);}
-canvas.sparkline{display:block;border-radius:6px;}
-
-/* PIN */
-#adminPinOverlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:20px;}
-.pin-dot{width:12px;height:12px;border-radius:50%;background:var(--surface2);border:2px solid var(--border2);transition:all .15s;}
-.pin-dot.filled{background:var(--accent);border-color:var(--accent);}
-.pin-dot.ok{background:var(--good);border-color:var(--good);}
-.pin-dot.err{background:var(--bad);border-color:var(--bad);}
-.pin-btn{font-family:var(--sans);font-size:20px;font-weight:300;width:58px;height:58px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:all .12s;}
-.pin-btn:hover{background:var(--surface);border-color:var(--border2);}
-.pin-btn:active{transform:scale(.92);}
-.pin-del,.pin-cancel{background:transparent;border-color:transparent;color:var(--text2);}
-
-/* THEME BTN */
-.theme-btn{outline:none;-webkit-appearance:none;cursor:pointer;border-radius:var(--rm);transition:all .15s;}
-.theme-btn.active{outline:2px solid var(--accent);outline-offset:2px;}
+.logout-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;
+  font-size:12px;color:var(--bad);cursor:pointer;background:rgba(255,79,106,.08);
+  border:1px solid rgba(255,79,106,.15);width:100%;font-family:var(--sans);font-weight:600;
+  transition:all .15s;}
+.logout-btn:hover{background:rgba(255,79,106,.15);}
 
 /* MOBILE */
 @media(max-width:768px){
   .layout{flex-direction:column;}
-  .sidebar{width:100%!important;flex-direction:row;align-items:center;padding:8px 12px!important;border-right:none;border-bottom:1px solid var(--border);gap:4px;overflow-x:auto;}
-  .sidebar-logo{margin-bottom:0;margin-right:6px;}
-  .nav-group{flex-direction:row;}
-  .sidebar-toggle{position:static;margin-left:auto;}
-  .sidebar.collapsed .nav-label{display:inline;}
-  .sidebar.collapsed .th-pill{display:flex;}
+  .sidebar{
+    width:100% !important;flex-direction:row;align-items:center;
+    padding:10px 14px !important;border-right:none;
+    border-bottom:1px solid var(--border);flex-shrink:0;
+    overflow-x:auto;gap:4px;
+  }
+  .sidebar.collapsed{width:100% !important;}
+  .sidebar-logo{margin-bottom:0;margin-right:8px;}
+  .sidebar-logo h2{font-size:13px;}
+  .sidebar-logo .tag{display:none;}
+  .sidebar-toggle{position:static;margin-left:auto;flex-shrink:0;}
+  .sidebar.collapsed .sidebar-logo h2{display:block;}
+  .sidebar.collapsed .nav-label{display:block;}
+  .sidebar.collapsed .nav-item{justify-content:flex-start;padding:8px 10px;}
   .sidebar-bottom{display:none;}
-  .sidebar-th{margin-bottom:0;}
-  .client-card{grid-template-columns:1fr;}
+  .nav-item{padding:8px 10px;font-size:12px;margin-bottom:0;flex-shrink:0;border-radius:8px;}
+  .nav-item .icon{font-size:14px;}
+  .sidebar-nav-group{display:flex;gap:4px;flex:1;overflow-x:auto;}
 }
+
+/* CONTENT */
+.content{flex:1;padding:24px;overflow-y:auto;}
+@media(max-width:768px){
+  .content{padding:14px;}
+  .page-title{font-size:18px;}
+  .page-sub{font-size:12px;margin-bottom:16px;}
+  .stats-row{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .stat-box{padding:12px;}
+  .stat-box .sv{font-size:20px;}
+  .card-bd{padding:14px;}
+  .form-grid{grid-template-columns:1fr;}
+}
+.page{display:none;}
+.page.active{display:block;}
+.page-title{font-size:22px;font-weight:800;margin-bottom:4px;}
+.page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card-hd{padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;gap:12px;}
+.card-hd h3{font-size:13px;font-weight:700;}
+.card-bd{padding:20px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
+.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-box .sl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-box .sv{font-size:26px;font-weight:800;font-family:var(--mono);}
+.stat-box.accent .sv{color:var(--accent);}
+.stat-box.good .sv{color:var(--good);}
+
+/* BUTTONS */
+.btn{font-family:var(--sans);font-size:12px;font-weight:700;padding:8px 14px;
+  border-radius:8px;border:1px solid var(--border2);background:rgba(255,255,255,.06);
+  color:var(--text);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn:hover{background:rgba(255,255,255,.12);}
+.btn.accent{background:rgba(0,194,255,.12);border-color:rgba(0,194,255,.3);color:var(--accent);}
+.btn.accent:hover{background:rgba(0,194,255,.22);}
+.btn.danger{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.25);color:var(--bad);}
+.btn.danger:hover{background:rgba(255,79,106,.18);}
+.btn.good{background:rgba(34,214,138,.1);border-color:rgba(34,214,138,.25);color:var(--good);}
+.btn:disabled{opacity:.4;cursor:not-allowed;}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--border);}
+th{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);background:rgba(255,255,255,.02);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,.02);}
+td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+  font-family:var(--mono);letter-spacing:.3px;}
+.badge.good{background:rgba(34,214,138,.12);color:var(--good);border:1px solid rgba(34,214,138,.2);}
+.badge.warn{background:rgba(245,166,35,.1);color:var(--warn);border:1px solid rgba(245,166,35,.2);}
+.badge.bad{background:rgba(255,79,106,.1);color:var(--bad);border:1px solid rgba(255,79,106,.2);}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr;}}
+.form-field{display:flex;flex-direction:column;gap:6px;}
+.form-field label{font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.form-field input,.form-field select{padding:10px 12px;background:rgba(255,255,255,.05);
+  border:1px solid var(--border);border-radius:8px;color:var(--text);
+  font-family:var(--sans);font-size:13px;outline:none;transition:border-color .2s;}
+.form-field input:focus,.form-field select:focus{border-color:var(--accent);}
+.form-field select option{background:#0d1219;}
+.file-input{padding:10px 12px;background:rgba(255,255,255,.05);
+  border:1.5px dashed var(--border2);border-radius:8px;color:var(--muted);
+  font-family:var(--sans);font-size:13px;cursor:pointer;width:100%;display:block;}
+.form-full{grid-column:1/-1;}
+
+/* TOAST */
+#toast{position:fixed;right:20px;bottom:20px;z-index:999;
+  background:var(--surface2);border:1px solid var(--border2);
+  padding:12px 18px;border-radius:12px;font-size:13px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;max-width:320px;}
+#toast.good{border-color:rgba(34,214,138,.3);color:var(--good);}
+#toast.bad{border-color:rgba(255,79,106,.3);color:var(--bad);}
+
+/* MODAL */
+.modal-overlay{
+  position:fixed;top:0;left:0;right:0;bottom:0;
+  background:rgba(0,0,0,.85);
+  display:none;align-items:center;justify-content:center;
+  z-index:9999;padding:20px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  padding:28px;width:100%;max-width:480px;
+  box-shadow:0 24px 64px rgba(0,0,0,.8);
+  position:relative;z-index:501;
+}
+.modal h3{font-size:16px;font-weight:800;margin-bottom:6px;}
+.modal p{font-size:13px;color:var(--muted);margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--muted);}
+.empty .ei{font-size:40px;margin-bottom:12px;}
+.empty p{font-size:13px;}
+
+/* LOADER */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);
+  border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* UPLOAD PROGRESS */
+.progress-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;margin-top:8px;}
+.progress-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s ease;width:0%;}
+
+  /* PIN PAD */
+  #adminPinOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
+  .pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);transition:all .2s;}
+  .pin-dot.filled{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(0,194,255,.5);}
+  .pin-dot.ok{background:var(--good);border-color:var(--good);}
+  .pin-dot.err{background:var(--bad);border-color:var(--bad);}
+  .pin-btn{font-family:var(--sans);font-size:22px;font-weight:700;width:68px;height:68px;border-radius:50%;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:var(--text);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+  .pin-btn:hover{background:rgba(255,255,255,.14);}
+  .pin-btn:active{background:rgba(255,255,255,.22);transform:scale(.9);}
+  .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
+  .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
+
 </style>
 </head>
 <body>
 
-<!-- LOGIN — same structure as index.html -->
+<!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-wrap">
-    <div class="login-brand">
-      <div class="lb-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
-        <img src="logo.png" alt="RC Capital"/>
-      </div>
-      <h1>RC Capital</h1>
-      <p>Panel de administración</p>
+  <div class="login-box">
+    <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
+      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RCCapital"/>
+      <h1>RCCapital</h1>
+      <span>ADMIN</span>
     </div>
-    <div class="login-card">
-      <div class="lc-top">
-        <span class="admin-tag">ADMIN</span>
-        <div style="display:flex;align-items:center;gap:5px;">
-          <span style="font-size:13px;">🌙</span>
-          <button class="th-pill" id="adminLoginPill" onclick="quickToggleTheme()"><div class="th-knob"></div></button>
-          <span style="font-size:13px;">☀️</span>
-        </div>
-      </div>
-      <div class="fi">
-        <label>Email de administrador</label>
-        <input type="email" id="adminEmail" placeholder="admin@rccapital.com" autocomplete="email"/>
-      </div>
-      <div class="fi">
-        <label>Contraseña</label>
-        <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/>
-      </div>
-      <button class="btn-primary" id="loginBtn" onclick="login()">Entrar al panel</button>
-      <div id="loginErr"></div>
+    <div class="field">
+      <label>Email de administrador</label>
+      <input type="email" id="adminEmail" placeholder="tu@email.com" autocomplete="email"/>
     </div>
-    <div class="login-footer">RC Capital · Solo administradores</div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/>
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="login()">Entrar al panel</button>
+    <div id="loginErr"></div>
   </div>
 </div>
 
@@ -244,13 +294,8 @@ canvas.sparkline{display:block;border-radius:6px;}
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
       <div class="sidebar-logo">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
-        <h2>RC Capital</h2>
+        <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
-      </div>
-      <div class="sidebar-th">
-        <span style="font-size:13px;">🌙</span>
-        <button class="th-pill" id="adminThemePill" onclick="quickToggleTheme()"><div class="th-knob"></div></button>
-        <span style="font-size:13px;">☀️</span>
       </div>
       <div class="sidebar-nav-group">
         <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
@@ -267,10 +312,12 @@ canvas.sparkline{display:block;border-radius:6px;}
         </button>
       </div>
       <div class="sidebar-bottom">
-        <button class="nav-item" data-page="settings" onclick="showPage('settings',this)" style="margin-bottom:6px;">
-          <span class="icon">⚙️</span><span class="nav-label"> Ajustes</span>
-        </button>
-        <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
+        <div class="th-pill-wrap" style="padding:0 4px;margin-bottom:10px;">
+  <span>🌙</span>
+  <button class="admin-th-pill" id="adminThemePill" onclick="quickToggleTheme()"><div class="admin-th-knob"></div></button>
+  <span>☀️</span>
+</div>
+<button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
 
@@ -297,16 +344,33 @@ canvas.sparkline{display:block;border-radius:6px;}
       <!-- MI CUENTA -->
       <div class="page" id="page-micuenta">
         <div class="page-title">Mi Cuenta</div>
-        <div class="page-sub">Tus comisiones y retiros como gestor</div>
-        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:13px;color:var(--text2);">
-          💡 Se actualiza automáticamente al subir el CSV consolidado en <strong style="color:var(--text);">Reportes</strong>
-          <span id="mcFileStatus" style="display:block;margin-top:4px;font-family:var(--mono);font-size:12px;"></span>
+        <div class="page-sub">Tus comisiones y retiros como gestor — desde el CSV consolidado</div>
+
+        <!-- Upload consolidated CSV -->
+        <div class="card" id="mcUploadCard" style="border-color:rgba(245,166,35,.2);background:linear-gradient(160deg,rgba(245,166,35,.04),rgba(0,0,0,.2));">
+          <div class="card-hd">
+            <h3>📤 Cargar CSV consolidado</h3>
+            <span style="font-size:11px;color:var(--muted);">Mismo archivo que descargas de Vantage</span>
+          </div>
+          <div class="card-bd">
+            <div id="mcDropZone"
+              style="border:2px dashed rgba(245,166,35,.3);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(245,166,35,.04);"
+              ondragover="event.preventDefault();this.style.borderColor='var(--warn)';this.style.background='rgba(245,166,35,.1)';"
+              ondragleave="this.style.borderColor='rgba(245,166,35,.3)';this.style.background='rgba(245,166,35,.04)';"
+              ondrop="mcHandleDrop(event)"
+              onclick="$('mcFileInput').click()">
+              <div style="font-size:32px;margin-bottom:8px;">📊</div>
+              <div style="font-size:14px;font-weight:700;color:var(--warn);">Arrastra el CSV consolidado de Vantage</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px;" id="mcDropSub">Se actualiza automáticamente al subir reportes · o carga aquí el CSV</div>
+            </div>
+            <input type="file" id="mcFileInput" accept=".csv" style="display:none;" onchange="mcLoadFile(this.files)"/>
+            <div id="mcFileStatus" style="margin-top:10px;font-size:12px;color:var(--muted);font-family:var(--mono);"></div>
+          </div>
         </div>
 
-        <!-- Mi Cuenta status — data comes automatically from Reportes -->
         <!-- KPIs gestor -->
         <div id="mcStats" style="display:none;">
-          <div class="stats-row" style="grid-template-columns:repeat(2,1fr);">
+          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
             <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
             <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
             <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
@@ -332,7 +396,7 @@ canvas.sparkline{display:block;border-radius:6px;}
               </div>
             </div>
             <div class="card-bd">
-              <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:12px;">
+              <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;">
                 <canvas id="mcChart" style="display:block;width:100%;height:220px;"></canvas>
               </div>
             </div>
@@ -505,64 +569,6 @@ canvas.sparkline{display:block;border-radius:6px;}
         </div>
       </div>
 
-
-      <!-- SETTINGS -->
-      <div class="page" id="page-settings">
-        <div class="page-title">Ajustes</div>
-        <div class="page-sub">Personaliza tu panel de administración</div>
-
-        <!-- Theme selector -->
-        <div class="card" style="max-width:480px;">
-          <div class="card-hd"><h3>Apariencia</h3></div>
-          <div class="card-bd">
-            <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">Elige el tema visual del panel</div>
-            <div style="display:flex;gap:12px;">
-
-              <!-- Dark -->
-              <button class="theme-btn active" data-theme="dark" onclick="applyTheme('dark')"
-                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(0,0,0,.4);cursor:pointer;transition:all .2s;text-align:center;">
-                <div style="font-size:28px;margin-bottom:8px;">🌙</div>
-                <div style="font-size:13px;font-weight:600;color:#e2eaf5;">Dark</div>
-                <div style="font-size:11px;color:#6b809a;margin-top:3px;">Oscuro</div>
-              </button>
-
-              <!-- Light -->
-              <button class="theme-btn" data-theme="light" onclick="applyTheme('light')"
-                style="flex:1;padding:16px 12px;border-radius:12px;border:2px solid var(--border2);background:rgba(255,255,255,.9);cursor:pointer;transition:all .2s;text-align:center;">
-                <div style="font-size:28px;margin-bottom:8px;">☀️</div>
-                <div style="font-size:13px;font-weight:600;color:#1a1a18;">Light</div>
-                <div style="font-size:11px;color:#8a8a82;margin-top:3px;">Claro</div>
-              </button>
-
-            </div>
-          </div>
-        </div>
-
-        <!-- Account info -->
-        <div class="card" style="max-width:480px;margin-top:0;">
-          <div class="card-hd"><h3>Cuenta</h3></div>
-          <div class="card-bd">
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:13px;color:var(--muted);">Email admin</span>
-              <span style="font-size:13px;font-family:var(--mono);">admin@rccapital.com</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:13px;color:var(--text2);">Contraseña admin</span>
-              <span style="font-size:13px;font-family:var(--mono);cursor:pointer;color:var(--text2);" onclick="this.textContent=this.textContent.includes('•')?'RCCapital2024Admin':'••••••••••••••'" title="Toca para revelar">••••••••••••••</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
-              <span style="font-size:13px;color:var(--text2);">PIN rápido</span>
-              <span style="font-size:13px;font-family:var(--mono);cursor:pointer;color:var(--text2);" onclick="this.textContent=this.textContent.includes('•')?'0180':'••••'" title="Toca para revelar">•••• (toca para revelar)</span>
-            </div>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
-              <span style="font-size:13px;color:var(--muted);">Versión</span>
-              <span style="font-size:13px;font-family:var(--mono);">v1.1 stable</span>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /settings -->
-
     </div><!-- /content -->
   </div><!-- /layout -->
 </div><!-- /appScreen -->
@@ -615,50 +621,26 @@ canvas.sparkline{display:block;border-radius:6px;}
 
 <div id="toast"></div>
 
+
+
 <script>
-
-
-
-// ── THEME SYSTEM ──────────────────────────────────────────────────
-function getTheme(){ return document.documentElement.getAttribute('data-theme')||'dark'; }
-function quickToggleTheme(){ applyTheme(getTheme()==='dark'?'light':'dark'); }
-function applyTheme(theme){
-  document.documentElement.setAttribute('data-theme', theme);
-  try{ localStorage.setItem('rcTheme', theme); }catch(e){}
-  // Update settings page toggle buttons
-  var btns = document.querySelectorAll('.theme-btn');
-  btns.forEach(function(b){ b.classList.toggle('active', b.dataset.theme === theme); });
-  // Sync all pills
-  ['adminThemePill','adminLoginPill'].forEach(function(id){
-    var el=document.getElementById(id);
-    if(el) el.classList.toggle('light-mode',theme==='light');
-  });
-}
-
-function quickToggleTheme(){
-  var cur = document.documentElement.getAttribute('data-theme')||'dark';
-  applyTheme(cur==='dark'?'light':'dark');
-}
-
-function initTheme(){
-  var saved = 'dark';
-  try{ saved = localStorage.getItem('rcTheme')||'dark'; }catch(e){}
-  applyTheme(saved);
-}
-
-// Init theme immediately
-(function(){ 
-  var t = 'dark';
-  try{ t = localStorage.getItem('rcTheme') || 'dark'; }catch(e){}
-  document.documentElement.setAttribute('data-theme', t);
-})();
-
-
 
 
 // ── CONFIG ────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
+
+// ── THEME ──────────────────────────────────────────────────────
+(function(){ var t=localStorage.getItem('rcTheme')||'light'; document.documentElement.setAttribute('data-theme',t); })();
+function getTheme(){ return document.documentElement.getAttribute('data-theme')||'dark'; }
+function quickToggleTheme(){
+  var t=getTheme()==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('rcTheme',t);}catch(e){}
+  ['adminThemePill'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle('light-mode',t==='light');});
+}
+
+
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
@@ -681,25 +663,9 @@ function toast(msg, type='good'){
   toast._t = setTimeout(()=> t.style.display='none', 3500);
 }
 
-function fmtDate(iso, showTime){
+function fmtDate(iso){
   if(!iso) return '—';
-  // Supabase returns "2026-06-01T06:19:00+00:00" — parse as UTC explicitly
-  var s = String(iso).replace('+00:00','Z').replace(' ','T');
-  if(!s.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(s)) s += 'Z';
-  var d = new Date(s);
-  if(isNaN(d.getTime())) d = new Date(iso);
-  // UTC-5 manually (Bogota/Lima/Quito — no DST)
-  var bog = new Date(d.getTime() - 5*3600*1000);
-  var MO = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-  var dd = String(bog.getUTCDate()).padStart(2,'0');
-  var mo = MO[bog.getUTCMonth()];
-  var yyyy = bog.getUTCFullYear();
-  var rh = bog.getUTCHours();
-  var ap = rh >= 12 ? 'PM' : 'AM';
-  var h12 = rh % 12 || 12;
-  var mn = String(bog.getUTCMinutes()).padStart(2,'0');
-  if(showTime===false) return dd+' '+mo+' '+yyyy;
-  return dd+' '+mo+' '+yyyy+' · '+h12+':'+mn+' '+ap;
+  return new Date(iso).toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'});
 }
 
 // ── AUTH ──────────────────────────────────────────────────────────
@@ -740,10 +706,6 @@ function showPage(name, el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   $('page-'+name).classList.add('active');
   if(el) el.classList.add('active');
-  // Re-render Mi Cuenta when navigating to it
-  if(name==='micuenta' && lastConsolidatedCSV){
-    setTimeout(function(){ try{ mcProcessCSV(lastConsolidatedCSV); }catch(e){} }, 80);
-  }
 }
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
@@ -753,10 +715,7 @@ async function loadAll(){
   updateDashboard();
   // Restore Mi Cuenta from localStorage
   if(lastConsolidatedCSV){
-    var _csv = lastConsolidatedCSV;
-    setTimeout(function(){
-      try{ mcProcessCSV(_csv); }catch(e){}
-    }, 600);
+    setTimeout(function(){ mcProcessCSV(lastConsolidatedCSV); }, 100);
   }
 }
 
@@ -816,10 +775,7 @@ function renderClientesTable(){
   const container = tbody.closest('.tbl-wrap');
   container.style.border = 'none';
   container.style.background = 'transparent';
-  // Clear existing cards to force full re-render
-  const existingCards = container.querySelector('#clientCards');
-  if(existingCards) existingCards.innerHTML = '';
-  container.innerHTML = '<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>';
+  container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
   const cards = $('clientCards');
 
   clientesCache.forEach(c => {
@@ -828,12 +784,13 @@ function renderClientesTable(){
     const eyeId  = 'eye-'+safeId;
     const card = document.createElement('div');
     card.id = 'card-'+safeId;
-    card.style.cssText = 'background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;transition:border-color .15s;cursor:pointer;';
+    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;transition:border-color .2s;cursor:pointer;';
     card.title = 'Ver detalle de '+c.nombre;
-    card.onmouseenter = function(){ card.style.borderColor='var(--border2)'; };
-    card.onmouseleave = function(){ card.style.borderColor='var(--border)'; };
+    card.onmouseenter = () => card.style.borderColor='rgba(255,255,255,.16)';
+    card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
     card.onclick = function(e){
-      if(e.target.closest('button')||e.target.closest('select')||e.target.closest('input')) return;
+      // Don't trigger if clicking buttons inside the card
+      if(e.target.closest('button')||e.target.closest('select')) return;
       openDetalle(c.id, c.nombre);
     };
     const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
@@ -999,16 +956,10 @@ async function loadClientSparkline(c, safeId){
       // Parse report month (format: YYYY-MM)
       const [repYear, repMonth] = data.mes.split('-').map(Number);
 
-      // Format upload date — UTC-5 (Bogota/Lima/Quito)
+      // Format upload date
       const pad = x => String(x).padStart(2,'0');
-      let uploadStr = data.mes;
-      if(data.created_at){
-        const raw = String(data.created_at).replace('+00:00','Z').replace(' ','T');
-        const safe = raw.endsWith('Z')||/[+-]\d{2}:\d{2}$/.test(raw) ? raw : raw+'Z';
-        const bog = new Date(new Date(safe).getTime() - 5*3600*1000);
-        const rh=bog.getUTCHours(); const ap=rh>=12?'PM':'AM'; const h12=rh%12||12;
-        uploadStr = pad(bog.getUTCDate())+'/'+pad(bog.getUTCMonth()+1)+'/'+bog.getUTCFullYear()+' · '+h12+':'+pad(bog.getUTCMinutes())+' '+ap;
-      }
+      const d = data.created_at ? new Date(data.created_at) : null;
+      const uploadStr = d ? pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear() : data.mes;
 
       let icon, color, label;
 
@@ -1067,69 +1018,38 @@ async function loadClientSparkline(c, safeId){
     daEl.textContent = days + ' días';
   }
 
-  // Draw sparkline — theme-aware with grid and Y values
+  // Draw sparkline
   const canvas = $('spark-'+safeId);
   if(!canvas) return;
-  const isDkSp = document.documentElement.getAttribute('data-theme') !== 'light';
   const dpr = window.devicePixelRatio||1;
-  const W=160, H=72;
+  const W=160, H=56;
   canvas.width=W*dpr; canvas.height=H*dpr;
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   const ctx=canvas.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
 
   // Background
-  ctx.fillStyle = isDkSp ? '#0d1117' : '#ffffff';
-  ctx.fillRect(0,0,W,H);
-  // Border
-  ctx.strokeStyle = isDkSp ? '#30363d' : '#d0d7de';
-  ctx.lineWidth=0.5; ctx.strokeRect(0.5,0.5,W-1,H-1);
+  ctx.fillStyle='rgba(0,0,0,.3)';
+  ctx.roundRect(0,0,W,H,6); ctx.fill();
 
   const n=equity.length;
   if(n<2) return;
-
-  const pad={l:32,r:4,t:6,b:6};
+  const minV=Math.min(...equity), maxV=Math.max(...equity);
+  const span=(maxV-minV)||1;
+  const pad={l:4,r:4,t:5,b:5};
   const iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
   const dep=equity[0];
-  const allV=equity.concat([dep]);
-  let minV=Math.min(...allV), maxV=Math.max(...allV);
-  const mg=(maxV-minV)*0.1||1; minV-=mg; maxV+=mg;
-  const span=maxV-minV||1;
-
-  // Grid lines (2 horizontal)
-  ctx.strokeStyle = isDkSp ? 'rgba(255,255,255,.06)' : 'rgba(0,0,0,.07)';
-  ctx.lineWidth=0.5;
-  for(let i=0;i<=1;i++){
-    const gy=pad.t+ih*(i/1);
-    ctx.beginPath(); ctx.moveTo(pad.l,gy); ctx.lineTo(pad.l+iw,gy); ctx.stroke();
-  }
-
-  // Y axis labels (top and bottom value)
-  ctx.fillStyle = isDkSp ? '#8b949e' : '#656d76';
-  ctx.font='7px -apple-system,sans-serif'; ctx.textAlign='right';
-  [[maxV,pad.t+5],[minV,H-pad.b]].forEach(([v,gy])=>{
-    const lbl=Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v);
-    ctx.fillText(lbl, pad.l-2, gy);
-  });
-
-  // Y axis line
-  ctx.strokeStyle = isDkSp ? '#30363d' : '#d0d7de';
-  ctx.lineWidth=0.5;
-  ctx.beginPath(); ctx.moveTo(pad.l,pad.t); ctx.lineTo(pad.l,pad.t+ih); ctx.stroke();
+  const depY=pad.t+ih*(1-(dep-minV)/span);
 
   // Deposit baseline
-  const depY=pad.t+ih*(1-(dep-minV)/span);
-  ctx.strokeStyle = isDkSp ? 'rgba(255,255,255,.2)' : 'rgba(0,0,0,.15)';
+  ctx.strokeStyle='rgba(255,255,255,.15)';
   ctx.setLineDash([3,3]); ctx.lineWidth=0.8;
   ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke();
   ctx.setLineDash([]);
 
-  // Colors
-  const color = isPos
-    ? (isDkSp ? '63,185,80' : '26,127,55')
-    : (isDkSp ? '248,81,73' : '207,34,46');
-
   // Area fill
+  const color = isPos ? '34,214,138' : '255,79,106';
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x=pad.l+iw*(i/Math.max(1,n-1));
@@ -1138,11 +1058,11 @@ async function loadClientSparkline(c, safeId){
   }
   ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();
   const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
-  grd.addColorStop(0,`rgba(${color},.2)`); grd.addColorStop(1,`rgba(${color},.02)`);
+  grd.addColorStop(0,`rgba(${color},.35)`); grd.addColorStop(1,`rgba(${color},.02)`);
   ctx.fillStyle=grd; ctx.fill();
 
   // Line
-  ctx.lineWidth=1.5; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},1)`;
+  ctx.lineWidth=1.8; ctx.lineJoin='round'; ctx.strokeStyle=`rgba(${color},.9)`;
   ctx.beginPath();
   for(let i=0;i<n;i++){
     const x=pad.l+iw*(i/Math.max(1,n-1));
@@ -1381,7 +1301,7 @@ async function subirReporte(){
     let error;
     if(existing){
       // Update existing
-      ({ error } = await db.from('reportes').update({csv_data:text,created_at:new Date().toISOString()}).eq('id',existing.id));
+      ({ error } = await db.from('reportes').update({csv_data:text}).eq('id',existing.id));
     } else {
       // Insert new
       ({ error } = await db.from('reportes').insert({cliente_id:clienteId, mes, csv_data:text}));
@@ -1538,26 +1458,10 @@ var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
 function processAllLoaded(results, curMes){
   bulkFiles = [];
   var managerRows = []; // collect manager's own CSV rows
-  var rawFullCSV = (results.length > 0 && results[0].text) ? results[0].text : null;
 
   results.forEach(function(r){
     if(!r.text) return; // skip errors silently
     if(bulkMode==='single'){
-      // Feed Mi Cuenta with the full raw CSV immediately
-      if(r.text && r.text.length > 100){
-        lastConsolidatedCSV = r.text;
-        try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
-        // Feed Mi Cuenta immediately - use full raw CSV
-        var _fullCsv = r.text;
-        setTimeout(function(){
-          try{
-            var mcEl=document.getElementById('mcStats');
-            if(mcEl){ mcProcessCSV(_fullCsv); }
-          }catch(ex){}
-        }, 300);
-        var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
-        if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
-      }
       try{
         var split = splitConsolidatedCSV(r.text);
         split.forEach(function(inv){
@@ -1673,15 +1577,13 @@ async function uploadAllBulk(){
   for(var i=0;i<toUpload.length;i++){
     var bf=toUpload[i];
     try{
-      // Replace existing or insert new — always store latest CSV
-      var now_iso=new Date().toISOString();
-      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).order('created_at',{ascending:false}).limit(1);
+      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).eq('mes',bf.mes).single();
       var error;
-      if(res.data && res.data.length>0){
-        var u=await db.from('reportes').update({csv_data:bf.text,mes:bf.mes,created_at:now_iso}).eq('id',res.data[0].id);
+      if(res.data){
+        var u=await db.from('reportes').update({csv_data:bf.text}).eq('id',res.data.id);
         error=u.error;
       } else {
-        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text,created_at:now_iso});
+        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text});
         error=ins.error;
       }
       if(error){bf.status='error';fail++;}else{bf.status='ok';ok++;}
@@ -1690,9 +1592,8 @@ async function uploadAllBulk(){
   }
   btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
   toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':'')+' · 💰 Mi Cuenta actualizada');
-  await loadReportes(); updateDashboard();
-  clientesCache = []; // force full reload
-  await loadClientes();
+  await loadReportes(); updateDashboard(); await loadClientes();
+  // Auto-feed Mi Cuenta from the same CSV data
   autoFeedMiCuenta();
 }
 
@@ -1709,12 +1610,11 @@ const ADMIN_PIN = '0180';
 let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
 
 function handleAdminTap(){
-  adminTapCount = (adminTapCount||0) + 1;
+  adminTapCount++;
   clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
+  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 2000);
   if(adminTapCount >= 5){
     adminTapCount = 0;
-    clearTimeout(adminTapTimer);
     adminPinOpen();
   }
 }
@@ -1862,9 +1762,8 @@ function autoFeedMiCuenta(){
 
 function mcHandleDrop(e){
   e.preventDefault();
-  e.stopPropagation();
   var dz=$('mcDropZone');
-  if(dz){ dz.classList.remove('over'); }
+  dz.style.borderColor='rgba(245,166,35,.3)';dz.style.background='rgba(245,166,35,.04)';
   mcLoadFile(e.dataTransfer.files);
 }
 
@@ -1872,30 +1771,22 @@ function mcLoadFile(fileList){
   if(!fileList||!fileList.length) return;
   var file=fileList[0];
   if(!file) return;
-  var st=$('mcFileStatus');
-  if(st){ st.textContent='⏳ Cargando '+file.name+'...'; st.style.color='var(--text2)'; }
+  $('mcFileStatus').textContent='⏳ Analizando...';
   var reader=new FileReader();
   reader.onload=function(ev){
     try{
       var text=ev.target.result;
-      if(!text||text.trim().length<20){
-        if(st){ st.textContent='❌ Archivo vacío o inválido'; st.style.color='var(--bad)'; }
-        return;
-      }
       lastConsolidatedCSV=text;
       try{ localStorage.setItem('rcMiCuentaCSV', text); }catch(e){}
       mcProcessCSV(text);
-      var now=new Date(); var pty=new Date(now.getTime()-5*3600000);
-      var hh=pty.getUTCHours(); var ampm=hh>=12?'PM':'AM'; hh=hh%12||12;
-      var mm=String(pty.getUTCMinutes()).padStart(2,'0');
-      if(st){ st.textContent='✅ Cargado · '+hh+':'+mm+' '+ampm+' PTY'; st.style.color='var(--good)'; }
-      if($('mcFileInput')) $('mcFileInput').value='';
+      $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
+      $('mcFileInput').value='';
     }catch(err){
-      if(st){ st.textContent='❌ Error: '+err.message; st.style.color='var(--bad)'; }
+      $('mcFileStatus').textContent='❌ Error: '+err.message;
     }
   };
   reader.onerror=function(){
-    if(st){ st.textContent='❌ No se pudo leer el archivo'; st.style.color='var(--bad)'; }
+    $('mcFileStatus').textContent='❌ No se pudo leer el archivo';
   };
   reader.readAsText(file);
 }
@@ -1911,7 +1802,6 @@ function mcProcessCSV(text){
   var iInv=['investorname','investor','inversor','name','usuario'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
   function normStr(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
   var mgrNorm=normStr(MANAGER_CSV_NAME);
-  var debugReasons={};  // track all unique reasons for debugging
   var totalPerf=0,totalMgmt=0,totalDep=0,totalWith=0;
   var monthly={};
 
@@ -1925,14 +1815,13 @@ function mcProcessCSV(text){
     var mk=time.getFullYear()+'-'+String(time.getMonth()+1).padStart(2,'0');
     if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
 
-    if(!debugReasons[reason]) debugReasons[reason]=0; debugReasons[reason]++;
-    if(reason==='performancefee'||reason==='performance fee'||reason==='performancefees'||reason==='performance_fee'){
+    if(reason==='performancefee'||reason==='performance fee'){
       var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
-    } else if(reason==='managementfee'||reason==='management fee'||reason==='managementfees'||reason==='management_fee'){
+    } else if(reason==='managementfee'||reason==='management fee'){
       var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
-    } else if(reason==='depositfee'||reason==='deposit fee'||reason==='depositfees'||reason==='deposit_fee'){
+    } else if(reason==='depositfee'||reason==='deposit fee'){
       var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
-    } else if(reason==='withdrawal'||reason==='retiro'||reason==='withdraw'){
+    } else if(reason==='withdrawal'||reason==='retiro'){
       // Only count withdrawals that belong to the manager
       var rowInv=iInv>=0?normStr(cols[iInv]):'';
       var isMgr=(rowInv===mgrNorm)||(rowInv.length>3&&mgrNorm.indexOf(rowInv)>=0)||(mgrNorm.length>3&&rowInv.indexOf(mgrNorm)>=0);
@@ -1977,13 +1866,7 @@ function mcProcessCSV(text){
 
   // Draw chart
   mcDrawChart(monthKeys, monthly);
-  // Show stats regardless, even if no fees yet
   $('mcStats').style.display='block';
-  var statusEl=$('mcFileStatus');
-  if(statusEl && totalFees===0){
-    statusEl.textContent='⚠️ No se encontraron comisiones. Verifica que el CSV sea el correcto.';
-    statusEl.style.color='var(--warn)';
-  }
 }
 
 function mcDrawChart(monthKeys, monthly){
@@ -1996,8 +1879,6 @@ function mcDrawChart(monthKeys, monthly){
   var ctx=canvas.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.clearRect(0,0,W,H);
-  var _isDkMC=document.documentElement.getAttribute('data-theme')!=='light';
-  if(!_isDkMC){ctx.fillStyle='#ffffff';ctx.fillRect(0,0,W,H);}
 
   var pad={l:64,r:16,t:16,b:52};
   var iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
@@ -2013,9 +1894,9 @@ function mcDrawChart(monthKeys, monthly){
   maxV=maxV||1;
 
   // Grid
-  ctx.strokeStyle=_isDkMC?'rgba(255,255,255,.06)':'rgba(0,0,0,.07)'; ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
   for(var i=0;i<=4;i++){var y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle=_isDkMC?'#8b949e':'#656d76'; ctx.font='11px -apple-system,monospace'; ctx.textAlign='right';
+  ctx.fillStyle='#6b809a'; ctx.font='11px JetBrains Mono,monospace'; ctx.textAlign='right';
   for(var i=0;i<=4;i++){var v=maxV*(1-i/4);ctx.fillText('$'+(v>=1000?(v/1000).toFixed(1)+'k':v.toFixed(0)),pad.l-6,pad.t+ih*(i/4)+4);}
 
   // Bars - stacked per/mgmt/dep
@@ -2048,7 +1929,7 @@ function mcDrawChart(monthKeys, monthly){
     // Withdrawal line marker
     if(m.with>0){
       var wy=pad.t+ih*(1-(m.with/maxV));
-      ctx.strokeStyle=_isDkMC?'rgba(248,81,73,.8)':'rgba(207,34,46,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+      ctx.strokeStyle='rgba(255,79,106,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
       ctx.beginPath(); ctx.moveTo(x-2,wy); ctx.lineTo(x+barW+2,wy); ctx.stroke();
       ctx.setLineDash([]);
     }
@@ -2060,7 +1941,7 @@ function mcDrawChart(monthKeys, monthly){
   });
 
   // Withdrawal legend
-  ctx.strokeStyle=_isDkMC?'rgba(248,81,73,.8)':'rgba(207,34,46,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
+  ctx.strokeStyle='rgba(255,79,106,.8)'; ctx.lineWidth=2; ctx.setLineDash([3,3]);
   ctx.beginPath(); ctx.moveTo(W-140,12); ctx.lineTo(W-122,12); ctx.stroke();
   ctx.setLineDash([]);
   ctx.fillStyle='rgba(255,79,106,.8)'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='left';
@@ -2072,35 +1953,29 @@ function mcDrawChart(monthKeys, monthly){
 function closeDetalle(){ $('modalDetalle').style.display='none'; }
 
 async function openDetalle(clienteId, nombre){
-  // Show modal immediately with loading state
   $('detNombre').textContent = nombre;
-  $('detROI').textContent = '...';
-  $('detEquity').textContent = '...';
-  $('detSub').textContent = 'Cargando...';
-  $('detDep').textContent = '';
+  $('detROI').textContent = '—'; $('detEquity').textContent = '—';
   $('detTableBody').innerHTML = '';
-  $('detPeriodo').textContent = '';
   $('modalDetalle').style.display = 'flex';
 
-  // Load latest report
+  // Load latest report from Supabase
   var res = await db.from('reportes').select('csv_data,mes,created_at')
-    .eq('cliente_id', clienteId).order('created_at',{ascending:false}).limit(1);
-
-  if(!res.data || !res.data.length || !res.data[0].csv_data){
-    $('detROI').textContent = '—';
-    $('detSub').textContent = 'Sin reportes disponibles';
+    .eq('cliente_id', clienteId).order('mes',{ascending:false}).limit(1).single();
+  if(!res.data || !res.data.csv_data){
+    $('detPeriodo').textContent = 'Sin reportes disponibles';
     return;
   }
 
-  var rep = res.data[0];
+  var rep = res.data;
+  $('detPeriodo').textContent = 'Período: ' + rep.mes;
+
+  // Parse CSV and compute stats (reusing same logic as index.html)
   try{
     var rows = parseCSVdet(rep.csv_data);
     var stats = computeStatsdet(rows);
     renderDetalle(stats, nombre);
-    // Draw the detail chart after a tick (so canvas has dimensions)
-    setTimeout(function(){ if(stats.es&&stats.es.length>1) drawDetChart(stats); }, 50);
   }catch(e){
-    $('detSub').textContent = 'Error: '+e.message;
+    $('detPeriodo').textContent = 'Error procesando datos: '+e.message;
   }
 }
 
@@ -2175,7 +2050,7 @@ function renderDetalle(stats, nombre){
 
   // Deposit breakdown
   if(stats.depFeeAmt>0){
-    $('detDep').innerHTML='Depósito inicial: '+fmt(stats.depGross)+'<br>Activation fee: <span style="color:var(--bad);">-'+fmt(stats.depFeeAmt)+'</span><br><span style="color:var(--good);font-weight:600;">Capital inicial: '+fmt(stats.dep)+'</span>';
+    $('detDep').innerHTML='Depósito: '+fmt(stats.depGross)+' · Fee: <span style="color:var(--bad);">-'+fmt(stats.depFeeAmt)+'</span> · <span style="color:var(--accent);">Capital: '+fmt(stats.dep)+'</span>';
   } else {
     $('detDep').textContent='Depósito inicial: '+fmt(stats.depGross);
   }
@@ -2226,10 +2101,9 @@ function drawDetChart(stats){
   var span=maxV-minV, n=labels.length;
   if(!span) return;
   // Grid
-  var isDkDet2=document.documentElement.getAttribute('data-theme')!=='light';
-  ctx.strokeStyle=isDkDet2?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)'; ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
   for(var i=0;i<=4;i++){var y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle=isDkDet2?'#8b949e':'#656d76'; ctx.font='10px -apple-system,monospace'; ctx.textAlign='right';
+  ctx.fillStyle='#6b809a'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='right';
   for(var i=0;i<=4;i++){var v=maxV-span*(i/4),y=pad.t+ih*(i/4);ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-4,y+3);}
   // Deposit line
   var depY=pad.t+ih*(1-(dep-minV)/span);
@@ -2254,72 +2128,69 @@ function drawDetChart(stats){
   ctx.fillStyle=isPos?'#22d68a':'#ff4f6a'; ctx.beginPath(); ctx.arc(ex,ey,3.5,0,Math.PI*2); ctx.fill();
 }
 
-
-
-
 </script>
 
 <!-- MODAL DETALLE CLIENTE -->
 <div class="modal-overlay" id="modalDetalle" style="display:none;">
-  <div class="modal" style="max-width:900px;width:95vw;max-height:90vh;overflow-y:auto;padding:24px;">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;">
+  <div class="modal" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
       <div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;">Estado de cuenta</div>
-        <div id="detNombre" style="font-size:22px;font-weight:600;letter-spacing:-.3px;">—</div>
-        <div id="detPeriodo" style="font-size:12px;color:var(--text2);font-family:var(--mono);margin-top:3px;">—</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Estado de cuenta</div>
+        <h3 id="detNombre" style="font-size:20px;font-weight:800;margin:0;">—</h3>
+        <div id="detPeriodo" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">—</div>
       </div>
-      <button onclick="closeDetalle()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text2);width:30px;height:30px;border-radius:6px;font-size:14px;cursor:pointer;flex-shrink:0;">✕</button>
+      <button onclick="closeDetalle()" style="background:rgba(255,255,255,.08);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>
     </div>
 
-    <!-- Hero -->
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rm);padding:24px 28px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;">
+    <!-- ROI Hero -->
+    <div style="background:linear-gradient(160deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid var(--border);border-radius:16px;padding:22px 24px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
       <div>
-        <div style="font-size:11px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;">Rendimiento Total</div>
-        <div id="detROI" style="font-size:48px;font-weight:600;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;">—</div>
-        <div id="detSub" style="font-size:12px;color:var(--text2);margin-top:8px;">—</div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Rendimiento Total</div>
+        <div id="detROI" style="font-size:40px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1;">—</div>
+        <div id="detSub" style="font-size:11px;color:var(--muted);margin-top:8px;">—</div>
       </div>
       <div style="text-align:right;">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:5px;">Valor de la cuenta</div>
-        <div id="detEquity" style="font-size:24px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums;">—</div>
-        <div id="detDep" style="font-size:12px;color:var(--text2);margin-top:5px;font-family:var(--mono);line-height:1.8;">—</div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Valor de la cuenta</div>
+        <div id="detEquity" style="font-size:22px;font-weight:800;font-family:var(--mono);">—</div>
+        <div id="detDep" style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);">—</div>
       </div>
     </div>
 
     <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;">
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Profit neto</div>
-        <div id="detProfit" style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;">—</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Profit neto</div>
+        <div id="detProfit" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Días activo</div>
-        <div id="detDias" style="font-size:16px;font-weight:600;color:var(--accent);font-variant-numeric:tabular-nums;">—</div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Días activo</div>
+        <div id="detDias" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent);">—</div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Mejor mes</div>
-        <div id="detBest" style="font-size:16px;font-weight:600;color:var(--good);font-variant-numeric:tabular-nums;">—</div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Mejor mes</div>
+        <div id="detBest" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--good);">—</div>
       </div>
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--rm);padding:14px;">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;">Meses positivos</div>
-        <div id="detPosM" style="font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;">—</div>
+      <div style="background:rgba(0,0,0,.25);border:1px solid var(--border);border-radius:12px;padding:12px;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Meses positivos</div>
+        <div id="detPosM" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
       </div>
     </div>
 
     <!-- Chart -->
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rm);padding:14px;margin-bottom:10px;">
-      <div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
-      <canvas id="detChart" style="display:block;width:100%;height:180px;"></canvas>
+    <div style="background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
+      <canvas id="detChart" style="display:block;width:100%;height:160px;"></canvas>
     </div>
 
     <!-- Table -->
-    <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Resumen por período</div>
-    <div style="overflow:auto;border:1px solid var(--border);border-radius:var(--r);max-height:240px;">
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">Resumen por período</div>
+    <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:240px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
         <thead><tr>
-          <th style="padding:9px 14px;text-align:left;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Mes</th>
-          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">P&L neto</th>
-          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Retorno %</th>
-          <th style="padding:9px 14px;text-align:right;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);">Equity final</th>
+          <th style="padding:8px 12px;text-align:left;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Mes</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">P&L neto</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Retorno %</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Equity final</th>
         </tr></thead>
         <tbody id="detTableBody"></tbody>
       </table>
