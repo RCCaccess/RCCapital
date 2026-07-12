@@ -651,7 +651,7 @@ function quickToggleTheme(){
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RCCapital2024Admin';
+const ADMIN_PASS  = 'RCCapital2026Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -690,7 +690,7 @@ async function login(){
   const p2 = pass.trim();
   if(!e2||!p2){ err.textContent='Completa los campos.'; err.style.display='block'; return; }
   if(e2!==ADMIN_EMAIL||p2!==ADMIN_PASS){
-    err.textContent='Incorrecto ('+e2+' / '+p2.length+'chars)';
+    err.textContent='Credenciales incorrectas.';
     err.style.display='block'; return;
   }
   btn.textContent='Entrando...'; btn.disabled=true;
