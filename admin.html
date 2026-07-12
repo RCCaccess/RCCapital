@@ -429,6 +429,10 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <div class="page" id="page-clientes">
         <div class="page-title">Clientes</div>
         <div class="page-sub">Gestiona los accesos de tus inversores</div>
+        <div id="supabaseAlert" style="display:none;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--bad);">
+          ⚠️ <strong>No se puede conectar a Supabase.</strong> El proyecto puede estar pausado.<br/>
+          <a href="https://supabase.com/dashboard/project/oettmexxsohqudmshhip" target="_blank" style="color:var(--accent);text-decoration:underline;">Haz clic aquí para reactivar el proyecto →</a>
+        </div>
         <div class="card">
           <div class="card-hd">
             <h3>Agregar nuevo cliente</h3>
@@ -627,8 +631,8 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 
 // ── CONFIG ────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
+const SUPABASE_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 
 // ── THEME ──────────────────────────────────────────────────────
 (function(){ var t=localStorage.getItem('rcTheme')||'dark'; document.documentElement.setAttribute('data-theme',t); })();
@@ -738,6 +742,21 @@ async function loadReportes(){
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────
+async // Test Supabase connection
+async function testSupabaseConnection(){
+  try{
+    var r = await db.from('clientes').select('id').limit(1);
+    if(r.error) throw new Error(r.error.message);
+    toast('✅ Supabase conectado correctamente');
+  }catch(e){
+    if(e.message.includes('Failed to fetch')||e.message.includes('fetch')){
+      toast('❌ Supabase pausado. Ve a supabase.com → tu proyecto → Resume','bad');
+    } else {
+      toast('❌ '+e.message,'bad');
+    }
+  }
+}
+
 async function updateDashboard(){
   $('statClientes').textContent = clientesCache.length;
   const { data: reps } = await db.from('reportes').select('*,clientes(nombre)').order('created_at',{ascending:false}).limit(5);
@@ -1103,8 +1122,13 @@ async function agregarCliente(){
   btn.innerHTML='➕ Agregar cliente'; btn.disabled=false;
 
   if(error){
-    if(error.code==='23505') toast('Este email ya existe','bad');
-    else toast('Error: '+error.message,'bad');
+    if(error.code==='23505') toast('⚠️ Este email ya existe','bad');
+    else if(error.message&&error.message.includes('Failed to fetch')){
+      toast('❌ No se puede conectar a Supabase. Ve a supabase.com y reactiva el proyecto.','bad');
+    } else {
+      toast('❌ Error: '+error.message,'bad');
+      console.error('Supabase error:', error);
+    }
     return;
   }
   $('newNombre').value=''; $('newEmail').value=''; $('newPass').value=generatePass();
