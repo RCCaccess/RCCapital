@@ -609,23 +609,6 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   </div>
 </div>
 
-<!-- ADMIN PIN -->
-<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
-  <div style="text-align:center;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
-    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
-      <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
-      <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
-      <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
-      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
-    </div>
-    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
-  </div>
-</div>
-
 <div id="toast"></div>
 
 
@@ -1140,8 +1123,12 @@ async function agregarCliente(){
   }
   $('newNombre').value=''; $('newEmail').value=''; $('newPass').value=generatePass();
   toast('✅ Cliente '+nombre+' agregado correctamente');
+  // Force full reload of clientes data and re-render
+  clientesCache = [];
   await loadClientes();
-  updateDashboard();
+  await updateDashboard();
+  // Navigate to clientes tab to show new entry
+  showPage('clientes', document.querySelector('[data-page="clientes"]'));
 }
 
 // ── ELIMINAR CLIENTE ─────────────────────────────────────────────
@@ -1490,6 +1477,18 @@ function processAllLoaded(results, curMes){
   bulkFiles = [];
   var managerRows = []; // collect manager's own CSV rows
 
+  // Ensure clientesCache is fresh before matching
+  if(!clientesCache.length){
+    toast('⚠️ Cargando clientes... vuelve a soltar el archivo en 2 segundos','bad');
+    loadClientes().then(function(){
+      toast('✅ Clientes cargados. Sube el CSV nuevamente.');
+    });
+    return;
+  }
+
+  console.log('Processing CSV with', clientesCache.length, 'clients in cache:',
+    clientesCache.map(function(c){return c.nombre;}).join(', '));
+
   results.forEach(function(r){
     if(!r.text) return; // skip errors silently
     if(bulkMode==='single'){
@@ -1546,6 +1545,7 @@ function processAllLoaded(results, curMes){
 function findClientByInvestor(investorName){
   if(!investorName) return null;
   function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
+  console.log('Matching investor:', investorName, '→ cache:', clientesCache.map(function(c){return c.nombre;}).join('|'));
   var normInv=norm(investorName);
   var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
   var best=null,bestScore=0,bestPct=0;
@@ -2231,6 +2231,24 @@ function drawDetChart(stats){
     </div>
   </div>
 </div>
+
+<!-- ADMIN PIN -->
+<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <div style="text-align:center;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
+    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
+      <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
+      <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
+      <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
+      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
+    </div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
+  </div>
+</div>
+
 
 </body>
 </html>
