@@ -625,7 +625,7 @@ function computeStats(rows){
 function renderReporte(rep){
   let rows;try{rows=parseCSV(rep.csv_data);}catch(e){$('emptyState').style.display='block';return;}
   const stats=computeStats(rows);
-  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats};
+  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats,nombre:currentCliente?currentCliente.nombre:''};
   $('reportContent').style.display='block';
   const today=new Date(),ts=`${pad2(today.getDate())}/${pad2(today.getMonth()+1)}/${today.getFullYear()}`;
   $('rhName').textContent=currentCliente.nombre;
@@ -736,7 +736,12 @@ $('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='n
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-async function generarPDF(){
+async function tryPDF(){
+  if(!CC.labels||!CC.labels.length){alert('No hay datos. Carga un reporte primero.');return;}
+  generarPDF();
+}
+
+function generarPDF(){
   if(!CC.labels||!CC.labels.length){alert('No hay datos. Carga un reporte primero.');return;}
   const s=CC.stats;if(!s){alert('Sin datos.');return;}
   const btn=$('btnPDF');btn.textContent='⏳...';btn.disabled=true;
