@@ -262,6 +262,14 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
   .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
 
+
+/* Theme pill */
+.theme-row{display:flex;align-items:center;gap:6px;padding:8px 0;margin-bottom:4px;}
+.theme-row span{font-size:11px;color:var(--muted);}
+.th-admin-pill{width:36px;height:20px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
+.th-admin-pill.pill-on{background:var(--accent);border-color:var(--accent);}
+.th-admin-pill .pill-knob{width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s;}
+.th-admin-pill.pill-on .pill-knob{transform:translateX(16px);background:#fff;}
 </style>
 </head>
 <body>
@@ -313,6 +321,11 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         </button>
       </div>
       <div class="sidebar-bottom">
+        <div class="theme-row">
+          <span>🌙</span>
+          <button class="th-admin-pill" id="adminThemePill" onclick="toggleAdminTheme()"><div class="pill-knob"></div></button>
+          <span>☀️</span>
+        </div>
         <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
@@ -628,6 +641,20 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
+
+// ── THEME ──
+(function(){
+  var t = localStorage.getItem('rcAdminTheme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+})();
+function toggleAdminTheme(){
+  var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  try{ localStorage.setItem('rcAdminTheme', t); }catch(e){}
+  var pill = document.getElementById('adminThemePill');
+  if(pill) pill.classList.toggle('pill-on', t === 'light');
+}
+
 const ADMIN_PASS  = 'RCCapital2026Admin';
 
 const { createClient } = supabase;
@@ -693,6 +720,13 @@ function showPage(name, el){
 }
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
+// Init theme pill state
+(function(){
+  var t = localStorage.getItem('rcAdminTheme') || 'light';
+  var pill = document.getElementById('adminThemePill');
+  if(pill && t === 'light') pill.classList.add('pill-on');
+})();
+
 async function loadAll(){
   await loadClientes();
   await loadReportes();
