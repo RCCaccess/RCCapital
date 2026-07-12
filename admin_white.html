@@ -237,42 +237,6 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
   .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
 
-
-/* ── MOBILE ADMIN NAV ── */
-@media(max-width:768px){
-  .layout{flex-direction:column !important;}
-  #adminSidebar{
-    width:100% !important;
-    height:auto !important;
-    flex-direction:row !important;
-    padding:8px 10px !important;
-    border-right:none !important;
-    border-bottom:1px solid var(--border) !important;
-    overflow-x:auto;
-    position:sticky;
-    top:0;
-    z-index:50;
-  }
-  #adminSidebar .sidebar-logo{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-bottom:0 !important;margin-right:8px;}
-  #adminSidebar .sidebar-logo h2{font-size:13px;}
-  #adminSidebar .sidebar-logo .tag{display:none;}
-  .sidebar-nav-group{flex-direction:row !important;gap:2px;overflow-x:auto;flex:1;}
-  .nav-item{padding:6px 10px !important;white-space:nowrap;flex-shrink:0;}
-  .nav-item .icon{width:14px !important;font-size:13px;}
-  .nav-label{font-size:11px !important;}
-  .sidebar-bottom{display:none !important;}
-  .sidebar-toggle{display:none !important;}
-  .content{padding:14px 10px !important;}
-  .page-title{font-size:18px;}
-  .card{border-radius:10px;}
-  table{font-size:12px;}
-  th,td{padding:8px 10px !important;}
-}
-@media(max-width:420px){
-  .nav-label{display:none !important;}
-  .nav-item .icon{font-size:16px;width:auto !important;}
-  .nav-item{padding:8px 10px !important;}
-}
 </style>
 </head>
 <body>
@@ -304,7 +268,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
-      <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics = PIN">
+      <div class="sidebar-logo">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
@@ -634,12 +598,12 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 
 // ── CONFIG ────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
+const SUPABASE_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RCCapital2024Admin';
+const ADMIN_PASS  = 'RCCapital2026Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -1104,10 +1068,8 @@ async function agregarCliente(){
   }
   $('newNombre').value=''; $('newEmail').value=''; $('newPass').value=generatePass();
   toast('✅ Cliente '+nombre+' agregado correctamente');
-  clientesCache=[];
   await loadClientes();
-  await updateDashboard();
-  showPage('clientes', document.querySelector('[data-page="clientes"]'));
+  updateDashboard();
 }
 
 // ── ELIMINAR CLIENTE ─────────────────────────────────────────────
@@ -1454,43 +1416,54 @@ var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
 
 function processAllLoaded(results, curMes){
   bulkFiles = [];
-  var managerRows = [];
+  var managerRows = []; // collect manager's own CSV rows
 
   results.forEach(function(r){
-    if(!r.text){ return; }
+    if(!r.text) return; // skip errors silently
     if(bulkMode==='single'){
       try{
         var split = splitConsolidatedCSV(r.text);
         split.forEach(function(inv){
-          var normName = (inv.investorName||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-          var normMgr  = MANAGER_CSV_NAME.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-          if(normName===normMgr||normName.indexOf(normMgr)>=0||normMgr.indexOf(normName)>=0){
-            managerRows.push(inv.csvText); return;
+          var normName = (inv.investorName||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+          var normMgr  = MANAGER_CSV_NAME.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+
+          // Check if this is the manager's own account
+          if(normName === normMgr || normName.indexOf(normMgr) >= 0 || normMgr.indexOf(normName) >= 0){
+            managerRows.push(inv.csvText);
+            return; // don't add to client list
           }
+
           var match = findClientByInvestor(inv.investorName);
-          // Show ALL investors — matched and unmatched
+          if(!match) return; // skip unrecognized investors silently
+
           bulkFiles.push({
             file:r.file, text:inv.csvText,
             investor:inv.investorName,
-            clienteId:match?match.id:'',
-            clienteName:match?match.nombre:'⚠️ Sin asignar',
+            clienteId:match.id,
+            clienteName:match.nombre,
             mes:curMes, status:'pending', rowCount:inv.rowCount
           });
         });
-        if(managerRows.length>0){
-          lastConsolidatedCSV=r.text;
-          try{localStorage.setItem('rcMiCuentaCSV',r.text);}catch(e){}
-          setTimeout(function(){try{mcProcessCSV(r.text);}catch(e){}},300);
+
+        // Feed manager data to Mi Cuenta
+        if(managerRows.length > 0){
+          lastConsolidatedCSV = r.text;
+          try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
+          mcProcessCSV(r.text);
+          var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
+          if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">&#9679;</span>';
         }
-      }catch(ex){ console.error('processAllLoaded error:',ex); }
+
+      }catch(ex){ /* skip silently */ }
     } else {
-      var inv=extractInvestorFromCSV(r.text);
-      var match=findClientByInvestor(inv);
+      var inv = extractInvestorFromCSV(r.text);
+      var match = findClientByInvestor(inv);
+      if(!match) return; // skip unrecognized silently
       bulkFiles.push({
         file:r.file, text:r.text,
         investor:inv||'(desconocido)',
-        clienteId:match?match.id:'',
-        clienteName:match?match.nombre:'⚠️ Sin asignar',
+        clienteId:match.id,
+        clienteName:match.nombre,
         mes:curMes, status:'pending', rowCount:0
       });
     }
@@ -1498,6 +1471,24 @@ function processAllLoaded(results, curMes){
   renderBulkList();
 }
 
+function findClientByInvestor(investorName){
+  if(!investorName) return null;
+  function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
+  var normInv=norm(investorName);
+  var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
+  var best=null,bestScore=0,bestPct=0;
+  for(var i=0;i<clientesCache.length;i++){
+    var c=clientesCache[i];
+    var normC=norm(c.nombre);
+    if(normC===normInv) return c; // exact match wins immediately
+    var wordsC=normC.split(' ').filter(function(w){return w.length>2;});
+    var matches=wordsC.filter(function(w){return wordsInv.indexOf(w)>=0;}).length;
+    var pct=wordsC.length>0?matches/wordsC.length:0;
+    // Require at least 2 matching words AND more than 50% of client name matched
+    if(matches>=2&&pct>bestPct){bestPct=pct;bestScore=matches;best=c;}
+  }
+  return best;
+}
 
 function renderBulkList(){
   var list=$('bulkList'); list.innerHTML='';
@@ -1578,13 +1569,13 @@ const ADMIN_PIN = '0180';
 let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
 
 function handleAdminTap(){
-  adminTapCount = (adminTapCount||0) + 1;
+  adminTapCount++;
   clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
-  var el = document.getElementById('secretLogoAdmin');
-  if(!el) el = document.querySelector('.sidebar-logo');
-  if(el){ el.style.opacity='0.5'; setTimeout(function(){ el.style.opacity='1'; },120); }
-  if(adminTapCount>=5){ adminTapCount=0; adminPinOpen(); }
+  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 2000);
+  if(adminTapCount >= 5){
+    adminTapCount = 0;
+    adminPinOpen();
+  }
 }
 
 function adminPinOpen(){
