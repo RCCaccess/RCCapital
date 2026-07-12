@@ -621,7 +621,7 @@ const SUPABASE_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 
 // ── THEME ──────────────────────────────────────────────────────
-(function(){ var t=localStorage.getItem('rcTheme')||'dark'; document.documentElement.setAttribute('data-theme',t); })();
+(function(){ var t=localStorage.getItem('rcTheme')||'light'; document.documentElement.setAttribute('data-theme',t); })();
 function getTheme(){ return document.documentElement.getAttribute('data-theme')||'dark'; }
 function quickToggleTheme(){
   var t=getTheme()==='dark'?'light':'dark';
@@ -1449,9 +1449,33 @@ function handleBulkFiles(fileList){
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  // Always reload clients before processing to ensure cache is fresh
+  // Reload clients then read files
   loadClientes().then(function(){
-    console.log('Cache after reload:', clientesCache.length, clientesCache.map(function(x){return x.nombre;}).join(', '));
+    console.log('Clientes en cache:', clientesCache.length,
+      clientesCache.map(function(x){return x.nombre;}).join(' | '));
+
+    var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
+    var results = [];
+    var pending = filesToRead.length;
+
+    filesToRead.forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        results.push({file:file, text:ev.target.result});
+        pending--;
+        if(pending===0) processAllLoaded(results, curMes);
+      };
+      reader.onerror = function(){
+        results.push({file:file, text:null});
+        pending--;
+        if(pending===0) processAllLoaded(results, curMes);
+      };
+      reader.readAsText(file);
+    });
+
+  }).catch(function(err){
+    console.error('loadClientes failed:', err);
+    // Try with existing cache anyway
     var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
     var results = [];
     var pending = filesToRead.length;
@@ -1462,14 +1486,14 @@ function handleBulkFiles(fileList){
         pending--;
         if(pending===0) processAllLoaded(results, curMes);
       };
-    reader.onerror = function(){
-      results.push({file:file, text:null});
-      pending--;
-      if(pending===0) processAllLoaded(results, curMes);
-    };
-    reader.readAsText(file);
+      reader.onerror = function(){
+        results.push({file:file, text:null});
+        pending--;
+        if(pending===0) processAllLoaded(results, curMes);
+      };
+      reader.readAsText(file);
+    });
   });
-  }); // end loadClientes().then
 }
 function processAllLoaded(results, curMes){
   bulkFiles = [];
