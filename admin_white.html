@@ -271,9 +271,9 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;-webkit-tap-highlight-color:transparent;">
-      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RCCapital"/>
-      <h1>RCCapital</h1>
+    <div class="login-logo" style="cursor:default;user-select:none;">
+      <img src="logo.png" id="secretLogoAdmin" onclick="handleAdminTap()" style="width:40px;height:40px;object-fit:contain;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" alt="RCCapital"/>
+      <h1>RC Capital</h1>
       <span>ADMIN</span>
     </div>
     <div class="field">
@@ -685,12 +685,14 @@ async function login(){
   const err   = $('loginErr');
   const btn   = $('loginBtn');
 
-  if(!email || !pass){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
-  if(email !== ADMIN_EMAIL || pass !== ADMIN_PASS){
-    err.textContent='Credenciales incorrectas. Email: '+ADMIN_EMAIL; 
-    err.style.display='block'; 
-    console.log('Expected email:', ADMIN_EMAIL, 'got:', email);
-    console.log('Expected pass:', ADMIN_PASS, 'got:', pass);
+  const emailClean = email.toLowerCase().trim();
+  const passClean  = pass.trim();
+  if(!emailClean || !passClean){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
+  console.log('Login attempt - email:', emailClean, 'expected:', ADMIN_EMAIL);
+  console.log('Pass match:', passClean === ADMIN_PASS, 'len:', passClean.length);
+  if(emailClean !== ADMIN_EMAIL || passClean !== ADMIN_PASS){
+    err.textContent='Credenciales incorrectas.';
+    err.style.display='block';
     return;
   }
   btn.textContent='Entrando...'; btn.disabled=true;
@@ -1641,11 +1643,12 @@ const ADMIN_PIN = '0180';
 let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
 
 function handleAdminTap(){
-  if(typeof adminTapCount === 'undefined') adminTapCount = 0;
-  adminTapCount++;
+  adminTapCount = (adminTapCount||0) + 1;
   clearTimeout(adminTapTimer);
   adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
-  console.log('Logo tap:', adminTapCount);
+  // Visual feedback on each tap
+  var logo = document.getElementById('secretLogoAdmin');
+  if(logo){ logo.style.opacity='0.5'; setTimeout(function(){ logo.style.opacity='1'; },100); }
   if(adminTapCount >= 5){
     adminTapCount = 0;
     adminPinOpen();
