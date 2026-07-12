@@ -1449,18 +1449,19 @@ function handleBulkFiles(fileList){
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  // Read first file (consolidated mode) or all files (multi mode)
-  var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
-  var results = []; // {text, file}
-  var pending = filesToRead.length;
-
-  filesToRead.forEach(function(file){
-    var reader = new FileReader();
-    reader.onload = function(ev){
-      results.push({file:file, text:ev.target.result});
-      pending--;
-      if(pending===0) processAllLoaded(results, curMes);
-    };
+  // Always reload clients before processing to ensure cache is fresh
+  loadClientes().then(function(){
+    console.log('Cache after reload:', clientesCache.length, clientesCache.map(function(x){return x.nombre;}).join(', '));
+    var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
+    var results = [];
+    var pending = filesToRead.length;
+    filesToRead.forEach(function(file){
+      var reader = new FileReader();
+      reader.onload = function(ev){
+        results.push({file:file, text:ev.target.result});
+        pending--;
+        if(pending===0) processAllLoaded(results, curMes);
+      };
     reader.onerror = function(){
       results.push({file:file, text:null});
       pending--;
@@ -1468,11 +1469,8 @@ function handleBulkFiles(fileList){
     };
     reader.readAsText(file);
   });
+  }); // end loadClientes().then
 }
-
-// Manager name as it appears in the CSV - used to auto-feed Mi Cuenta
-var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
-
 function processAllLoaded(results, curMes){
   bulkFiles = [];
   var managerRows = []; // collect manager's own CSV rows
