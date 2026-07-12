@@ -488,63 +488,40 @@ canvas{display:block;width:100%!important;}
 
 <script>
 
-
-// ── AUTO LOGIN ───────────────────────────────────────────────────
-(function(){
-  try{
-    var saved = localStorage.getItem('rcSavedLogin');
-    if(saved){
-      var d = JSON.parse(saved);
-      // Auto-fill fields
-      document.addEventListener('DOMContentLoaded', function(){
-        var em = document.getElementById('clientEmail');
-        var pw = document.getElementById('clientPass');
-        var cb = document.getElementById('rememberMe');
-        if(em) em.value = d.email||'';
-        if(pw) pw.value = d.pass||'';
-        if(cb) cb.checked = true;
-      });
-    }
-    // Check active session
-    var sess = localStorage.getItem('rcActiveSession');
-    if(sess){
-      var sd = JSON.parse(sess);
-      if(sd && sd.expires > Date.now()){
-        // Session still valid — auto login
-        document.addEventListener('DOMContentLoaded', function(){
-          window._autoLoginData = sd;
-        });
-      } else {
-        localStorage.removeItem('rcActiveSession');
-      }
-    }
-  }catch(e){}
-})();
-
-// ── THEME ────────────────────────────────────────────────────────
+// ── THEME ──────────────────────────────────────────────────────
 function getTheme(){ return document.documentElement.getAttribute('data-theme')||'dark'; }
 function toggleTheme(){
-  var t = getTheme()==='dark' ? 'light' : 'dark';
-  applyThemeIdx(t);
-}
-function applyThemeIdx(t){
-  document.documentElement.setAttribute('data-theme', t);
-  try{ localStorage.setItem('rcIdxTheme', t); }catch(e){}
+  var t=getTheme()==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  try{localStorage.setItem('rcIdxTheme',t);}catch(e){}
   _updateThemeUI(t);
-  if(CC.labels&&CC.labels.length){ drawEquityChart(); }
+  if(CC.labels&&CC.labels.length) drawEquityChart();
 }
 function _updateThemeUI(t){
-  var isDark = t==='dark';
-  // Update all theme toggles
-  ['themePill','themePill2'].forEach(function(id){
+  var isDark=t==='dark';
+  ['themePill','themePill2','bbThemePill'].forEach(function(id){
     var el=document.getElementById(id);
     if(el) el.classList.toggle('on',!isDark);
   });
-  var icon=document.getElementById('themeIcon');
-  if(icon) icon.textContent=isDark?'🌙':'☀️';
 }
-// Init theme UI after DOM ready
-if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){_updateThemeUI(getTheme());});}else{_updateThemeUI(getTheme());}
+(function(){
+  try{
+    var t=localStorage.getItem('rcIdxTheme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+    _updateThemeUI(t);
+  }catch(e){}
+})();
+
+// ── AUTO LOGIN ──────────────────────────────────────────────────
+(function(){
+  try{
+    var sess=localStorage.getItem('rcActiveSession');
+    if(!sess) return;
+    var sd=JSON.parse(sess);
+    if(!sd||sd.expires<Date.now()){localStorage.removeItem('rcActiveSession');return;}
+    window._autoSession=sd;
+  }catch(e){}
+})();
 
 
 const SUPABASE_URL='https://oettmexxsohqudmshhip.supabase.co';
@@ -553,21 +530,6 @@ const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 let currentCliente=null,activeRange='ALL',CC={};
-// Preload logo for PDF
-var _logoB64 = null;
-(function(){
-  var img = new Image();
-  img.crossOrigin='anonymous';
-  img.onload = function(){
-    try{
-      var cv=document.createElement('canvas');
-      cv.width=img.width; cv.height=img.height;
-      var cx=cv.getContext('2d'); cx.drawImage(img,0,0);
-      _logoB64 = cv.toDataURL('image/png');
-    }catch(e){ _logoB64=null; }
-  };
-  img.src='logo.png';
-})();
 const pad2=x=>String(x).padStart(2,'0');
 const dayKey=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
 const mKey=d=>`${d.getFullYear()}-${pad2(d.getMonth()+1)}`;
@@ -601,62 +563,24 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
-function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
-function showApp(){
-  $('loginScreen').style.display='none';
-  $('appScreen').style.display='block';
-  $('abNombre').textContent=currentCliente.nombre;
-  var bb=$('bbNombre'); if(bb) bb.textContent=currentCliente.nombre;
-  loadReportes();
-  // Ask for push notification permission (once)
-  requestNotifPermission();
+function logout(){
+  try{localStorage.removeItem('rcActiveSession');}catch(e){}
+  sessionStorage.removeItem('rcLogin');
+  currentCliente=null;CC={};
+  $('appScreen').style.display='none';
+  $('loginScreen').style.display='flex';
+  document.querySelectorAll('.per-btn').forEach(function(b){b.remove();});
+  $('reportContent').style.display='none';
+  $('periodBar').style.display='none';
 }
-
-function requestNotifPermission(){
-  if(!('Notification' in window)) return;
-  if(Notification.permission==='default'){
-    // Small delay so user sees the app first
-    setTimeout(function(){
-      Notification.requestPermission().then(function(perm){
-        if(perm==='granted'){
-          // Save subscription to localStorage for admin to target
-          try{
-            var subs=JSON.parse(localStorage.getItem('rcNotifSubs')||'[]');
-            var entry={email:currentCliente.email,nombre:currentCliente.nombre,ts:Date.now()};
-            subs=subs.filter(function(s){return s.email!==entry.email;});
-            subs.push(entry);
-            localStorage.setItem('rcNotifSubs',JSON.stringify(subs));
-          }catch(e){}
-          // Show confirmation
-          new Notification('RC Capital', {
-            body:'✅ Recibirás una notificación cuando tu reporte esté listo.',
-            icon:'icons/icon-192.png',
-            badge:'icons/icon-192.png'
-          });
-        }
-      });
-    }, 2000);
-  }
-}
-
-// Show local notification when new report loads
-function notifyNewReport(nombre, mes){
-  if(!('Notification' in window)) return;
-  if(Notification.permission!=='granted') return;
-  new Notification('RC Capital — Nuevo Reporte', {
-    body:'Hola '+nombre+', tu reporte de '+mes+' ya está disponible.',
-    icon:'icons/icon-192.png',
-    badge:'icons/icon-192.png',
-    tag:'new-report'
-  });
-}
+function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;loadReportes();}
 
 async function loadReportes(){
   $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
   const{data,error}=await db.from('reportes').select('*').eq('cliente_id',currentCliente.id).order('mes',{ascending:false});
   if(error||!data||!data.length){$('loadingState').style.display='none';$('emptyState').style.display='block';return;}
   const pbc=$('periodBtns');pbc.innerHTML='';
-  data.forEach((rep,i)=>{const btn=document.createElement('button');btn.className='per-btn'+(i===0?' active':'');btn.textContent=mLabel(rep.mes);btn.onclick=()=>{document.querySelectorAll('.per-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderReporte(rep);};pbc.appendChild(btn);});
+  data.forEach((rep,i)=>{const btn=document.createElement('button');btn.className='period-btn'+(i===0?' active':'');btn.textContent=mLabel(rep.mes);btn.onclick=()=>{document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderReporte(rep);};pbc.appendChild(btn);});
   if(data.length>1)$('periodBar').style.display='flex';
   $('loadingState').style.display='none';
   renderReporte(data[0]);
@@ -695,58 +619,40 @@ function computeStats(rows){
   const days=fd&&ld?Math.round((ld-fd)/86400000):0;
   const sd=Object.keys(dailyEq).sort();const es=sd.map(dk=>({dk,eq:dailyEq[dk]}));
   const mEq={};for(const{dk,eq}of es)mEq[dk.slice(0,7)]=eq;
-  // Max drawdown: largest peak-to-trough decline as % of capital (dep)
-  let peak=dep, maxDD=0;
-  for(const{eq}of es){ if(eq>peak)peak=eq; const dd=peak>0?(peak-eq)/peak*100:0; if(dd>maxDD)maxDD=dd; }
-  return{dep,depGross,depFeeAmt,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq,maxDD};
+  return{dep,depGross,depFeeAmt,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq};
 }
 
 function renderReporte(rep){
   let rows;try{rows=parseCSV(rep.csv_data);}catch(e){$('emptyState').style.display='block';return;}
   const stats=computeStats(rows);
-  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats,nombre:currentCliente.nombre};
-  // Notify if this is a freshly uploaded report (< 5 min old)
-  if(rep.created_at){
-    var age=(Date.now()-new Date(rep.created_at).getTime())/60000;
-    if(age<5) notifyNewReport(currentCliente.nombre, rep.mes||'');
-  }
+  CC={labels:stats.es.map(s=>s.dk),equity:stats.es.map(s=>s.eq),deposit:stats.dep,stats};
   $('reportContent').style.display='block';
-  // Última actualización = fecha del último CSV cargado (created_at), UTC-5
-  let ts='—';
-  if(rep.created_at){
-    const raw=String(rep.created_at).replace('+00:00','Z').replace(' ','T');
-    const safe=raw.endsWith('Z')||/[+-]\d{2}:\d{2}$/.test(raw)?raw:raw+'Z';
-    const bog=new Date(new Date(safe).getTime()-5*3600*1000);
-    ts=`${pad2(bog.getUTCDate())}/${pad2(bog.getUTCMonth()+1)}/${bog.getUTCFullYear()}`;
-  }
-  const today=new Date(),footTs=`${pad2(today.getDate())}/${pad2(today.getMonth()+1)}/${today.getFullYear()}`;
+  const today=new Date(),ts=`${pad2(today.getDate())}/${pad2(today.getMonth()+1)}/${today.getFullYear()}`;
   $('rhName').textContent=currentCliente.nombre;
   $('rhPeriod').textContent=stats.firstDate&&stats.lastDate?`${dayKey(stats.firstDate)}  →  ${dayKey(stats.lastDate)}`:'—';
-  $('rhDate').textContent='Última actualización: '+ts;$('footerDate').textContent=footTs;
+  $('rhDate').textContent=ts;$('footerDate').textContent=ts;
   $('heroROI').textContent=(stats.roi>=0?'+':'')+fmtPct(stats.roi);
   $('heroROI').className='hero-value '+(stats.roi>=0?'pos':'neg');
-  $('heroSub').textContent=stats.me.length+' meses bajo gestión · Rendimiento neto';
+  $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
   $('heroEq').textContent=fmtUSD(stats.equity);
   if(stats.depFeeAmt>0){
     $('heroDep').innerHTML=
-      'Depósito inicial: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span><br>'+
-      'Activation fee: <span class="hero-dep-fee">-'+fmtUSD(stats.depFeeAmt)+'</span><br>'+
-      '<span class="hero-dep-cap">Capital inicial: '+fmtUSD(stats.dep)+'</span>';
+      'Depósito inicial: <span style="color:var(--text);font-weight:600;">'+fmtUSD(stats.depGross)+'</span><br>'+
+      'Activation fee: <span style="color:var(--bad);">-'+fmtUSD(stats.depFeeAmt)+'</span><br>'+
+      '<span style="color:var(--accent);font-weight:700;">Capital a gestionar: '+fmtUSD(stats.dep)+'</span>';
   } else {
-    $('heroDep').innerHTML='Depósito inicial: <span class="hero-dep-v">'+fmtUSD(stats.depGross)+'</span>';
+    $('heroDep').textContent='Depósito inicial: '+fmtUSD(stats.depGross);
   }
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kb-value '+(netProfit>=0?'pos':'neg');
-  $('kpiDays').textContent=fmtNum(stats.me.length);
+  $('kpiDays').textContent=fmtNum(stats.days);
   $('kpiDaysSub').textContent=stats.firstDate?'Desde '+dayKey(stats.firstDate):'—';
   $('kpiBest').textContent=stats.best[0]?'+'+fmtUSD(stats.best[1]):'—';
   $('kpiBestLbl').textContent=stats.best[0]?mLabel(stats.best[0]):'—';
   $('kpiPosM').textContent=stats.posM+' / '+stats.me.length;
 
-
-
-  activeRange='ALL';updateRangeUI();drawEquityChart();buildTable(stats);
+  activeRange='ALL';updateRangeUI();drawEquityChart();drawMonthlyChart(stats);buildTable(stats);
 }
 
 function buildTable(stats){
@@ -763,28 +669,27 @@ function drawEquityChart(){
   const pad={l:66,r:14,t:18,b:34},iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
   const ext=[...equity,deposit];let minV=Math.min(...ext),maxV=Math.max(...ext);
   const mg=(maxV-minV)*0.08||5;minV-=mg;maxV+=mg;const span=maxV-minV,n=labels.length;
-  var _dk=getTheme()==='dark';
-  ctx.strokeStyle=_dk?'rgba(255,255,255,.06)':'rgba(0,0,0,.06)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
   for(let i=0;i<=5;i++){const y=pad.t+ih*(i/5);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle=_dk?'#555555':'#aaaaaa';ctx.font='11px -apple-system,monospace';ctx.textAlign='right';
+  ctx.fillStyle='#6b809a';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='right';
   for(let i=0;i<=5;i++){const v=maxV-span*(i/5),y=pad.t+ih*(i/5);ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-8,y+4);}
-  const step=Math.max(1,Math.ceil(n/6));ctx.textAlign='center';
+  const step=Math.max(1,Math.ceil(n/6));ctx.fillStyle='#6b809a';ctx.textAlign='center';
   for(let i=0;i<n;i+=step){const x=pad.l+iw*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),x,pad.t+ih+22);}
   const depY=pad.t+ih*(1-(deposit-minV)/span);
-  ctx.strokeStyle=_dk?'rgba(91,141,238,.3)':'rgba(58,111,216,.25)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;
+  ctx.strokeStyle='rgba(255,255,255,.18)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;
   ctx.beginPath();ctx.moveTo(pad.l,depY);ctx.lineTo(pad.l+iw,depY);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle=_dk?'rgba(255,255,255,.3)':'rgba(0,0,0,.3)';ctx.font='10px -apple-system,monospace';ctx.textAlign='left';ctx.fillText('Depósito',pad.l+6,depY-6);
+  ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';ctx.fillText('Depósito',pad.l+6,depY-6);
   const lastVal=equity[n-1],isPos=lastVal>=deposit;
   ctx.beginPath();for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
   ctx.lineTo(pad.l+iw,depY);ctx.lineTo(pad.l,depY);ctx.closePath();
   const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
-  if(isPos){grd.addColorStop(0,'rgba(76,175,120,.15)');grd.addColorStop(1,'rgba(0,0,0,0)');}else{grd.addColorStop(0,'rgba(224,90,90,.12)');grd.addColorStop(1,'rgba(0,0,0,0)');}
+  if(isPos){grd.addColorStop(0,'rgba(34,214,138,.2)');grd.addColorStop(1,'rgba(34,214,138,.02)');}else{grd.addColorStop(0,'rgba(255,79,106,.16)');grd.addColorStop(1,'rgba(255,79,106,.02)');}
   ctx.fillStyle=grd;ctx.fill();
-  ctx.lineWidth=2;ctx.lineJoin='round';ctx.strokeStyle=isPos?'#4caf78':'#e05a5a';
+  ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.strokeStyle=isPos?'#22d68a':'#ff4f6a';
   ctx.beginPath();for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
   const ex=pad.l+iw,ey=pad.t+ih*(1-(lastVal-minV)/span);
-  ctx.fillStyle=isPos?'#4caf78':'#e05a5a';ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ex,ey,2,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=isPos?'#22d68a':'#ff4f6a';ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(ex,ey,2,0,Math.PI*2);ctx.fill();
   canvas._d={labels,equity,deposit,pad,iw,ih,minV,span};
   const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;
   $('cstOpen').textContent=fmtUSD(CC.deposit);$('cstClose').textContent=fmtUSD(close);$('cstHigh').textContent=fmtUSD(high);
@@ -793,187 +698,102 @@ function drawEquityChart(){
   
 }
 
+function drawMonthlyChart(stats){
+  if(!stats.me.length)return;const canvas=$('chartMonthly');
+  const{ctx,W,H}=hiDPI(canvas,160);ctx.clearRect(0,0,W,H);
+  const labels=stats.me.map(([k])=>mLabel(k)),values=stats.me.map(([,v])=>v);
+  const pad={l:62,r:10,t:12,b:48},iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
+  const minV=Math.min(0,...values),maxV=Math.max(0,...values),span=(maxV-minV)||1,zero=pad.t+ih*(1-(0-minV)/span);
+  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
+  ctx.fillStyle='#6b809a';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='right';
+  for(let i=0;i<=4;i++){const v=maxV-span*(i/4),y=pad.t+ih*(i/4);ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-6,y+4);}
+  const n=labels.length,slot=iw/Math.max(1,n),bw=Math.max(6,slot*0.65);
+  for(let i=0;i<n;i++){const v=values[i],barH=Math.max(2,Math.abs(ih*(v/span))),x=pad.l+slot*(i+0.5)-bw/2,y=v>=0?zero-barH:zero;
+    const grd=ctx.createLinearGradient(0,y,0,y+barH);
+    if(v>=0){grd.addColorStop(0,'rgba(34,214,138,.85)');grd.addColorStop(1,'rgba(34,214,138,.25)');}else{grd.addColorStop(0,'rgba(255,79,106,.8)');grd.addColorStop(1,'rgba(255,79,106,.2)');}
+    ctx.fillStyle=grd;if(ctx.roundRect)ctx.roundRect(x,y,bw,barH,3);else ctx.rect(x,y,bw,barH);ctx.fill();}
+  ctx.fillStyle='#6b809a';ctx.font='10px Syne,sans-serif';ctx.textAlign='center';
+  for(let i=0;i<n;i++){const x=pad.l+slot*(i+0.5);ctx.save();ctx.translate(x,pad.t+ih+10);ctx.rotate(-Math.PI/5);ctx.fillText(labels[i],0,0);ctx.restore();}
+}
+
+$('chartEquity').addEventListener('mousemove',e=>{
+  const canvas=$('chartEquity');if(!canvas._d)return;
+  const{labels,equity,pad,iw}=canvas._d;
+  const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left;
+  const n=labels.length,i=Math.max(0,Math.min(n-1,Math.round((mx-pad.l)/iw*(n-1))));
+  const prev=i>0?equity[i-1]:equity[0],chg=equity[i]-prev,pct=prev?(chg/Math.abs(prev)*100):0;
+  $('ttDate').textContent=labels[i];$('ttVal').textContent=fmtUSD(equity[i]);
+  $('ttChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chg>=0?'+':'')+fmtPct(pct)+')';
+  $('ttChg').style.color=chg>=0?'var(--good)':'var(--bad)';
+  const tt=$('tooltip');tt.style.display='block';tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-44)+'px';
+});
+$('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');
+
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-async function tryPDF(){
+async function generarPDF(){
+  if(!CC.labels||!CC.labels.length){alert('No hay datos para generar el PDF.');return;}
+  const btn=$('btnPDF');btn.textContent='⏳ Generando...';btn.disabled=true;
   try{
-    var j = window.jspdf || window.jsPDF;
-    if(!j && typeof jsPDF !== 'undefined') j = {jsPDF: jsPDF};
-    if(!j){ alert('Cargando... intenta de nuevo en 2 segundos.'); return; }
-    if(!CC.labels||!CC.labels.length){ alert('No hay datos para generar el PDF.'); return; }
-    generarPDF();
-  }catch(e){ alert('Error: '+e.message); }
+    const{jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+    const W=297,H=210,M=10,iW=W-M*2;let y=M;
+    pdf.setFillColor(7,10,15);pdf.rect(0,0,W,H,'F');
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(0,194,255);pdf.text('ESTADO DE CUENTA',M,y+5);
+    pdf.setFontSize(16);pdf.setTextColor(226,234,245);pdf.text($('rhName').textContent||'—',M,y+14);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(7);pdf.setTextColor(107,128,154);pdf.text($('rhPeriod').textContent||'—',M,y+20);
+    pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(226,234,245);pdf.text('RCCapital',W-M,y+9,{align:'right'});
+    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('rhDate').textContent||'—',W-M,y+15,{align:'right'});
+    y+=24;pdf.setDrawColor(40,55,75);pdf.setLineWidth(0.3);pdf.line(M,y,W-M,y);y+=6;
+    const colL=M,colR=M+iW*0.38+4,colLW=iW*0.38,colRW=iW*0.60;
+    const roiTxt=$('heroROI').textContent||'—';const roiPos=!roiTxt.startsWith('-');
+    pdf.setFillColor(13,18,25);pdf.rect(colL,y,colLW,34,'F');
+    pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text('RENDIMIENTO TOTAL',colL+5,y+7);
+    pdf.setFontSize(28);if(roiPos){pdf.setTextColor(34,214,138);}else{pdf.setTextColor(255,79,106);}pdf.text(roiTxt,colL+5,y+24);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('heroSub').textContent||'',colL+5,y+31);
+    pdf.setFontSize(6);pdf.text('VALOR DE LA CUENTA',colL+colLW-5,y+7,{align:'right'});
+    pdf.setFont('helvetica','bold');pdf.setFontSize(12);pdf.setTextColor(226,234,245);pdf.text($('heroEq').textContent||'—',colL+colLW-5,y+19,{align:'right'});
+    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);const stats=CC.stats||{};const depLines=stats.depFeeAmt>0?['Depósito: '+fmtUSD(stats.depGross),'Fee: -'+fmtUSD(stats.depFeeAmt),'Capital: '+fmtUSD(stats.dep)]:['Depósito: '+fmtUSD(CC.deposit)];
+      depLines.forEach(function(ln,li){if(li===2){pdf.setTextColor(0,194,255);}else{pdf.setTextColor(107,128,154);}pdf.text(ln,colL+colLW-5,y+20+li*5,{align:'right'});});
+    y+=38;
+    const kpis=[{label:'PROFIT NETO',val:$('kpiProfit').textContent,t:'profit'},{label:'DÍAS ACTIVO',val:$('kpiDays').textContent,t:'blue'},{label:'MEJOR MES',val:$('kpiBest').textContent,t:'good'},{label:'MESES POSITIVOS',val:$('kpiPosM').textContent,t:'neutral'}];
+    const kW=(colLW-3)/2;
+    kpis.forEach(function(k,i){const kx=colL+(i%2)*(kW+3),ky=y+Math.floor(i/2)*20;pdf.setFillColor(10,15,24);pdf.rect(kx,ky,kW,17,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);pdf.text(k.label,kx+3,ky+6);pdf.setFontSize(9);if(k.t==='profit'){if(k.val.startsWith('-')){pdf.setTextColor(255,79,106);}else{pdf.setTextColor(34,214,138);}}else if(k.t==='blue')pdf.setTextColor(0,194,255);else if(k.t==='good')pdf.setTextColor(34,214,138);else pdf.setTextColor(226,234,245);pdf.text(k.val||'—',kx+3,ky+13);});
+    y+=43;
+    const cs=[{l:'INICIO',v:$('cstOpen').textContent},{l:'ACTUAL',v:$('cstClose').textContent},{l:'MÁXIMO',v:$('cstHigh').textContent},{l:'MÍNIMO',v:$('cstLow').textContent}];
+    const csW=(colLW-9)/4;
+    cs.forEach(function(s,i){const sx=colL+i*(csW+3);pdf.setFillColor(8,12,20);pdf.rect(sx,y,csW,12,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.setTextColor(107,128,154);pdf.text(s.l,sx+2,y+5);pdf.setFontSize(6);pdf.setFont('helvetica','normal');const sp=!s.v.startsWith('-');if(i===3){if(sp){pdf.setTextColor(34,214,138);}else{pdf.setTextColor(255,79,106);}}else{pdf.setTextColor(226,234,245);}pdf.text(s.v||'—',sx+2,y+10);});
+    y+=16;
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Resumen por Período',colL,y+5);y+=8;
+    const tC=[colLW*0.28,colLW*0.24,colLW*0.24,colLW*0.24];const tX=[colL,colL+tC[0],colL+tC[0]+tC[1],colL+tC[0]+tC[1]+tC[2]];
+    pdf.setFillColor(16,24,38);pdf.rect(colL,y,colLW,6,'F');
+    ['MES','P&L MES','RET %','EQUITY'].forEach(function(h,i){pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.setTextColor(107,128,154);pdf.text(h,i===0?tX[i]+2:tX[i]+tC[i]-2,y+4,{align:i===0?'left':'right'});});y+=6;
+    const tableRows=$('summaryBody').querySelectorAll('tr');const rH=5;
+    tableRows.forEach(function(row,ri){if(y+rH>H-20)return;var cells=row.querySelectorAll('td');if(cells.length<4)return;if(ri%2===0){pdf.setFillColor(8,12,20);pdf.rect(colL,y,colLW,rH,'F');}cells.forEach(function(cell,i){const txt=cell.textContent.trim();pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);if(i===0)pdf.setTextColor(226,234,245);else if(txt.startsWith('-'))pdf.setTextColor(255,79,106);else if(txt.startsWith('+'))pdf.setTextColor(34,214,138);else pdf.setTextColor(226,234,245);pdf.text(txt,i===0?tX[i]+2:tX[i]+tC[i]-2,y+3.8,{align:i===0?'left':'right'});});pdf.setDrawColor(20,30,45);pdf.setLineWidth(0.15);pdf.line(colL,y+rH,colL+colLW,y+rH);y+=rH;});
+    let ry=M+28;
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Evolución del Capital',colR,ry+5);ry+=9;
+    var eqC=$('chartEquity');if(eqC&&eqC.width>0){try{var eqImgData=eqC.toDataURL('image/jpeg',0.85);var eqH=74;pdf.setFillColor(10,14,20);pdf.rect(colR,ry,colRW,eqH,'F');pdf.addImage(eqImgData,'JPEG',colR+1,ry+1,colRW-2,eqH-2);ry+=eqH+4;}catch(e){console.log('eq chart err',e);ry+=4;}}
+    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Resultado Mensual',colR,ry+5);ry+=9;
+    var mC=$('chartMonthly');if(mC&&mC.width>0){try{var mImgData=mC.toDataURL('image/jpeg',0.85);var mH=50;pdf.setFillColor(10,14,20);pdf.rect(colR,ry,colRW,mH,'F');pdf.addImage(mImgData,'JPEG',colR+1,ry+1,colRW-2,mH-2);ry+=mH+4;}catch(e){console.log('m chart err',e);ry+=4;}}
+    pdf.setDrawColor(40,55,75);pdf.line(M,H-13,W-M,H-13);
+    pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);
+    pdf.text('Este reporte es de carácter informativo. Rendimientos pasados no garantizan resultados futuros.',M,H-8);
+    pdf.text('RCCapital · '+($('footerDate').textContent||'—'),W-M,H-8,{align:'right'});
+    const name=(currentCliente.nombre||'Cliente').replace(/\s+/g,'_');
+    pdf.save('RCCapital_'+name+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  }catch(err){alert('Error PDF: '+err.message);}
+  finally{btn.textContent='⬇️ Guardar PDF';btn.disabled=false;}
 }
 
-function generarPDF(){
-  var jsPDFClass = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
-  if(!jsPDFClass){ alert('PDF no disponible. Recarga la página.'); return; }
-  var s=CC.stats; if(!s){ alert('Sin datos.'); return; }
-  var nombre=CC.nombre||currentCliente&&currentCliente.nombre||'Inversor';
+window.addEventListener('resize',()=>{if(CC.labels&&CC.labels.length){drawEquityChart();if(CC.stats)drawMonthlyChart(CC.stats);}});
+const saved=sessionStorage.getItem('rc_client');
+if(saved){try{currentCliente=JSON.parse(saved);showApp();}catch(e){}}
 
-  var doc=new jsPDFClass({orientation:'portrait',unit:'mm',format:'letter'});
-  var PW=215.9,PH=279.4,M=14;
-  var y=M;
-  var fmt=function(n){return(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
-  var fmtP=function(n){return(isFinite(n)?n:0).toFixed(2)+'%';};
-  var pad2=function(x){return String(x).padStart(2,'0');};
-  var MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  var mLbl=function(k){var p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
-  var today=new Date();
-  var bog=new Date(today.getTime()-5*3600000);
-  var rh=bog.getUTCHours(); var ap=rh>=12?'PM':'AM'; var h12=rh%12||12;
-  var todayStr=pad2(bog.getUTCDate())+'/'+pad2(bog.getUTCMonth()+1)+'/'+bog.getUTCFullYear()+' · '+h12+':'+pad2(bog.getUTCMinutes())+' '+ap;
-
-  var C={text:'#1f2328',text2:'#656d76',border:'#d0d7de',bg2:'#f6f8fa',good:'#1a7f37',bad:'#cf222e',heroBg:'#1f2328',heroGreen:'#3fb950',heroBad:'#f85149'};
-  function sf(sz,wt,col){doc.setFontSize(sz);doc.setFont('helvetica',wt||'normal');doc.setTextColor(col||C.text);}
-  function ln(x1,y1,x2,y2,col,w){doc.setDrawColor(col||C.border);doc.setLineWidth(w||0.25);doc.line(x1,y1,x2,y2);}
-
-  // HEADER — use preloaded logo
-  doc.setFillColor('#1f2328'); doc.roundedRect(M,y,10,10,2,2,'F');
-  if(_logoB64){
-    try{ doc.addImage(_logoB64,'PNG',M+1,y+1,8,8); }
-    catch(e){ sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8); }
-  } else {
-    sf(5,'bold','#ffffff'); doc.text('RC',M+1.8,y+6.8);
-  }
-  sf(13,'bold',C.text); doc.text('RC Capital',M+13,y+7);
-  sf(8,'normal',C.text2); doc.text(todayStr,PW-M,y+4,{align:'right'});
-  doc.text('Estado de Cuenta',PW-M,y+9,{align:'right'});
-  y+=13; ln(M,y,PW-M,y,C.border,0.4); y+=6;
-
-  // CLIENT NAME
-  sf(7,'bold',C.text2); doc.text('INVERSOR',M,y); y+=6;
-  sf(15,'bold',C.text); doc.text(nombre,M,y); y+=6;
-  if(s.firstDate&&s.lastDate){
-    sf(8,'normal',C.text2);
-    doc.text(s.firstDate.getFullYear()+'-'+pad2(s.firstDate.getMonth()+1)+'-'+pad2(s.firstDate.getDate())+' → '+s.lastDate.getFullYear()+'-'+pad2(s.lastDate.getMonth()+1)+'-'+pad2(s.lastDate.getDate()),M,y);
-  }
-  y+=9; ln(M,y,PW-M,y,C.border,0.3); y+=6;
-
-  // HERO
-  var heroW=PW-M*2,heroH=s.depFeeAmt>0?38:34;
-  doc.setFillColor('#1f2328'); doc.roundedRect(M,y,heroW,heroH,3,3,'F');
-  var roi=s.roi||0; var isPos=roi>=0;
-  sf(7,'bold','#8b949e'); doc.text('RENDIMIENTO TOTAL',M+5,y+7);
-  sf(20,'bold',isPos?C.heroGreen:C.heroBad); doc.text((isPos?'+':'')+fmtP(roi),M+5,y+20);
-  sf(7,'normal','#8b949e'); doc.text(s.me.length+' meses bajo gestión',M+5,y+28);
-  sf(6.5,'bold','#8b949e'); doc.text('CAPITAL ACTUAL EN GESTIÓN',PW-M-5,y+7,{align:'right'});
-  sf(15,'bold','#ffffff'); doc.text(fmt(s.equity||0),PW-M-5,y+16,{align:'right'});
-  sf(6.5,'normal','#8b949e');
-  if(s.depFeeAmt>0){
-    doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+22,{align:'right'});
-    sf(6.5,'normal','#f85149');
-    doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+27,{align:'right'});
-    sf(6.5,'bold','#3fb950');
-    doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+32,{align:'right'});
-  } else {
-    sf(6.5,'normal','#8b949e');
-    doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+23,{align:'right'});
-  }
-  y+=heroH+5;
-
-  // KPIS
-  var kw=(heroW-9)/4;
-  var kpis=[
-    {l:'BENEFICIO ACTUAL',v:(s.runP+s.runF>=0?'+':'')+fmt(s.runP+s.runF),c:s.runP+s.runF>=0?C.good:C.bad},
-    {l:'MESES EN GESTIÓN',v:String(s.me.length),c:C.text},
-    {l:'MEJOR MES',v:s.best&&s.best[0]?'+'+fmt(s.best[1]):'—',c:C.good},
-    {l:'MESES POSITIVOS',v:(s.posM||0)+'/'+s.me.length,c:C.text}
-  ];
-  kpis.forEach(function(k,i){
-    var kx=M+i*(kw+3);
-    doc.setFillColor(C.bg2); doc.setDrawColor(C.border); doc.setLineWidth(0.2);
-    doc.roundedRect(kx,y,kw,14,2,2,'FD');
-    sf(6,'bold',C.text2); doc.text(k.l,kx+3,y+5.5);
-    sf(9,'bold',k.c); doc.text(k.v,kx+3,y+11.5);
-  });
-  y+=19;
-
-  // EQUITY CHART — small canvas safe for iOS
-  sf(9,'bold',C.text); doc.text('Evolución del Capital',M,y); y+=4;
-  var cW=heroW,cH=44;
-  doc.setFillColor('#ffffff'); doc.setDrawColor(C.border); doc.setLineWidth(0.2);
-  doc.roundedRect(M,y,cW,cH,2,2,'FD');
-  try{
-    var tmp=document.createElement('canvas');
-    tmp.width=600; tmp.height=180; // smaller = safer on iOS
-    var ctx=tmp.getContext('2d');
-    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,600,180);
-    var fd=getFiltered(); var labels=fd.labels,equity=fd.equity,dep=fd.deposit,n=labels.length;
-    if(n>1){
-      var pp={l:50,r:8,t:10,b:26}, iw2=600-pp.l-pp.r, ih2=180-pp.t-pp.b;
-      var ext=equity.concat([dep]);
-      var minV=Math.min.apply(null,ext),maxV=Math.max.apply(null,ext);
-      var mg=(maxV-minV)*0.1||2; minV-=mg; maxV+=mg; var span=maxV-minV||1;
-      ctx.strokeStyle='rgba(0,0,0,.07)'; ctx.lineWidth=1;
-      for(var i=0;i<=4;i++){var gy=pp.t+ih2*(i/4);ctx.beginPath();ctx.moveTo(pp.l,gy);ctx.lineTo(pp.l+iw2,gy);ctx.stroke();}
-      ctx.fillStyle='#656d76'; ctx.font='12px sans-serif'; ctx.textAlign='right';
-      for(var i=0;i<=4;i++){var v=maxV-span*(i/4),gy=pp.t+ih2*(i/4);ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v),pp.l-4,gy+5);}
-      var depY2=pp.t+ih2*(1-(dep-minV)/span);
-      ctx.strokeStyle='rgba(0,0,0,.2)'; ctx.setLineDash([5,5]); ctx.lineWidth=1.5;
-      ctx.beginPath();ctx.moveTo(pp.l,depY2);ctx.lineTo(pp.l+iw2,depY2);ctx.stroke();ctx.setLineDash([]);
-      var posC=equity[n-1]>=dep;
-      var grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih2);
-      if(posC){grd.addColorStop(0,'rgba(26,127,55,.15)');grd.addColorStop(1,'rgba(26,127,55,.01)');}
-      else{grd.addColorStop(0,'rgba(207,34,46,.12)');grd.addColorStop(1,'rgba(207,34,46,.01)');}
-      ctx.beginPath();
-      for(var i=0;i<n;i++){var ex2=pp.l+iw2*(i/Math.max(1,n-1)),ey2=pp.t+ih2*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
-      ctx.lineTo(pp.l+iw2,depY2);ctx.lineTo(pp.l,depY2);ctx.closePath();
-      ctx.fillStyle=grd; ctx.fill();
-      ctx.lineWidth=2; ctx.strokeStyle=posC?'#1a7f37':'#cf222e'; ctx.lineJoin='round';
-      ctx.beginPath();
-      for(var i=0;i<n;i++){var ex2=pp.l+iw2*(i/Math.max(1,n-1)),ey2=pp.t+ih2*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex2,ey2):ctx.lineTo(ex2,ey2);}
-      ctx.stroke();
-      ctx.fillStyle='#656d76'; ctx.font='11px sans-serif'; ctx.textAlign='center';
-      var step=Math.max(1,Math.ceil(n/7));
-      for(var i=0;i<n;i+=step){var ex2=pp.l+iw2*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),ex2,pp.t+ih2+18);}
-      doc.addImage(tmp.toDataURL('image/jpeg',0.85),'JPEG',M+1,y+1,cW-2,cH-2);
-    }
-  }catch(chartErr){ /* skip chart if canvas fails */ }
-  y+=cH+5;
-
-  // TABLE
-  sf(9,'bold',C.text); doc.text('Resultado Mensual',M,y); y+=4;
-  var tW=heroW;
-  var cols=[{l:'MES',x:M,w:20,a:'left'},{l:'P&L NETO',x:M+22,w:36,a:'right'},{l:'RETORNO',x:M+60,w:26,a:'right'},{l:'EQUITY FINAL',x:M+88,w:36,a:'right'}];
-  doc.setFillColor(C.bg2); doc.setDrawColor(C.border); doc.setLineWidth(0.2);
-  doc.rect(M,y,tW,7,'FD');
-  cols.forEach(function(cl){sf(6,'bold',C.text2);doc.text(cl.l,cl.a==='right'?cl.x+cl.w:cl.x+2,y+5,{align:cl.a});});
-  y+=7;
-  if(s.me&&s.me.length){
-    s.me.forEach(function(entry,ri){
-      if(y+7>PH-M){doc.addPage();y=M;}
-      var mk=entry[0],pnl=entry[1];
-      var eq2=s.mEq&&s.mEq[mk]?s.mEq[mk]:s.dep;
-      var prev=eq2-pnl,pct=prev>0?(pnl/Math.abs(prev)*100):0;
-      if(ri%2===0){doc.setFillColor(C.bg2);doc.rect(M,y,tW,7,'F');}
-      ln(M,y+7,M+tW,y+7,C.border,0.15);
-      sf(7.5,'normal',C.text); doc.text(mLbl(mk),M+2,y+5);
-      sf(7.5,'bold',pnl>=0?C.good:C.bad); doc.text((pnl>=0?'+':'')+fmt(pnl),cols[1].x+cols[1].w,y+5,{align:'right'});
-      sf(7.5,'normal',pct>=0?C.good:C.bad); doc.text((pct>=0?'+':'')+fmtP(pct),cols[2].x+cols[2].w,y+5,{align:'right'});
-      sf(7.5,'normal',C.text); doc.text(fmt(eq2),cols[3].x+cols[3].w,y+5,{align:'right'});
-      y+=7;
-    });
-  }
-
-  // SAVE — universal method
-  var fname='RC_Capital_'+(nombre.replace(/\s+/g,'_'))+'_'+bog.getUTCFullYear()+'.pdf';
-  try{
-    var blob=doc.output('blob');
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url; a.download=fname; a.style.display='none';
-    document.body.appendChild(a); a.click();
-    setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},2000);
-  }catch(e){
-    try{ doc.save(fname); }catch(e2){
-      var uri=doc.output('datauristring');
-      var w=window.open(); if(w) w.document.write('<iframe src="'+uri+'" width="100%" height="100%"></iframe>');
-    }
-  }
-}
-
+// ── SECRET ADMIN ACCESS ──────────────────────────────────────────
+const SECRET_PIN = '1128';
+let tapCount = 0, tapTimer = null, pinEntry = '';
 
 function handleSecretTap(){
   tapCount++;
@@ -1052,18 +872,29 @@ document.addEventListener('keydown', e=>{
 
 
 
+document.addEventListener('DOMContentLoaded',function(){
+  // Prefill saved credentials
+  try{
+    var s=localStorage.getItem('rcSavedLogin');
+    if(s){var d=JSON.parse(s);
+      var em=$('clientEmail'),pw=$('clientPass'),cb=document.getElementById('rememberMe');
+      if(em)em.value=d.email||'';if(pw)pw.value=d.pass||'';if(cb)cb.checked=true;
+    }
+  }catch(e){}
+  // Auto-login from session
+  if(window._autoSession){
+    var sd=window._autoSession;
+    currentCliente={id:sd.id,nombre:sd.nombre,email:sd.email,password_hash:sd.password_hash};
+    showApp();
+  }
+  // Init theme UI
+  try{_updateThemeUI(getTheme());}catch(e){}
+});
 
 </script>
-
 <script>
-// PWA Service Worker
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('service-worker.js').catch(function(){});
-  });
-}
-var deferredPrompt;
-window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;});
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('service-worker.js').catch(function(){});});}
+var deferredPrompt;window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;});
 </script>
 </body>
 </html>
