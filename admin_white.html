@@ -295,7 +295,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
-      <div class="sidebar-logo">
+      <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics para PIN">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
@@ -1505,13 +1505,12 @@ function processAllLoaded(results, curMes){
           }
 
           var match = findClientByInvestor(inv.investorName);
-          if(!match) return; // skip unrecognized investors silently
-
+          // Always add to list — even unmatched can be manually assigned
           bulkFiles.push({
             file:r.file, text:inv.csvText,
             investor:inv.investorName,
-            clienteId:match.id,
-            clienteName:match.nombre,
+            clienteId:match?match.id:'',
+            clienteName:match?match.nombre:'⚠️ Sin asignar',
             mes:curMes, status:'pending', rowCount:inv.rowCount
           });
         });
@@ -1545,20 +1544,35 @@ function processAllLoaded(results, curMes){
 function findClientByInvestor(investorName){
   if(!investorName) return null;
   function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
-  console.log('Matching investor:', investorName, '→ cache:', clientesCache.map(function(c){return c.nombre;}).join('|'));
-  var normInv=norm(investorName);
-  var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
-  var best=null,bestScore=0,bestPct=0;
+  var normInv = norm(investorName);
+  var wordsInv = normInv.split(' ').filter(function(w){ return w.length>2; });
+  var best=null, bestScore=0, bestPct=0;
+
   for(var i=0;i<clientesCache.length;i++){
-    var c=clientesCache[i];
-    var normC=norm(c.nombre);
-    if(normC===normInv) return c; // exact match wins immediately
-    var wordsC=normC.split(' ').filter(function(w){return w.length>2;});
-    var matches=wordsC.filter(function(w){return wordsInv.indexOf(w)>=0;}).length;
-    var pct=wordsC.length>0?matches/wordsC.length:0;
-    // Require at least 2 matching words AND more than 50% of client name matched
-    if(matches>=2&&pct>bestPct){bestPct=pct;bestScore=matches;best=c;}
+    var cl = clientesCache[i];
+    var normC = norm(cl.nombre);
+
+    // 1. Exact match
+    if(normC === normInv) return cl;
+
+    // 2. CSV name contains full client name or vice versa
+    if(normInv.indexOf(normC) >= 0 || normC.indexOf(normInv) >= 0) return cl;
+
+    var wordsC = normC.split(' ').filter(function(w){ return w.length>2; });
+    var matches = wordsC.filter(function(w){ return wordsInv.indexOf(w)>=0; }).length;
+    var pct = wordsC.length>0 ? matches/wordsC.length : 0;
+
+    // 3. Good score: at least 1 word match + >40% of client name covered
+    if(matches>=1 && pct>0.4 && pct>bestPct){
+      bestPct=pct; bestScore=matches; best=cl;
+    }
+    // 4. If 2+ words match, always a good candidate
+    if(matches>=2 && matches>bestScore){
+      bestScore=matches; best=cl;
+    }
   }
+  console.log('Match result for "'+investorName+'":', best?best.nombre:'NO MATCH',
+    '| cache:', clientesCache.map(function(x){return x.nombre;}).join(', '));
   return best;
 }
 
