@@ -1,46 +1,19 @@
-<!doctype html><!-- v2.1 -->
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-<meta http-equiv="Pragma" content="no-cache"/>
-<meta http-equiv="Expires" content="0"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>RCCapital · Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-/* ── TOKENS ── */
-:root,[data-theme="dark"]{
-  --bg:#0d1117;--surface:#161b22;--surface2:#21262d;
-  --border:#30363d;--border2:#484f58;
-  --text:#e6edf3;--text2:#8b949e;
-  --accent:#2f81f7;--good:#3fb950;--bad:#f85149;--warn:#d29922;
-  --muted:#8b949e;
-  --sans:-apple-system,BlinkMacSystemFont,'Inter','SF Pro Text','Helvetica Neue',sans-serif;
-  --mono:'SFMono-Regular','Consolas','Liberation Mono',monospace;
-  --r:6px;--rm:12px;
-}
-[data-theme="light"]{
-  --bg:#ffffff;--surface:#ffffff;--surface2:#f6f8fa;
-  --border:#d0d7de;--border2:#afb8c1;
-  --text:#1f2328;--text2:#656d76;
-  --accent:#0969da;--good:#1a7f37;--bad:#cf222e;--warn:#9a6700;
-  --muted:#656d76;
+:root{
+  --bg:#070a0f;--surface:#0d1219;--surface2:#111a24;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.15);
+  --text:#e2eaf5;--muted:#6b809a;--accent:#00c2ff;--good:#22d68a;--bad:#ff4f6a;--warn:#f5a623;
+  --sans:'Syne',sans-serif;--mono:'JetBrains Mono',monospace;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-/* Theme */
-html{color-scheme:dark;}[data-theme="light"]{color-scheme:light;}
-body *{transition:background-color .18s,border-color .18s,color .15s;}
-canvas,.spinner{transition:none!important;}
-/* Theme pill */
-.th-pill-wrap{display:flex;align-items:center;gap:5px;margin-bottom:12px;}
-.th-pill-wrap span{font-size:11px;color:var(--text2);}
-.admin-th-pill{width:36px;height:20px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
-.admin-th-pill.light-mode{background:var(--accent);border-color:var(--accent);}
-.admin-th-knob{width:14px;height:14px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s;}
-.admin-th-pill.light-mode .admin-th-knob{transform:translateX(16px);background:#fff;}
-
 body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;
   background-image:radial-gradient(ellipse 900px 500px at 80% -10%,rgba(0,194,255,.05),transparent);}
 
@@ -264,6 +237,42 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
   .pin-cancel{background:rgba(255,255,255,.03);color:var(--muted);}
 
+
+/* ── MOBILE ADMIN NAV ── */
+@media(max-width:768px){
+  .layout{flex-direction:column !important;}
+  #adminSidebar{
+    width:100% !important;
+    height:auto !important;
+    flex-direction:row !important;
+    padding:8px 10px !important;
+    border-right:none !important;
+    border-bottom:1px solid var(--border) !important;
+    overflow-x:auto;
+    position:sticky;
+    top:0;
+    z-index:50;
+  }
+  #adminSidebar .sidebar-logo{display:flex;align-items:center;gap:6px;flex-shrink:0;margin-bottom:0 !important;margin-right:8px;}
+  #adminSidebar .sidebar-logo h2{font-size:13px;}
+  #adminSidebar .sidebar-logo .tag{display:none;}
+  .sidebar-nav-group{flex-direction:row !important;gap:2px;overflow-x:auto;flex:1;}
+  .nav-item{padding:6px 10px !important;white-space:nowrap;flex-shrink:0;}
+  .nav-item .icon{width:14px !important;font-size:13px;}
+  .nav-label{font-size:11px !important;}
+  .sidebar-bottom{display:none !important;}
+  .sidebar-toggle{display:none !important;}
+  .content{padding:14px 10px !important;}
+  .page-title{font-size:18px;}
+  .card{border-radius:10px;}
+  table{font-size:12px;}
+  th,td{padding:8px 10px !important;}
+}
+@media(max-width:420px){
+  .nav-label{display:none !important;}
+  .nav-item .icon{font-size:16px;width:auto !important;}
+  .nav-item{padding:8px 10px !important;}
+}
 </style>
 </head>
 <body>
@@ -271,9 +280,9 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="login-logo" style="cursor:default;user-select:none;">
-      <img src="logo.png" id="secretLogoAdmin" onclick="handleAdminTap()" style="width:40px;height:40px;object-fit:contain;border-radius:8px;cursor:pointer;-webkit-tap-highlight-color:transparent;" alt="RCCapital"/>
-      <h1>RC Capital</h1>
+    <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
+      <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RCCapital"/>
+      <h1>RCCapital</h1>
       <span>ADMIN</span>
     </div>
     <div class="field">
@@ -295,7 +304,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
-      <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics para PIN">
+      <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics = PIN">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
@@ -315,12 +324,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         </button>
       </div>
       <div class="sidebar-bottom">
-        <div class="th-pill-wrap" style="padding:0 4px;margin-bottom:10px;">
-  <span>🌙</span>
-  <button class="admin-th-pill" id="adminThemePill" onclick="quickToggleTheme()"><div class="admin-th-knob"></div></button>
-  <span>☀️</span>
-</div>
-<button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
+        <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
 
@@ -432,10 +436,6 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <div class="page" id="page-clientes">
         <div class="page-title">Clientes</div>
         <div class="page-sub">Gestiona los accesos de tus inversores</div>
-        <div id="supabaseAlert" style="display:none;background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:var(--bad);">
-          ⚠️ <strong>No se puede conectar a Supabase.</strong> El proyecto puede estar pausado.<br/>
-          <a href="https://supabase.com/dashboard/project/oettmexxsohqudmshhip" target="_blank" style="color:var(--accent);text-decoration:underline;">Haz clic aquí para reactivar el proyecto →</a>
-        </div>
         <div class="card">
           <div class="card-hd">
             <h3>Agregar nuevo cliente</h3>
@@ -609,6 +609,23 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   </div>
 </div>
 
+<!-- ADMIN PIN -->
+<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+  <div style="text-align:center;">
+    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
+    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
+      <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
+      <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
+      <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
+      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
+    </div>
+    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 
@@ -617,24 +634,12 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 
 // ── CONFIG ────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
-
-// ── THEME ──────────────────────────────────────────────────────
-(function(){ var t=localStorage.getItem('rcTheme')||'light'; document.documentElement.setAttribute('data-theme',t); })();
-function getTheme(){ return document.documentElement.getAttribute('data-theme')||'dark'; }
-function quickToggleTheme(){
-  var t=getTheme()==='dark'?'light':'dark';
-  document.documentElement.setAttribute('data-theme',t);
-  try{localStorage.setItem('rcTheme',t);}catch(e){}
-  ['adminThemePill'].forEach(function(id){var el=document.getElementById(id);if(el)el.classList.toggle('light-mode',t==='light');});
-}
-
-
+const SUPABASE_URL = 'https://oettmexxsohqudmshhip.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_-Qlw-WScokeIss_e1twUog_gMVshynf';
 
 // Admin credentials — cambia esto
 const ADMIN_EMAIL = 'admin@rccapital.com';
-const ADMIN_PASS  = 'RCCapital2026Admin';
+const ADMIN_PASS  = 'RCCapital2024Admin';
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -668,13 +673,9 @@ async function login(){
   const err   = $('loginErr');
   const btn   = $('loginBtn');
 
-  // Simple direct comparison
-  const e2 = email.toLowerCase().trim();
-  const p2 = pass.trim();
-  if(!e2||!p2){ err.textContent='Completa los campos.'; err.style.display='block'; return; }
-  if(e2!==ADMIN_EMAIL||p2!==ADMIN_PASS){
-    err.textContent='Credenciales incorrectas.';
-    err.style.display='block'; return;
+  if(!email || !pass){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
+  if(email !== ADMIN_EMAIL || pass !== ADMIN_PASS){
+    err.textContent='Credenciales incorrectas.'; err.style.display='block'; return;
   }
   btn.textContent='Entrando...'; btn.disabled=true;
   sessionStorage.setItem('rcadmin','1');
@@ -732,21 +733,6 @@ async function loadReportes(){
 }
 
 // ── DASHBOARD ────────────────────────────────────────────────────
-async // Test Supabase connection
-async function testSupabaseConnection(){
-  try{
-    var r = await db.from('clientes').select('id').limit(1);
-    if(r.error) throw new Error(r.error.message);
-    toast('✅ Supabase conectado correctamente');
-  }catch(e){
-    if(e.message.includes('Failed to fetch')||e.message.includes('fetch')){
-      toast('❌ Supabase pausado. Ve a supabase.com → tu proyecto → Resume','bad');
-    } else {
-      toast('❌ '+e.message,'bad');
-    }
-  }
-}
-
 async function updateDashboard(){
   $('statClientes').textContent = clientesCache.length;
   const { data: reps } = await db.from('reportes').select('*,clientes(nombre)').order('created_at',{ascending:false}).limit(5);
@@ -1112,22 +1098,15 @@ async function agregarCliente(){
   btn.innerHTML='➕ Agregar cliente'; btn.disabled=false;
 
   if(error){
-    if(error.code==='23505') toast('⚠️ Este email ya existe','bad');
-    else if(error.message&&error.message.includes('Failed to fetch')){
-      toast('❌ No se puede conectar a Supabase. Ve a supabase.com y reactiva el proyecto.','bad');
-    } else {
-      toast('❌ Error: '+error.message,'bad');
-      console.error('Supabase error:', error);
-    }
+    if(error.code==='23505') toast('Este email ya existe','bad');
+    else toast('Error: '+error.message,'bad');
     return;
   }
   $('newNombre').value=''; $('newEmail').value=''; $('newPass').value=generatePass();
   toast('✅ Cliente '+nombre+' agregado correctamente');
-  // Force full reload of clientes data and re-render
-  clientesCache = [];
+  clientesCache=[];
   await loadClientes();
   await updateDashboard();
-  // Navigate to clientes tab to show new entry
   showPage('clientes', document.querySelector('[data-page="clientes"]'));
 }
 
@@ -1449,85 +1428,47 @@ function handleBulkFiles(fileList){
   var now=new Date();
   var curMes=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
 
-  // Reload clients then read files
-  loadClientes().then(function(){
-    console.log('Clientes en cache:', clientesCache.length,
-      clientesCache.map(function(x){return x.nombre;}).join(' | '));
+  // Read first file (consolidated mode) or all files (multi mode)
+  var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
+  var results = []; // {text, file}
+  var pending = filesToRead.length;
 
-    var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
-    var results = [];
-    var pending = filesToRead.length;
-
-    filesToRead.forEach(function(file){
-      var reader = new FileReader();
-      reader.onload = function(ev){
-        results.push({file:file, text:ev.target.result});
-        pending--;
-        if(pending===0) processAllLoaded(results, curMes);
-      };
-      reader.onerror = function(){
-        results.push({file:file, text:null});
-        pending--;
-        if(pending===0) processAllLoaded(results, curMes);
-      };
-      reader.readAsText(file);
-    });
-
-  }).catch(function(err){
-    console.error('loadClientes failed:', err);
-    // Try with existing cache anyway
-    var filesToRead = bulkMode==='single' ? [fileList[0]] : Array.from(fileList);
-    var results = [];
-    var pending = filesToRead.length;
-    filesToRead.forEach(function(file){
-      var reader = new FileReader();
-      reader.onload = function(ev){
-        results.push({file:file, text:ev.target.result});
-        pending--;
-        if(pending===0) processAllLoaded(results, curMes);
-      };
-      reader.onerror = function(){
-        results.push({file:file, text:null});
-        pending--;
-        if(pending===0) processAllLoaded(results, curMes);
-      };
-      reader.readAsText(file);
-    });
+  filesToRead.forEach(function(file){
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      results.push({file:file, text:ev.target.result});
+      pending--;
+      if(pending===0) processAllLoaded(results, curMes);
+    };
+    reader.onerror = function(){
+      results.push({file:file, text:null});
+      pending--;
+      if(pending===0) processAllLoaded(results, curMes);
+    };
+    reader.readAsText(file);
   });
 }
+
+// Manager name as it appears in the CSV - used to auto-feed Mi Cuenta
+var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
+
 function processAllLoaded(results, curMes){
   bulkFiles = [];
-  var managerRows = []; // collect manager's own CSV rows
-
-  // Ensure clientesCache is fresh before matching
-  if(!clientesCache.length){
-    toast('⚠️ Cargando clientes... vuelve a soltar el archivo en 2 segundos','bad');
-    loadClientes().then(function(){
-      toast('✅ Clientes cargados. Sube el CSV nuevamente.');
-    });
-    return;
-  }
-
-  console.log('Processing CSV with', clientesCache.length, 'clients in cache:',
-    clientesCache.map(function(c){return c.nombre;}).join(', '));
+  var managerRows = [];
 
   results.forEach(function(r){
-    if(!r.text) return; // skip errors silently
+    if(!r.text){ return; }
     if(bulkMode==='single'){
       try{
         var split = splitConsolidatedCSV(r.text);
         split.forEach(function(inv){
-          var normName = (inv.investorName||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-          var normMgr  = MANAGER_CSV_NAME.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
-
-          // Check if this is the manager's own account
-          if(normName === normMgr || normName.indexOf(normMgr) >= 0 || normMgr.indexOf(normName) >= 0){
-            managerRows.push(inv.csvText);
-            return; // don't add to client list
+          var normName = (inv.investorName||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+          var normMgr  = MANAGER_CSV_NAME.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+          if(normName===normMgr||normName.indexOf(normMgr)>=0||normMgr.indexOf(normName)>=0){
+            managerRows.push(inv.csvText); return;
           }
-
           var match = findClientByInvestor(inv.investorName);
-          // Always add to list — even unmatched can be manually assigned
+          // Show ALL investors — matched and unmatched
           bulkFiles.push({
             file:r.file, text:inv.csvText,
             investor:inv.investorName,
@@ -1536,26 +1477,20 @@ function processAllLoaded(results, curMes){
             mes:curMes, status:'pending', rowCount:inv.rowCount
           });
         });
-
-        // Feed manager data to Mi Cuenta
-        if(managerRows.length > 0){
-          lastConsolidatedCSV = r.text;
-          try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
-          mcProcessCSV(r.text);
-          var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
-          if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">&#9679;</span>';
+        if(managerRows.length>0){
+          lastConsolidatedCSV=r.text;
+          try{localStorage.setItem('rcMiCuentaCSV',r.text);}catch(e){}
+          setTimeout(function(){try{mcProcessCSV(r.text);}catch(e){}},300);
         }
-
-      }catch(ex){ /* skip silently */ }
+      }catch(ex){ console.error('processAllLoaded error:',ex); }
     } else {
-      var inv = extractInvestorFromCSV(r.text);
-      var match = findClientByInvestor(inv);
-      if(!match) return; // skip unrecognized silently
+      var inv=extractInvestorFromCSV(r.text);
+      var match=findClientByInvestor(inv);
       bulkFiles.push({
         file:r.file, text:r.text,
         investor:inv||'(desconocido)',
-        clienteId:match.id,
-        clienteName:match.nombre,
+        clienteId:match?match.id:'',
+        clienteName:match?match.nombre:'⚠️ Sin asignar',
         mes:curMes, status:'pending', rowCount:0
       });
     }
@@ -1563,40 +1498,6 @@ function processAllLoaded(results, curMes){
   renderBulkList();
 }
 
-function findClientByInvestor(investorName){
-  if(!investorName) return null;
-  function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
-  var normInv = norm(investorName);
-  var wordsInv = normInv.split(' ').filter(function(w){ return w.length>2; });
-  var best=null, bestScore=0, bestPct=0;
-
-  for(var i=0;i<clientesCache.length;i++){
-    var cl = clientesCache[i];
-    var normC = norm(cl.nombre);
-
-    // 1. Exact match
-    if(normC === normInv) return cl;
-
-    // 2. CSV name contains full client name or vice versa
-    if(normInv.indexOf(normC) >= 0 || normC.indexOf(normInv) >= 0) return cl;
-
-    var wordsC = normC.split(' ').filter(function(w){ return w.length>2; });
-    var matches = wordsC.filter(function(w){ return wordsInv.indexOf(w)>=0; }).length;
-    var pct = wordsC.length>0 ? matches/wordsC.length : 0;
-
-    // 3. Good score: at least 1 word match + >40% of client name covered
-    if(matches>=1 && pct>0.4 && pct>bestPct){
-      bestPct=pct; bestScore=matches; best=cl;
-    }
-    // 4. If 2+ words match, always a good candidate
-    if(matches>=2 && matches>bestScore){
-      bestScore=matches; best=cl;
-    }
-  }
-  console.log('Match result for "'+investorName+'":', best?best.nombre:'NO MATCH',
-    '| cache:', clientesCache.map(function(x){return x.nombre;}).join(', '));
-  return best;
-}
 
 function renderBulkList(){
   var list=$('bulkList'); list.innerHTML='';
@@ -1680,13 +1581,10 @@ function handleAdminTap(){
   adminTapCount = (adminTapCount||0) + 1;
   clearTimeout(adminTapTimer);
   adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 3000);
-  // Visual feedback on each tap
-  var logo = document.getElementById('secretLogoAdmin');
-  if(logo){ logo.style.opacity='0.5'; setTimeout(function(){ logo.style.opacity='1'; },100); }
-  if(adminTapCount >= 5){
-    adminTapCount = 0;
-    adminPinOpen();
-  }
+  var el = document.getElementById('secretLogoAdmin');
+  if(!el) el = document.querySelector('.sidebar-logo');
+  if(el){ el.style.opacity='0.5'; setTimeout(function(){ el.style.opacity='1'; },120); }
+  if(adminTapCount>=5){ adminTapCount=0; adminPinOpen(); }
 }
 
 function adminPinOpen(){
@@ -2267,24 +2165,6 @@ function drawDetChart(stats){
     </div>
   </div>
 </div>
-
-<!-- ADMIN PIN -->
-<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
-  <div style="text-align:center;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
-    <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
-      <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:228px;margin:0 auto;">
-      <button class="pin-btn" onclick="adminPinTap('1')">1</button><button class="pin-btn" onclick="adminPinTap('2')">2</button><button class="pin-btn" onclick="adminPinTap('3')">3</button>
-      <button class="pin-btn" onclick="adminPinTap('4')">4</button><button class="pin-btn" onclick="adminPinTap('5')">5</button><button class="pin-btn" onclick="adminPinTap('6')">6</button>
-      <button class="pin-btn" onclick="adminPinTap('7')">7</button><button class="pin-btn" onclick="adminPinTap('8')">8</button><button class="pin-btn" onclick="adminPinTap('9')">9</button>
-      <button class="pin-btn pin-del" onclick="adminPinDel()">⌫</button><button class="pin-btn" onclick="adminPinTap('0')">0</button><button class="pin-btn pin-cancel" onclick="adminPinClose()">✕</button>
-    </div>
-    <div id="adminPinErr" style="font-size:12px;color:var(--bad);margin-top:18px;height:16px;"></div>
-  </div>
-</div>
-
 
 </body>
 </html>
