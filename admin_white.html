@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html><!-- v2.1 -->
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
@@ -685,15 +685,13 @@ async function login(){
   const err   = $('loginErr');
   const btn   = $('loginBtn');
 
-  const emailClean = email.toLowerCase().trim();
-  const passClean  = pass.trim();
-  if(!emailClean || !passClean){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
-  console.log('Login attempt - email:', emailClean, 'expected:', ADMIN_EMAIL);
-  console.log('Pass match:', passClean === ADMIN_PASS, 'len:', passClean.length);
-  if(emailClean !== ADMIN_EMAIL || passClean !== ADMIN_PASS){
-    err.textContent='Credenciales incorrectas.';
-    err.style.display='block';
-    return;
+  // Simple direct comparison
+  const e2 = email.toLowerCase().trim();
+  const p2 = pass.trim();
+  if(!e2||!p2){ err.textContent='Completa los campos.'; err.style.display='block'; return; }
+  if(e2!==ADMIN_EMAIL||p2!==ADMIN_PASS){
+    err.textContent='Incorrecto ('+e2+' / '+p2.length+'chars)';
+    err.style.display='block'; return;
   }
   btn.textContent='Entrando...'; btn.disabled=true;
   sessionStorage.setItem('rcadmin','1');
