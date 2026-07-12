@@ -1,0 +1,29 @@
+name: Supabase Keep-Alive Ping
+
+on:
+  schedule:
+    - cron: '0 8 */5 * *'  # Every 5 days at 8AM UTC
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Supabase RCCapital
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping database
+        run: |
+          echo "🏓 Pinging Supabase RCCapital..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -X GET \
+            "https://bhyftbbohsjivhhjstbb.supabase.co/rest/v1/clientes?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU")
+          echo "📡 HTTP Status: $RESPONSE"
+          if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "206" ]; then
+            echo "✅ Supabase alive!"
+          else
+            echo "⚠️ Status: $RESPONSE — check supabase.com"
+          fi
+
+      - name: Log time
+        run: echo "⏰ $(TZ='America/Bogota' date '+%Y-%m-%d %H:%M %Z')"
