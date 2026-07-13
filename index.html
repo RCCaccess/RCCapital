@@ -524,6 +524,22 @@ function _updateThemeUI(t){
 })();
 
 
+// Preload logo for PDF
+var _logoB64 = null;
+(function(){
+  var img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = function(){
+    try{
+      var cv = document.createElement('canvas');
+      cv.width = img.width; cv.height = img.height;
+      var cx = cv.getContext('2d'); cx.drawImage(img,0,0);
+      _logoB64 = cv.toDataURL('image/png');
+    }catch(e){ _logoB64 = null; }
+  };
+  img.src = 'logo.png';
+})();
+
 const SUPABASE_URL='https://bhyftbbohsjivhhjstbb.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 const{createClient}=supabase;
