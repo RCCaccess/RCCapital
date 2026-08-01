@@ -74,13 +74,8 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 .sidebar-logo .tag{font-size:9px;color:var(--accent);font-family:var(--mono);
   background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);
   border-radius:4px;padding:2px 5px;white-space:nowrap;}
-.sidebar-toggle{position:absolute;top:18px;right:-14px;z-index:10;
-  width:28px;height:28px;border-radius:50%;
-  background:var(--surface);border:1px solid var(--border2);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;font-size:12px;color:var(--muted);transition:all .2s;
-  box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.sidebar-toggle:hover{color:var(--accent);border-color:rgba(0,194,255,.3);}
+
+
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
   font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;
   transition:all .15s;border:none;background:transparent;width:100%;text-align:left;margin-bottom:2px;
@@ -109,7 +104,7 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
   .sidebar-logo{margin-bottom:0;margin-right:8px;}
   .sidebar-logo h2{font-size:13px;}
   .sidebar-logo .tag{display:none;}
-  .sidebar-toggle{position:static;margin-left:auto;flex-shrink:0;}
+  
   .sidebar.collapsed .sidebar-logo h2{display:block;}
   .sidebar.collapsed .nav-label{display:block;}
   .sidebar.collapsed .nav-item{justify-content:flex-start;padding:8px 10px;}
@@ -297,7 +292,6 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   <div class="layout">
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
-      <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Ocultar/mostrar menú">◀</button>
       <div class="sidebar-logo">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RCCapital</h2>
@@ -1737,8 +1731,7 @@ function toggleSidebar(){
 (function(){
   var saved = localStorage.getItem('rcSidebarCollapsed');
   if(saved==='1'){
-    var sb=$('adminSidebar'), btn=$('sidebarToggle');
-    if(sb){ sb.classList.add('collapsed'); if(btn) btn.textContent='▶'; }
+    
   }
 })();
 
