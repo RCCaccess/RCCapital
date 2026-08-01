@@ -10,8 +10,8 @@
 <style>
 :root{
   --bg:#FAFBFC;--surface:#F1F4F8;--surface2:#E4E9F0;
-  --border:#D6DDE6;--border2:#A8C2DA;
-  --text:#0E1620;--text2:#5A6675;--text3:#A8C2DA;
+  --border:#C5CFD9;--border2:#A8C2DA;
+  --text:#0E1620;--text2:#3D4F63;--text3:#7C8B9C;
   --accent:#23639E;--accent2:#1D5488;--steel:#7C8B9C;
   --good:#0B8A6B;--bad:#C8483C;
   --sans:'Inter','Helvetica Neue',sans-serif;
@@ -348,26 +348,26 @@ function drawEquityChart(){
   const pad={l:66,r:14,t:18,b:34},iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
   const ext=[...equity,deposit];let minV=Math.min(...ext),maxV=Math.max(...ext);
   const mg=(maxV-minV)*0.08||5;minV-=mg;maxV+=mg;const span=maxV-minV,n=labels.length;
-  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
+  ctx.strokeStyle='rgba(14,22,32,.07)';ctx.lineWidth=1;
   for(let i=0;i<=5;i++){const y=pad.t+ih*(i/5);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle='#6b809a';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='right';
+  ctx.fillStyle='#3D4F63';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='right';
   for(let i=0;i<=5;i++){const v=maxV-span*(i/5),y=pad.t+ih*(i/5);ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-8,y+4);}
   const step=Math.max(1,Math.ceil(n/6));ctx.fillStyle='#6b809a';ctx.textAlign='center';
   for(let i=0;i<n;i+=step){const x=pad.l+iw*(i/Math.max(1,n-1));ctx.fillText(labels[i].slice(5),x,pad.t+ih+22);}
   const depY=pad.t+ih*(1-(deposit-minV)/span);
-  ctx.strokeStyle='rgba(255,255,255,.18)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;
+  ctx.strokeStyle='rgba(35,99,158,.35)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;
   ctx.beginPath();ctx.moveTo(pad.l,depY);ctx.lineTo(pad.l+iw,depY);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='rgba(255,255,255,.3)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';ctx.fillText('Depósito',pad.l+6,depY-6);
+  ctx.fillStyle='rgba(35,99,158,.7)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';ctx.fillText('Depósito',pad.l+6,depY-6);
   const lastVal=equity[n-1],isPos=lastVal>=deposit;
   ctx.beginPath();for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
   ctx.lineTo(pad.l+iw,depY);ctx.lineTo(pad.l,depY);ctx.closePath();
   const grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
-  if(isPos){grd.addColorStop(0,'rgba(34,214,138,.2)');grd.addColorStop(1,'rgba(34,214,138,.02)');}else{grd.addColorStop(0,'rgba(255,79,106,.16)');grd.addColorStop(1,'rgba(255,79,106,.02)');}
+  if(isPos){grd.addColorStop(0,'rgba(11,138,107,.18)');grd.addColorStop(1,'rgba(11,138,107,.02)');}else{grd.addColorStop(0,'rgba(200,72,60,.14)');grd.addColorStop(1,'rgba(200,72,60,.02)');}
   ctx.fillStyle=grd;ctx.fill();
-  ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.strokeStyle=isPos?'#22d68a':'#ff4f6a';
+  ctx.lineWidth=2.2;ctx.lineJoin='round';ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C';
   ctx.beginPath();for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();
   const ex=pad.l+iw,ey=pad.t+ih*(1-(lastVal-minV)/span);
-  ctx.fillStyle=isPos?'#22d68a':'#ff4f6a';ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=isPos?'#0B8A6B':'#C8483C';ctx.beginPath();ctx.arc(ex,ey,4,0,Math.PI*2);ctx.fill();
   ctx.fillStyle='rgba(0,0,0,.6)';ctx.beginPath();ctx.arc(ex,ey,2,0,Math.PI*2);ctx.fill();
   canvas._d={labels,equity,deposit,pad,iw,ih,minV,span};
   const open=equity[0],close=equity[n-1],high=Math.max(...equity),chg=close-open,chgPct=open?(chg/Math.abs(open)*100):0;
@@ -414,58 +414,246 @@ $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range
 
 async function tryPDF(){if(!CC.labels||!CC.labels.length){alert('Sin datos');return;}generarPDF();}
 function generarPDF(){
-  if(!CC.labels||!CC.labels.length){alert('No hay datos para generar el PDF.');return;}
-  const btn=$('btnPDF');btn.textContent='⏳ Generando...';btn.disabled=true;
+  if(!CC.labels||!CC.labels.length||!CC.stats){alert('Sin datos');return;}
+  const btn=$('btnPDF');if(btn){btn.textContent='⏳';btn.disabled=true;}
   try{
     const{jsPDF}=window.jspdf;
-    const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-    const W=297,H=210,M=10,iW=W-M*2;let y=M;
-    pdf.setFillColor(7,10,15);pdf.rect(0,0,W,H,'F');
-    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(0,194,255);pdf.text('ESTADO DE CUENTA',M,y+5);
-    pdf.setFontSize(16);pdf.setTextColor(226,234,245);pdf.text($('rhName').textContent||'—',M,y+14);
-    pdf.setFont('helvetica','normal');pdf.setFontSize(7);pdf.setTextColor(107,128,154);pdf.text($('rhPeriod').textContent||'—',M,y+20);
-    pdf.setFont('helvetica','bold');pdf.setFontSize(9);pdf.setTextColor(226,234,245);pdf.text('RCCapital',W-M,y+9,{align:'right'});
-    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('rhDate').textContent||'—',W-M,y+15,{align:'right'});
-    y+=24;pdf.setDrawColor(40,55,75);pdf.setLineWidth(0.3);pdf.line(M,y,W-M,y);y+=6;
-    const colL=M,colR=M+iW*0.38+4,colLW=iW*0.38,colRW=iW*0.60;
-    const roiTxt=$('heroROI').textContent||'—';const roiPos=!roiTxt.startsWith('-');
-    pdf.setFillColor(13,18,25);pdf.rect(colL,y,colLW,34,'F');
-    pdf.setFont('helvetica','bold');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text('RENDIMIENTO TOTAL',colL+5,y+7);
-    pdf.setFontSize(28);if(roiPos){pdf.setTextColor(34,214,138);}else{pdf.setTextColor(255,79,106);}pdf.text(roiTxt,colL+5,y+24);
-    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);pdf.text($('heroSub').textContent||'',colL+5,y+31);
-    pdf.setFontSize(6);pdf.text('VALOR DE LA CUENTA',colL+colLW-5,y+7,{align:'right'});
-    pdf.setFont('helvetica','bold');pdf.setFontSize(12);pdf.setTextColor(226,234,245);pdf.text($('heroEq').textContent||'—',colL+colLW-5,y+19,{align:'right'});
-    pdf.setFont('helvetica','normal');pdf.setFontSize(6);pdf.setTextColor(107,128,154);const stats=CC.stats||{};const depLines=stats.depFeeAmt>0?['Depósito: '+fmtUSD(stats.depGross),'Fee: -'+fmtUSD(stats.depFeeAmt),'Capital: '+fmtUSD(stats.dep)]:['Depósito: '+fmtUSD(CC.deposit)];
-      depLines.forEach(function(ln,li){if(li===2){pdf.setTextColor(0,194,255);}else{pdf.setTextColor(107,128,154);}pdf.text(ln,colL+colLW-5,y+20+li*5,{align:'right'});});
-    y+=38;
-    const kpis=[{label:'PROFIT NETO',val:$('kpiProfit').textContent,t:'profit'},{label:'DÍAS ACTIVO',val:$('kpiDays').textContent,t:'blue'},{label:'MEJOR MES',val:$('kpiBest').textContent,t:'good'},{label:'MESES POSITIVOS',val:$('kpiPosM').textContent,t:'neutral'}];
-    const kW=(colLW-3)/2;
-    kpis.forEach(function(k,i){const kx=colL+(i%2)*(kW+3),ky=y+Math.floor(i/2)*20;pdf.setFillColor(10,15,24);pdf.rect(kx,ky,kW,17,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);pdf.text(k.label,kx+3,ky+6);pdf.setFontSize(9);if(k.t==='profit'){if(k.val.startsWith('-')){pdf.setTextColor(255,79,106);}else{pdf.setTextColor(34,214,138);}}else if(k.t==='blue')pdf.setTextColor(0,194,255);else if(k.t==='good')pdf.setTextColor(34,214,138);else pdf.setTextColor(226,234,245);pdf.text(k.val||'—',kx+3,ky+13);});
-    y+=43;
-    const cs=[{l:'INICIO',v:$('cstOpen').textContent},{l:'ACTUAL',v:$('cstClose').textContent},{l:'MÁXIMO',v:$('cstHigh').textContent},{l:'MÍNIMO',v:$('cstLow').textContent}];
-    const csW=(colLW-9)/4;
-    cs.forEach(function(s,i){const sx=colL+i*(csW+3);pdf.setFillColor(8,12,20);pdf.rect(sx,y,csW,12,'F');pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.setTextColor(107,128,154);pdf.text(s.l,sx+2,y+5);pdf.setFontSize(6);pdf.setFont('helvetica','normal');const sp=!s.v.startsWith('-');if(i===3){if(sp){pdf.setTextColor(34,214,138);}else{pdf.setTextColor(255,79,106);}}else{pdf.setTextColor(226,234,245);}pdf.text(s.v||'—',sx+2,y+10);});
-    y+=16;
-    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Resumen por Período',colL,y+5);y+=8;
-    const tC=[colLW*0.28,colLW*0.24,colLW*0.24,colLW*0.24];const tX=[colL,colL+tC[0],colL+tC[0]+tC[1],colL+tC[0]+tC[1]+tC[2]];
-    pdf.setFillColor(16,24,38);pdf.rect(colL,y,colLW,6,'F');
-    ['MES','P&L MES','RET %','EQUITY'].forEach(function(h,i){pdf.setFont('helvetica','bold');pdf.setFontSize(5);pdf.setTextColor(107,128,154);pdf.text(h,i===0?tX[i]+2:tX[i]+tC[i]-2,y+4,{align:i===0?'left':'right'});});y+=6;
-    const tableRows=$('summaryBody').querySelectorAll('tr');const rH=5;
-    tableRows.forEach(function(row,ri){if(y+rH>H-20)return;var cells=row.querySelectorAll('td');if(cells.length<4)return;if(ri%2===0){pdf.setFillColor(8,12,20);pdf.rect(colL,y,colLW,rH,'F');}cells.forEach(function(cell,i){const txt=cell.textContent.trim();pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);if(i===0)pdf.setTextColor(226,234,245);else if(txt.startsWith('-'))pdf.setTextColor(255,79,106);else if(txt.startsWith('+'))pdf.setTextColor(34,214,138);else pdf.setTextColor(226,234,245);pdf.text(txt,i===0?tX[i]+2:tX[i]+tC[i]-2,y+3.8,{align:i===0?'left':'right'});});pdf.setDrawColor(20,30,45);pdf.setLineWidth(0.15);pdf.line(colL,y+rH,colL+colLW,y+rH);y+=rH;});
-    let ry=M+28;
-    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Evolución del Capital',colR,ry+5);ry+=9;
-    var eqC=$('chartEquity');if(eqC&&eqC.width>0){try{var eqImgData=eqC.toDataURL('image/jpeg',0.85);var eqH=74;pdf.setFillColor(10,14,20);pdf.rect(colR,ry,colRW,eqH,'F');pdf.addImage(eqImgData,'JPEG',colR+1,ry+1,colRW-2,eqH-2);ry+=eqH+4;}catch(e){console.log('eq chart err',e);ry+=4;}}
-    pdf.setFont('helvetica','bold');pdf.setFontSize(7);pdf.setTextColor(226,234,245);pdf.text('Resultado Mensual',colR,ry+5);ry+=9;
-    var mC=$('chartMonthly');if(mC&&mC.width>0){try{var mImgData=mC.toDataURL('image/jpeg',0.85);var mH=50;pdf.setFillColor(10,14,20);pdf.rect(colR,ry,colRW,mH,'F');pdf.addImage(mImgData,'JPEG',colR+1,ry+1,colRW-2,mH-2);ry+=mH+4;}catch(e){console.log('m chart err',e);ry+=4;}}
-    pdf.setDrawColor(40,55,75);pdf.line(M,H-13,W-M,H-13);
-    pdf.setFont('helvetica','normal');pdf.setFontSize(5.5);pdf.setTextColor(107,128,154);
-    pdf.text('Este reporte es de carácter informativo. Rendimientos pasados no garantizan resultados futuros.',M,H-8);
-    pdf.text('RCCapital · '+($('footerDate').textContent||'—'),W-M,H-8,{align:'right'});
-    const name=(currentCliente.nombre||'Cliente').replace(/\s+/g,'_');
-    pdf.save('RCCapital_'+name+'_'+new Date().toISOString().slice(0,10)+'.pdf');
-  }catch(err){alert('Error PDF: '+err.message);}
-  finally{btn.textContent='⬇️ Guardar PDF';btn.disabled=false;}
+    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
+    const PW=215.9,PH=279.4,M=16;let y=M;
+    const s=CC.stats;
+    const nombre=currentCliente?currentCliente.nombre:'—';
+    const fmt=n=>(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});
+    const fmtP=n=>(isFinite(n)?n:0).toFixed(2)+'%';
+    const pad2=x=>String(x).padStart(2,'0');
+    const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const mLbl=k=>{const p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
+    const bog=new Date(new Date().getTime()-5*3600000);
+    const todayStr=pad2(bog.getUTCDate())+'/'+pad2(bog.getUTCMonth()+1)+'/'+bog.getUTCFullYear();
+
+    // Color palette — clean white PDF
+    const INK='#0E1620';       // main text
+    const INK2='#5A6675';      // secondary text  
+    const BLUE='#23639E';      // accent blue
+    const BLUE_L='#EBF2F9';    // light blue tint
+    const GREEN='#0B8A6B';     // positive
+    const RED='#C8483C';       // negative
+    const BORDER='#D6DDE6';    // borders
+    const BG2='#F1F4F8';       // panel bg
+    const WHITE='#FFFFFF';
+
+    const sf=(sz,wt,col)=>{doc.setFontSize(sz);doc.setFont('helvetica',wt||'normal');doc.setTextColor(col||INK);};
+    const ln=(x1,y1,x2,y2,col,w)=>{doc.setDrawColor(col||BORDER);doc.setLineWidth(w||0.2);doc.line(x1,y1,x2,y2);};
+    const rect=(x,yy,w,h,fill,stroke)=>{
+      if(fill){doc.setFillColor(fill);} if(stroke){doc.setDrawColor(stroke);}
+      doc.setLineWidth(0.2);
+      doc.rect(x,yy,w,h,fill&&stroke?'FD':fill?'F':stroke?'D':'S');
+    };
+
+    // ── PAGE BORDER ──
+    doc.setDrawColor(BORDER);doc.setLineWidth(0.3);
+    doc.rect(8,8,PW-16,PH-16);
+
+    // ── HEADER BAR ──
+    doc.setFillColor('#1B222D');doc.rect(8,8,PW-16,18,'F');
+    // Logo
+    if(_logoB64){try{doc.addImage(_logoB64,'PNG',14,10,12,12);}catch(e){}}
+    sf(11,'bold','#FFFFFF');doc.text('RC Capital',30,18);
+    sf(7,'normal','#A8C2DA');doc.text('Portal del Inversor',30,22.5);
+    sf(7,'normal','#A8C2DA');doc.text('Estado de Cuenta  ·  '+todayStr,PW-14,18,{align:'right'});
+    y=34;
+
+    // ── INVESTOR NAME ──
+    sf(7,'bold',INK2);doc.text('INVERSOR',M,y);y+=4;
+    sf(18,'bold',INK);doc.text(nombre,M,y);y+=4;
+    if(s.firstDate&&s.lastDate){
+      sf(8,'normal',INK2);
+      doc.text(
+        s.firstDate.getFullYear()+'-'+pad2(s.firstDate.getMonth()+1)+'-'+pad2(s.firstDate.getDate())+
+        '  →  '+s.lastDate.getFullYear()+'-'+pad2(s.lastDate.getMonth()+1)+'-'+pad2(s.lastDate.getDate()),
+        M,y);
+    }
+    y+=6;ln(M,y,PW-M,y,BORDER,0.3);y+=6;
+
+    // ── HERO METRICS ──
+    const heroH=s.depFeeAmt>0?36:30;
+    rect(M,y,PW-M*2,heroH,BG2,BORDER);
+    const roi=s.roi||0,isPos=roi>=0;
+    // Left: ROI
+    sf(7,'bold',INK2);doc.text('RENDIMIENTO TOTAL',M+5,y+6);
+    sf(22,'bold',isPos?GREEN:RED);doc.text((isPos?'+':'')+fmtP(roi),M+5,y+18);
+    sf(7,'normal',INK2);doc.text(s.me.length+' meses bajo gestión',M+5,y+(heroH-5));
+    // Right: Capital
+    sf(7,'bold',BLUE);doc.text('CAPITAL ACTUAL EN GESTIÓN',PW-M-5,y+6,{align:'right'});
+    sf(16,'bold',INK);doc.text(fmt(s.equity||0),PW-M-5,y+17,{align:'right'});
+    sf(7,'normal',INK2);
+    if(s.depFeeAmt>0){
+      doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+22,{align:'right'});
+      doc.setTextColor(RED);doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+26,{align:'right'});
+      doc.setTextColor(GREEN);doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+30,{align:'right'});
+    } else {
+      doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+23,{align:'right'});
+    }
+    y+=heroH+5;
+
+    // ── KPI STRIP ──
+    const kw=(PW-M*2-9)/4;
+    const netP=s.runP+s.runF;
+    const kpis=[
+      {l:'BENEFICIO ACTUAL',v:(netP>=0?'+':'')+fmt(netP),c:netP>=0?GREEN:RED},
+      {l:'MESES EN GESTIÓN',v:String(s.me.length),c:INK},
+      {l:'MEJOR MES',v:s.best&&s.best[0]?'+'+fmt(s.best[1]):'—',c:GREEN},
+      {l:'MESES POSITIVOS',v:s.posM+'/'+s.me.length,c:INK}
+    ];
+    kpis.forEach((k,i)=>{
+      const kx=M+i*(kw+3);
+      rect(kx,y,kw,15,WHITE,BORDER);
+      sf(5.5,'bold',INK2);doc.text(k.l,kx+3,y+5);
+      sf(9,'bold',k.c);doc.text(k.v,kx+3,y+11.5);
+    });
+    y+=20;
+
+    // ── EQUITY CHART — professional light chart ──
+    try{
+      const cW=PW-M*2,cH=52;
+      rect(M,y,cW,cH,WHITE,BORDER);
+
+      // Chart title
+      sf(8,'bold',INK);doc.text('Evolución del Capital',M+4,y+6);
+      sf(6,'normal',INK2);doc.text('Línea base = depósito inicial',PW-M-4,y+6,{align:'right'});
+
+      // Draw chart on canvas
+      const tmp=document.createElement('canvas');
+      tmp.width=900;tmp.height=300;
+      const ctx=tmp.getContext('2d');
+      // White background
+      ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,900,300);
+
+      const labels=CC.labels,equity=CC.equity,deposit=CC.deposit,n=labels.length;
+      if(n>1){
+        const pp={l:58,r:14,t:16,b:36},iw=900-pp.l-pp.r,ih=300-pp.t-pp.b;
+        const allVals=equity.concat([deposit]);
+        let minV=Math.min(...allVals),maxV=Math.max(...allVals);
+        const mg=(maxV-minV)*0.08||5;minV-=mg;maxV+=mg;const span=maxV-minV||1;
+
+        // Grid lines — clean horizontal
+        ctx.strokeStyle='#E8EDF2';ctx.lineWidth=1;
+        const gridCount=5;
+        for(let i=0;i<=gridCount;i++){
+          const gy=pp.t+ih*(i/gridCount);
+          ctx.beginPath();ctx.moveTo(pp.l,gy);ctx.lineTo(pp.l+iw,gy);ctx.stroke();
+          // Y labels
+          const val=maxV-span*(i/gridCount);
+          ctx.fillStyle='#5A6675';ctx.font='500 13px Inter,sans-serif';ctx.textAlign='right';
+          const lbl=Math.abs(val)>=1000?'$'+(val/1000).toFixed(1)+'k':'$'+Math.round(val);
+          ctx.fillText(lbl,pp.l-6,gy+5);
+        }
+
+        // X axis line
+        ctx.strokeStyle='#C5CFD9';ctx.lineWidth=1.5;
+        ctx.beginPath();ctx.moveTo(pp.l,pp.t+ih);ctx.lineTo(pp.l+iw,pp.t+ih);ctx.stroke();
+        // Y axis line
+        ctx.beginPath();ctx.moveTo(pp.l,pp.t);ctx.lineTo(pp.l,pp.t+ih);ctx.stroke();
+
+        // X labels
+        const step=Math.max(1,Math.ceil(n/8));
+        ctx.fillStyle='#5A6675';ctx.font='500 12px Inter,sans-serif';ctx.textAlign='center';
+        for(let i=0;i<n;i+=step){
+          const ex=pp.l+iw*(i/Math.max(1,n-1));
+          ctx.fillText(labels[i].slice(5),ex,pp.t+ih+22);
+        }
+
+        // Deposit baseline — dashed blue
+        const depY=pp.t+ih*(1-(deposit-minV)/span);
+        ctx.strokeStyle='rgba(35,99,158,.5)';ctx.lineWidth=1.5;ctx.setLineDash([6,4]);
+        ctx.beginPath();ctx.moveTo(pp.l,depY);ctx.lineTo(pp.l+iw,depY);ctx.stroke();
+        ctx.setLineDash([]);
+        // Deposit label
+        ctx.fillStyle='rgba(35,99,158,.8)';ctx.font='bold 11px Inter,sans-serif';ctx.textAlign='left';
+        ctx.fillText('Depósito',pp.l+6,depY-7);
+
+        // Gradient fill
+        const isPos=equity[n-1]>=deposit;
+        const grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih);
+        if(isPos){grd.addColorStop(0,'rgba(11,138,107,.18)');grd.addColorStop(0.7,'rgba(11,138,107,.04)');grd.addColorStop(1,'rgba(11,138,107,0)');}
+        else{grd.addColorStop(0,'rgba(200,72,60,.14)');grd.addColorStop(0.7,'rgba(200,72,60,.04)');grd.addColorStop(1,'rgba(200,72,60,0)');}
+        ctx.beginPath();
+        for(let i=0;i<n;i++){
+          const ex=pp.l+iw*(i/Math.max(1,n-1)),ey=pp.t+ih*(1-(equity[i]-minV)/span);
+          i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);
+        }
+        ctx.lineTo(pp.l+iw,depY);ctx.lineTo(pp.l,depY);ctx.closePath();
+        ctx.fillStyle=grd;ctx.fill();
+
+        // Main line — smooth, thick
+        ctx.lineWidth=2.5;ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C';ctx.lineJoin='round';
+        ctx.beginPath();
+        for(let i=0;i<n;i++){
+          const ex=pp.l+iw*(i/Math.max(1,n-1)),ey=pp.t+ih*(1-(equity[i]-minV)/span);
+          i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);
+        }
+        ctx.stroke();
+
+        // End dot
+        const lastX=pp.l+iw,lastY=pp.t+ih*(1-(equity[n-1]-minV)/span);
+        ctx.beginPath();ctx.arc(lastX,lastY,5,0,Math.PI*2);
+        ctx.fillStyle=WHITE;ctx.fill();
+        ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C';ctx.lineWidth=2.5;ctx.stroke();
+
+        // Add to PDF
+        doc.addImage(tmp.toDataURL('image/png',1.0),'PNG',M+1,y+9,cW-2,cH-10);
+      }
+      y+=cH+5;
+    }catch(chartErr){console.warn('PDF chart:',chartErr);y+=5;}
+
+    // ── MONTHLY TABLE ──
+    sf(8,'bold',INK);doc.text('Resultado Mensual',M,y);y+=4;
+    const tW=PW-M*2;
+    // Header
+    rect(M,y,tW,8,INK,INK);
+    sf(6,'bold',WHITE);
+    doc.text('MES',M+3,y+5.5);
+    doc.text('P&L NETO',M+68,y+5.5,{align:'right'});
+    doc.text('RETORNO %',M+96,y+5.5,{align:'right'});
+    doc.text('CAPITAL FINAL',M+tW-3,y+5.5,{align:'right'});
+    y+=8;
+
+    let row=0;
+    for(const[mk,pnl]of s.me){
+      if(y+7>PH-18){doc.addPage();y=18;}
+      const eq=s.mEq[mk]||s.dep,prev=eq-pnl,pct=prev>0?(pnl/Math.abs(prev)*100):0;
+      rect(M,y,tW,7,row%2===0?BG2:WHITE,BORDER);
+      sf(7,'normal',INK);doc.text(mLbl(mk),M+3,y+5);
+      sf(7,'bold',pnl>=0?GREEN:RED);doc.text((pnl>=0?'+':'')+fmt(pnl),M+68,y+5,{align:'right'});
+      sf(7,'normal',pct>=0?GREEN:RED);doc.text((pct>=0?'+':'')+fmtP(pct),M+96,y+5,{align:'right'});
+      sf(7,'normal',INK);doc.text(fmt(eq),M+tW-3,y+5,{align:'right'});
+      y+=7;row++;
+    }
+    // Table bottom border
+    ln(M,y,M+tW,y,BORDER,0.3);
+
+    // ── FOOTER ──
+    sf(6,'normal',INK2);
+    doc.text('RC Capital  ·  Documento confidencial  ·  Generado el '+todayStr,PW/2,PH-12,{align:'center'});
+    ln(M,PH-16,PW-M,PH-16,BORDER,0.2);
+
+    // ── SAVE ──
+    const fname='RC_Capital_'+nombre.replace(/[\s]+/g,'_')+'_'+bog.getUTCFullYear()+'.pdf';
+    try{
+      const blob=doc.output('blob');
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url;a.download=fname;a.style.display='none';
+      document.body.appendChild(a);a.click();
+      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},2000);
+    }catch(e){
+      try{doc.save(fname);}catch(e2){
+        const w=window.open();if(w)w.document.write('<iframe src="'+doc.output('datauristring')+'" width="100%" height="100%"></iframe>');
+      }
+    }
+  }catch(err){alert('Error PDF: '+err.message);console.error(err);}
+  finally{if(btn){btn.textContent='↓ PDF';btn.disabled=false;}}
 }
+
 
 window.addEventListener('resize',()=>{if(CC.labels&&CC.labels.length){drawEquityChart();if(CC.stats)drawMonthlyChart(CC.stats);}});
 const saved=sessionStorage.getItem('rc_client');
