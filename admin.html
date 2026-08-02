@@ -28,7 +28,7 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 
 /* LOGIN */
 #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;
+.login-box{background:#fff;border:1px solid var(--border);border-radius:20px;
   padding:40px;width:100%;max-width:400px;box-shadow:0 24px 64px rgba(0,0,0,.5);}
 .login-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px;}
 .login-logo .dot{width:10px;height:10px;border-radius:50%;background:var(--btn-grad);}
@@ -57,7 +57,7 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 
 /* SIDEBAR */
 .sidebar{
-  width:220px;background:var(--surface);border-right:1px solid var(--border);
+  width:220px;background:#fff;border-right:1px solid var(--border);
   padding:20px 14px;display:flex;flex-direction:column;flex-shrink:0;
   transition:width .25s ease, padding .25s ease;overflow:hidden;position:relative;
 }
@@ -132,7 +132,7 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 .page-sub{font-size:13px;color:var(--muted);margin-bottom:28px;}
 
 /* CARDS */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
+.card{background:#fff;border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:20px;}
 .card-hd{padding:16px 20px;border-bottom:1px solid var(--border);
   display:flex;justify-content:space-between;align-items:center;gap:12px;}
 .card-hd h3{font-size:13px;font-weight:700;}
@@ -140,7 +140,7 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 
 /* STATS ROW */
 .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.stat-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;}
+.stat-box{background:#fff;border:1px solid var(--border);border-radius:14px;padding:18px;}
 .stat-box .sl{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
 .stat-box .sv{font-size:26px;font-weight:800;font-family:var(--mono);}
 .stat-box.accent .sv{color:var(--accent);}
@@ -190,7 +190,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 /* TOAST */
 #toast{position:fixed;right:20px;bottom:20px;z-index:999;
-  background:var(--surface2);border:1px solid var(--border2);
+  background:#F1F4F8;border:1px solid var(--border2);
   padding:12px 18px;border-radius:12px;font-size:13px;
   box-shadow:0 8px 24px rgba(0,0,0,.4);display:none;max-width:320px;}
 #toast.good{border-color:rgba(34,214,138,.3);color:var(--good);}
@@ -206,7 +206,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 }
 .modal-overlay.open{display:flex;}
 .modal{
-  background:var(--surface);border:1px solid var(--border2);border-radius:20px;
+  background:#fff;border:1px solid var(--border2);border-radius:20px;
   padding:28px;width:100%;max-width:480px;
   box-shadow:0 24px 64px rgba(0,0,0,.8);
   position:relative;z-index:501;
@@ -245,18 +245,18 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 /* Theme pill */
 .theme-row{display:flex;align-items:center;gap:6px;padding:8px 0;margin-bottom:4px;}
 .theme-row span{font-size:11px;color:var(--muted);}
-.th-admin-pill{width:36px;height:20px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
+.th-admin-pill{width:36px;height:20px;border-radius:10px;background:#F1F4F8;border:1px solid var(--border);cursor:pointer;padding:2px;display:flex;align-items:center;transition:background .2s;}
 .th-admin-pill.pill-on{background:var(--btn-grad);border-color:var(--accent);}
 .th-admin-pill .pill-knob{width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s;}
 .th-admin-pill.pill-on .pill-knob{transform:translateX(16px);background:#fff;}
 
 .sidebar .nav-item{color:#E9EEF4 !important;}
-.sidebar .nav-item:hover{background:rgba(255,255,255,.08) !important;}
+.sidebar .nav-item:hover{background:rgba(35,99,158,.08) !important;}
 .sidebar .nav-item.active{background:rgba(95,168,224,.15) !important;color:#5FA8E0 !important;}
 .sidebar .sidebar-logo h2{color:#fff !important;}
 .sidebar .sidebar-logo .tag{color:#5FA8E0 !important;border-color:#5FA8E0 !important;}
 .sidebar .nav-label{color:#E9EEF4 !important;}
-.sidebar .logout-btn{color:#E9EEF4 !important;border-color:rgba(255,255,255,.15) !important;}
+.sidebar .logout-btn{color:#E9EEF4 !important;border-color:rgba(35,99,158,.12) !important;}
 .sidebar .logout-btn:hover{background:rgba(200,72,60,.15) !important;color:#ff7b72 !important;}
 .sidebar .theme-row span{color:#A8C2DA !important;}
 
@@ -327,16 +327,16 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <div id="topActionBar" style="display:flex;align-items:center;justify-content:space-between;
         padding:10px 24px;background:#fff;border-bottom:1px solid var(--border);
         box-shadow:var(--shadow);position:sticky;top:0;z-index:40;gap:12px;flex-wrap:wrap;">
-        <div id="topBarTitle" style="font-size:15px;font-weight:600;color:var(--text);font-family:var(--sans);">Dashboard</div>
+        <div id="topBarTitle" style="font-size:15px;font-weight:700;color:#0E1620;font-family:var(--sans);letter-spacing:-.3px;">Dashboard</div>
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button onclick="showPage('dashboard',this)" 
-            style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--sans);">📊 Dashboard</button>
+            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">📊 Dashboard</button>
           <button onclick="showPage('clientes',this)"
-            style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--sans);">👥 Clientes</button>
+            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">👥 Clientes</button>
           <button onclick="showPage('reportes',this)"
-            style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--sans);">📄 Reportes</button>
+            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">📄 Reportes</button>
           <button onclick="showPage('micuenta',this)"
-            style="padding:8px 16px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:var(--text2);font-size:13px;cursor:pointer;font-family:var(--sans);">💰 Mi Cuenta</button>
+            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">💰 Mi Cuenta</button>
           <button onclick="logout()"
             style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--btn-grad);box-shadow:var(--btn-shadow);color:#fff;font-size:13px;cursor:pointer;font-family:var(--sans);">Salir</button>
         </div>
@@ -621,7 +621,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 </div>
 
 <!-- ADMIN PIN -->
-<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
+<div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0D1218,#1B2A3B);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
   <div style="text-align:center;">
     <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
     <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
@@ -669,6 +669,27 @@ const ADMIN_PASS  = 'RCCapital2026Admin';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
+// Auto-login from persistent session
+(function(){
+  try{
+    var sess = localStorage.getItem('rcAdminSession');
+    if(sess){
+      var d = JSON.parse(sess);
+      if(d && d.email === ADMIN_EMAIL){
+        // Valid session — skip login screen
+        document.addEventListener('DOMContentLoaded', function(){
+          currentAdmin = {email: d.email};
+          var ls = document.getElementById('loginScreen');
+          var as = document.getElementById('appScreen');
+          if(ls) ls.style.display='none';
+          if(as) as.style.display='block';
+          loadAll();
+        });
+      }
+    }
+  }catch(e){}
+})();
+
 // ── HELPERS ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
 let clientesCache = [];
@@ -704,10 +725,13 @@ async function login(){
   }
   btn.textContent='Entrando...'; btn.disabled=true;
   sessionStorage.setItem('rcadmin','1');
+  // Save persistent session — survives browser close
+  try{localStorage.setItem('rcAdminSession', JSON.stringify({email:email, ts:Date.now()}));}catch(e){}
   showApp();
 }
 
 function logout(){
+  try{localStorage.removeItem('rcAdminSession');}catch(e){}
   sessionStorage.removeItem('rcadmin');
   $('appScreen').style.display='none';
   $('loginScreen').style.display='flex';
@@ -796,82 +820,105 @@ async function updateDashboard(){
 
 // ── CLIENTES TABLE ───────────────────────────────────────────────
 function renderClientesTable(){
-  const tbody = $('clientesBody');
+  const container = $('clientesBody') ? $('clientesBody').closest('.tbl-wrap')||$('clientesBody').parentElement : null;
+  if(!container) return;
+
   if(!clientesCache.length){
-    tbody.innerHTML='<tr><td colspan="6"><div class="empty"><div class="ei">👥</div><p>Sin clientes aún. Agrega el primero arriba.</p></div></td></tr>';
+    container.innerHTML='<div style="text-align:center;padding:48px;color:var(--muted);"><div style="font-size:32px;margin-bottom:12px;">👥</div><p>Sin clientes aún.</p></div>';
     return;
   }
-  // Switch to card layout instead of table rows
-  const container = tbody.closest('.tbl-wrap');
-  container.style.border = 'none';
-  container.style.background = 'transparent';
-  container.innerHTML = `<div id="clientCards" style="display:flex;flex-direction:column;gap:10px;padding:4px 0;"></div>`;
-  const cards = $('clientCards');
 
-  clientesCache.forEach(c => {
+  container.innerHTML = `
+  <table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead>
+      <tr style="border-bottom:2px solid #0E1620;">
+        <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;white-space:nowrap;">Inversor</th>
+        <th style="padding:12px 16px;text-align:right;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Capital Inicial</th>
+        <th style="padding:12px 16px;text-align:right;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Capital Actual</th>
+        <th style="padding:12px 16px;text-align:right;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Rendimiento</th>
+        <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Inicio</th>
+        <th style="padding:12px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Acceso</th>
+        <th style="padding:12px 8px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;"></th>
+      </tr>
+    </thead>
+    <tbody id="clientesTbody"></tbody>
+  </table>`;
+
+  const tbody = document.getElementById('clientesTbody');
+
+  clientesCache.forEach((c,idx) => {
     const safeId = c.id.replace(/-/g,'');
     const passId = 'pass-'+safeId;
-    const eyeId  = 'eye-'+safeId;
-    const card = document.createElement('div');
-    card.id = 'card-'+safeId;
-    card.style.cssText = 'background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:14px 18px;display:grid;grid-template-columns:1fr auto auto;gap:20px;align-items:center;transition:border-color .2s;cursor:pointer;';
-    card.title = 'Ver detalle de '+c.nombre;
-    card.onmouseenter = () => card.style.borderColor='rgba(255,255,255,.16)';
-    card.onmouseleave = () => card.style.borderColor='rgba(255,255,255,.08)';
-    card.onclick = function(e){
-      // Don't trigger if clicking buttons inside the card
-      if(e.target.closest('button')||e.target.closest('select')) return;
-      openDetalle(c.id, c.nombre);
-    };
     const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    card.innerHTML =
-      // COL 1: Sparkline LEFT + info right (original style)
-      '<div style="display:flex;align-items:center;gap:14px;">' +
-        '<canvas id="spark-' + safeId + '" width="160" height="56" style="flex-shrink:0;border-radius:8px;display:block;"></canvas>' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:700;font-size:14px;margin-bottom:2px;">' + c.nombre + '</div>' +
-          '<div style="display:flex;align-items:center;gap:5px;margin-bottom:6px;">' +
-          '<span style="font-size:11px;color:var(--muted);font-family:var(--mono);">' + c.email + '</span>' +
-          '<button onclick="copyText(\'' + c.email + '\')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:1px;line-height:1;display:flex;align-items:center;transition:color .15s;" title="Copiar email" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--muted)\'">' +
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
-          '</button>' +
+
+    const tr = document.createElement('tr');
+    tr.style.cssText = 'border-bottom:1px solid #E8EDF2;transition:background .1s;cursor:pointer;';
+    tr.onmouseenter = ()=> tr.style.background='#F5F8FB';
+    tr.onmouseleave = ()=> tr.style.background='';
+    tr.onclick = (e)=>{ if(e.target.closest('button')) return; openDetalle(c.id, c.nombre); };
+
+    tr.innerHTML =
+      // Investor name + email
+      '<td style="padding:14px 16px;">' +
+        '<div style="font-weight:600;color:#0E1620;margin-bottom:2px;">'+c.nombre+'</div>' +
+        '<div style="font-size:11px;color:#5A6675;font-family:var(--mono);">'+c.email+'</div>' +
+      '</td>' +
+      // Capital inicial
+      '<td id="dep-'+safeId+'" style="padding:14px 16px;text-align:right;font-family:var(--mono);font-weight:500;color:#0E1620;">—</td>' +
+      // Capital actual
+      '<td id="eq-'+safeId+'" style="padding:14px 16px;text-align:right;font-family:var(--mono);font-weight:600;color:#0E1620;">—</td>' +
+      // Rendimiento
+      '<td id="roi-'+safeId+'" style="padding:14px 16px;text-align:right;font-family:var(--mono);font-weight:700;">—</td>' +
+      // Fecha inicio
+      '<td id="startDate-'+safeId+'" style="padding:14px 16px;font-family:var(--mono);font-size:12px;color:#5A6675;">—</td>' +
+      // Password
+      '<td style="padding:14px 16px;text-align:center;">' +
+        '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
+          '<span id="'+passId+'" data-pass="'+passEscaped+'" data-visible="0" style="font-family:var(--mono);font-size:12px;color:#23639E;letter-spacing:1px;">••••••••</span>' +
+          '<button id="eye-'+safeId+'" data-pass-id="'+passId+'" data-eye-id="eye-'+safeId+'" data-pass-val="'+passEscaped+'" onclick="var e=this;togglePass(e.dataset.passId,e.dataset.eyeId,e.dataset.passVal);" ' +
+            'style="background:none;border:none;cursor:pointer;color:#7C8B9C;padding:2px;font-size:12px;">👁</button>' +
         '</div>' +
-          '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px;">' +
-            '<span id="roi-' + safeId + '" style="font-size:13px;font-weight:700;font-family:var(--mono);">—</span>' +
-            '<span id="eq-' + safeId + '" style="font-size:11px;color:var(--muted);font-family:var(--mono);">—</span>' +
-            '<span id="lastRep-' + c.id + '" style="font-size:10px;color:var(--muted);font-family:var(--mono);">...</span>' +
-          '</div>' +
-          '<div style="display:flex;gap:14px;flex-wrap:wrap;">' +
-            '<div><span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Inicio </span>' +
-            '<span id="startDate-' + safeId + '" style="font-size:11px;font-family:var(--mono);color:var(--text);">—</span></div>' +
-            '<div><span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Activo </span>' +
-            '<span id="daysActive-' + safeId + '" style="font-size:11px;font-family:var(--mono);color:var(--accent);">—</span></div>' +
-            '<div><span style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">Reg. </span>' +
-            '<span style="font-size:11px;font-family:var(--mono);color:var(--muted);">' + fmtDate(c.created_at) + '</span></div>' +
-          '</div>' +
+      '</td>' +
+      // Actions
+      '<td style="padding:14px 8px;text-align:center;">' +
+        '<div style="display:flex;gap:4px;justify-content:center;">' +
+          '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="openEditPass(this.dataset.cid,this.dataset.cnm)" ' +
+            'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Clave</button>' +
+          '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="confirmDelete(this.dataset.cid,this.dataset.cnm)" ' +
+            'style="padding:5px 10px;border-radius:6px;background:#fff;color:#C8483C;border:1px solid #EDCFCC;font-size:11px;cursor:pointer;">Borrar</button>' +
         '</div>' +
-      '</div>' +
-      // COL 2: Password with eye
-      '<div style="text-align:center;min-width:120px;">' +
-        '<div style="font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;">Contraseña</div>' +
-        '<div style="display:flex;align-items:center;gap:5px;justify-content:center;">' +
-          '<span id="' + passId + '" data-visible="0" style="font-family:var(--mono);font-size:12px;color:var(--warn);letter-spacing:2px;">••••••••</span>' +
-          '<button id="' + eyeId + '" onclick="togglePass(\'' + passId + '\',\'' + eyeId + '\',\'' + passEscaped + '\')" ' +
-            'style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;font-size:13px;line-height:1;" title="Mostrar/ocultar">👁</button>' +
-          '<button onclick="copyPass(\'' + passEscaped + '\')" style="background:none;border:none;cursor:pointer;color:var(--muted);padding:2px;line-height:1;display:flex;align-items:center;transition:color .15s;" title="Copiar contraseña" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--muted)\'">' +
-            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
-          '</button>' +
-        '</div>' +
-      '</div>' +
-      // COL 3: Delete
-      '<div style="display:flex;flex-direction:column;gap:6px;align-self:center;">' +
-        '<button class="btn accent" onclick="openEditPass(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="font-size:11px;padding:6px 10px;">🔑 Clave</button>' +
-        '<button class="btn danger" onclick="confirmDelete(\'' + c.id + '\',\'' + c.nombre.replace(/'/g,"\'") + '\')" style="font-size:11px;padding:6px 10px;">🗑 Borrar</button>' +
-      '</div>';
-    cards.appendChild(card);
-    loadClientSparkline(c, safeId);
+      '</td>';
+
+    tbody.appendChild(tr);
+    // Load financial data async
+    loadClientData(c, safeId);
   });
 }
+
+// Load client financial data from their report
+async function loadClientData(cl, safeId){
+  try{
+    const {data} = await db.from('reportes').select('csv_data,created_at,mes').eq('cliente_id',cl.id).order('mes',{ascending:false}).limit(1);
+    if(!data||!data.length) return;
+    const rep = data[0];
+    if(!rep.csv_data) return;
+    const rows = parseCSVdet ? parseCSVdet(rep.csv_data) : [];
+    if(!rows.length) return;
+    const stats = computeStatsdet ? computeStatsdet(rows) : null;
+    if(!stats) return;
+    const fmtUSD = n => (isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});
+    const isPos = stats.roi >= 0;
+    const dep = document.getElementById('dep-'+safeId);
+    const eq  = document.getElementById('eq-'+safeId);
+    const roi = document.getElementById('roi-'+safeId);
+    const sd  = document.getElementById('startDate-'+safeId);
+    if(dep) dep.textContent = fmtUSD(stats.dep||0);
+    if(eq)  eq.textContent  = fmtUSD(stats.equity||0);
+    if(roi){ roi.textContent=(isPos?'+':'')+((stats.roi||0).toFixed(2))+'%'; roi.style.color=isPos?'#0B8A6B':'#C8483C'; }
+    if(sd && stats.firstDate){ const d=stats.firstDate; const p=x=>String(x).padStart(2,'0'); sd.textContent=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+  }catch(e){ console.warn('loadClientData error:',e); }
+}
+
 
 // ── GENERAR CLAVE ALEATORIA ──────────────────────────────────────
 function generatePass(){
