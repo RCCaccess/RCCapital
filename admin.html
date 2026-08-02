@@ -225,13 +225,13 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
   /* PIN PAD */
   #adminPinOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.95);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:24px;}
-  .pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);transition:all .2s;}
-  .pin-dot.filled{background:var(--btn-grad);border-color:var(--accent);box-shadow:0 0 12px rgba(0,194,255,.5);}
+  .pin-dot{width:14px;height:14px;border-radius:50%;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.45);transition:all .2s;}
+  .pin-dot.filled{background:#FFFFFF;border-color:#FFFFFF;box-shadow:0 0 14px rgba(255,255,255,.55);}
   .pin-dot.ok{background:var(--good);border-color:var(--good);}
   .pin-dot.err{background:var(--bad);border-color:var(--bad);}
-  .pin-btn{font-family:var(--sans);font-size:22px;font-weight:700;width:68px;height:68px;border-radius:50%;border:1px solid rgba(0,0,0,.08);background:#F8FAFC;color:var(--text);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;}
+  .pin-btn{font-family:var(--mono);font-size:23px;font-weight:600;width:68px;height:68px;border-radius:50%;border:none;background:#FFFFFF;color:#0E1620;cursor:pointer;transition:transform .1s,background .12s;-webkit-tap-highlight-color:transparent;box-shadow:0 4px 14px rgba(0,0,0,.28);}
   .pin-btn:hover{background:rgba(255,255,255,.14);}
-  .pin-btn:active{background:rgba(255,255,255,.22);transform:scale(.9);}
+  .pin-btn:active{background:#C5D9EC;transform:scale(.92);}
   .pin-del{background:rgba(255,79,106,.08);border-color:rgba(255,79,106,.2);color:var(--bad);}
   .pin-cancel{background:rgba(0,0,0,.03);color:var(--muted);}
 
@@ -263,7 +263,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 <!-- LOGIN -->
 <div id="loginScreen">
   <div class="login-box">
-    <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:default;user-select:none;">
+    <div class="login-logo" id="secretLogoAdmin" onclick="handleAdminTap()" style="cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:opacity .1s;">
       <img src="logo.png" style="width:40px;height:40px;object-fit:contain;border-radius:8px;" alt="RCCapital"/>
       <h1>RCCapital</h1>
       <span>ADMIN</span>
@@ -286,7 +286,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   <div class="layout">
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
-      <div class="sidebar-logo">
+      <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics para PIN">
         <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
         <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
@@ -663,7 +663,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 <!-- ADMIN PIN -->
 <div id="adminPinOverlay" style="display:none;position:fixed;inset:0;background:linear-gradient(135deg,#0D1218,#1B2A3B);z-index:9999;flex-direction:column;align-items:center;justify-content:center;gap:24px;">
   <div style="text-align:center;">
-    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);margin-bottom:20px;">Acceso rápido</div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#A8C2DA;margin-bottom:20px;">Acceso rápido</div>
     <div id="adminPinDots" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
       <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
     </div>
@@ -1941,9 +1941,15 @@ const ADMIN_PIN = '0180';
 let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
 
 function handleAdminTap(){
-  adminTapCount++;
+  adminTapCount = (adminTapCount || 0) + 1;
   clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(function(){ adminTapCount=0; }, 2000);
+  adminTapTimer = setTimeout(function(){ adminTapCount = 0; }, 3000);
+  // Visual feedback so the user knows taps are registering
+  var el = document.getElementById('secretLogoAdmin');
+  if(el){
+    el.style.opacity = '0.45';
+    setTimeout(function(){ el.style.opacity = '1'; }, 110);
+  }
   if(adminTapCount >= 5){
     adminTapCount = 0;
     adminPinOpen();
@@ -1951,14 +1957,18 @@ function handleAdminTap(){
 }
 
 function adminPinOpen(){
+  var ov = document.getElementById('adminPinOverlay');
+  if(!ov){ console.warn('PIN overlay no encontrado'); return; }
   adminPinEntry = '';
   adminUpdateDots();
-  $('adminPinErr').textContent = '';
-  $('adminPinOverlay').style.display = 'flex';
+  var errEl = document.getElementById('adminPinErr');
+  if(errEl) errEl.textContent = '';
+  ov.style.display = 'flex';
 }
 
 function adminPinClose(){
-  $('adminPinOverlay').style.display = 'none';
+  var ov = document.getElementById('adminPinOverlay');
+  if(ov) ov.style.display = 'none';
   adminPinEntry = '';
   adminUpdateDots();
 }
@@ -2003,7 +2013,8 @@ function adminPinCheck(){
 }
 
 document.addEventListener('keydown', function(e){
-  if($('adminPinOverlay').style.display==='flex'){
+  var _ov = document.getElementById('adminPinOverlay');
+  if(_ov && _ov.style.display === 'flex'){
     if(e.key>='0'&&e.key<='9') adminPinTap(e.key);
     if(e.key==='Backspace') adminPinDel();
     if(e.key==='Escape') adminPinClose();
@@ -2497,5 +2508,74 @@ function drawDetChart(stats){
   ctx.fillStyle='#FFFFFF';ctx.fill();
   ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C';ctx.lineWidth=2.5;ctx.stroke();
 }
+</script>
 
->
+<div class="modal-overlay" id="modalDetalle" style="display:none;">
+  <div class="modal" style="max-width:1000px;width:96%;max-height:92vh;overflow-y:auto;padding:28px 32px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Estado de cuenta</div>
+        <h3 id="detNombre" style="font-size:20px;font-weight:800;margin:0;">—</h3>
+        <div id="detPeriodo" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">—</div>
+      </div>
+      <button onclick="closeDetalle()" style="background:#F1F4F8;border:1px solid #D6DDE6;color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>
+    </div>
+
+    <!-- ROI Hero -->
+    <div style="background:#F1F4F8;border:1px solid #D6DDE6;border-radius:16px;padding:22px 24px;margin-bottom:12px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Rendimiento Total</div>
+        <div id="detROI" style="font-size:40px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1;">—</div>
+        <div id="detSub" style="font-size:11px;color:var(--muted);margin-top:8px;">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Valor de la cuenta</div>
+        <div id="detEquity" style="font-size:22px;font-weight:800;font-family:var(--mono);">—</div>
+        <div id="detDep" style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);">—</div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Profit neto</div>
+        <div id="detProfit" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Días activo</div>
+        <div id="detDias" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent);">—</div>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Mejor mes</div>
+        <div id="detBest" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--good);">—</div>
+      </div>
+      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Meses positivos</div>
+        <div id="detPosM" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div style="background:rgba(0,0,0,.2);border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);margin-bottom:12px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
+      <canvas id="detChart" style="display:block;width:100%;height:160px;"></canvas>
+    </div>
+
+    <!-- Table -->
+    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">Resumen por período</div>
+    <div style="overflow:auto;border:1px solid #D6DDE6;border-radius:10px;max-height:240px;">
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr>
+          <th style="padding:8px 12px;text-align:left;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#F1F4F8;border-bottom:1px solid var(--border);">Mes</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#F1F4F8;border-bottom:1px solid var(--border);">P&L neto</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#F1F4F8;border-bottom:1px solid var(--border);">Retorno %</th>
+          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:#F1F4F8;border-bottom:1px solid var(--border);">Equity final</th>
+        </tr></thead>
+        <tbody id="detTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
