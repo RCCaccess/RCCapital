@@ -1,12 +1,13 @@
-// RC Capital Service Worker v1.1
-const CACHE = 'rccapital-v2';
+// RC Capital Service Worker v1.2
+const CACHE = 'rccapital-v3';
 const ASSETS = [
   '/RCCapital/inversores.html',
   '/RCCapital/logo.png',
   '/RCCapital/manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js'
 ];
 
 // Install: cache core assets
