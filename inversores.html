@@ -8,6 +8,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 /* ── PALETTE ── */
 :root{
@@ -88,6 +89,12 @@ canvas,.spinner{transition:none!important;}
 .btn-login:hover{filter:brightness(1.06);}
 .btn-login:disabled{opacity:.45;cursor:not-allowed;}
 #loginErr{font-size:12px;color:var(--bad);text-align:center;margin-top:8px;min-height:14px;}
+.forgot-row{text-align:center;margin-top:14px;}
+.forgot-row a{font-size:12px;color:var(--accent);text-decoration:none;}
+.forgot-row a:hover{text-decoration:underline;}
+.forgot-row a.disabled{pointer-events:none;opacity:.5;}
+#forgotMsg{font-size:12px;text-align:center;margin-top:8px;min-height:14px;color:var(--good);}
+#forgotMsg.err{color:var(--bad);}
 .login-foot{text-align:center;margin-top:18px;font-size:11px;color:var(--muted);opacity:.7;}
 
 /* ── APP ── */
@@ -350,6 +357,8 @@ canvas{display:block;width:100% !important;}
       </div>
       <button class="btn-login" id="loginBtn" onclick="login()">Acceder</button>
       <div id="loginErr"></div>
+      <div class="forgot-row"><a href="#" id="forgotLink" onclick="forgotPassword();return false;">¿Olvidaste tu contraseña?</a></div>
+      <div id="forgotMsg"></div>
     </div>
     <div class="login-foot">Acceso seguro · Solo tú puedes ver tu información</div>
   </div>
@@ -466,6 +475,17 @@ const SUPABASE_URL='https://bhyftbbohsjivhhjstbb.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+// ── EmailJS (aviso de "olvidé mi contraseña") ──
+// 1) Crea una cuenta gratis en https://www.emailjs.com y conecta tu Gmail (Email Services).
+// 2) Crea una plantilla (Email Templates) cuyo "To email" sea oscar0180@gmail.com, y que
+//    use las variables {{investor_email}} y {{request_time}} en el cuerpo del mensaje.
+// 3) Reemplaza los 3 valores de abajo con los de tu cuenta (Account → General/API Keys).
+const EMAILJS_PUBLIC_KEY='TU_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID='TU_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID='TU_TEMPLATE_ID';
+try{ if(window.emailjs) emailjs.init({publicKey:EMAILJS_PUBLIC_KEY}); }catch(e){}
+
 const $=id=>document.getElementById(id);
 let currentCliente=null,activeRange='ALL',CC={};
 const pad2=x=>String(x).padStart(2,'0');
@@ -493,7 +513,20 @@ function login(){
       showErr('Email o contraseña incorrectos.');return;
     }
     currentCliente=res.data;
-    try{sessionStorage.setItem('rc_client',JSON.stringify(res.data));}catch(e){}
+    try{
+      sessionStorage.setItem('rc_client',JSON.stringify(res.data));
+      if($('rememberMe').checked){
+        localStorage.setItem('rcActiveSession',JSON.stringify({
+          id:res.data.id,nombre:res.data.nombre,email:res.data.email,
+          password_hash:res.data.password_hash,
+          expires:Date.now()+30*24*60*60*1000 // 30 días
+        }));
+        localStorage.setItem('rcSavedLogin',JSON.stringify({email:email,pass:pass}));
+      } else {
+        localStorage.removeItem('rcActiveSession');
+        localStorage.removeItem('rcSavedLogin');
+      }
+    }catch(e){}
     showApp();
   }).catch(function(e){
     btn.textContent='Acceder a mi reporte →';btn.disabled=false;
@@ -501,6 +534,24 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
+
+function forgotPassword(){
+  const email=($('clientEmail').value||'').trim().toLowerCase();
+  const msgEl=$('forgotMsg'),link=$('forgotLink');
+  msgEl.className='';msgEl.textContent='';
+  if(!email){msgEl.className='err';msgEl.textContent='Escribe tu correo arriba primero.';return;}
+  if(!window.emailjs || EMAILJS_PUBLIC_KEY==='TU_PUBLIC_KEY'){
+    msgEl.className='err';
+    msgEl.textContent='El aviso automático no está configurado aún. Escribe a tu gestor directamente.';
+    return;
+  }
+  link.classList.add('disabled');
+  const now=new Date(),ts=now.toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
+  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{investor_email:email,request_time:ts})
+    .then(()=>{msgEl.className='';msgEl.textContent='Listo, se notificó a tu gestor. Te contactará pronto.';})
+    .catch(()=>{msgEl.className='err';msgEl.textContent='No se pudo enviar el aviso. Escribe a tu gestor directamente.';})
+    .finally(()=>{link.classList.remove('disabled');});
+}
 function logout(){
   try{
     localStorage.removeItem('rcActiveSession');
