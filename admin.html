@@ -57,9 +57,17 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 
 /* SIDEBAR */
 .sidebar{
-  width:220px;background:#fff;border-right:1px solid var(--border);
+  width:220px;
+  background:linear-gradient(180deg,#1D4B7C 0%,#163A61 55%,#102A47 100%);
+  border-right:1px solid rgba(255,255,255,.06);
+  box-shadow:2px 0 16px rgba(16,42,71,.18);
   padding:20px 14px;display:flex;flex-direction:column;flex-shrink:0;
   transition:width .25s ease, padding .25s ease;overflow:hidden;position:relative;
+}
+.sidebar::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);
+  pointer-events:none;
 }
 .sidebar.collapsed{width:56px;padding:20px 8px;}
 .sidebar.collapsed .sidebar-logo h2,
@@ -70,10 +78,10 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
 .sidebar.collapsed .nav-item{justify-content:center;padding:10px 6px;}
 .sidebar.collapsed .nav-item .icon{width:auto;}
 .sidebar-logo{display:flex;align-items:center;gap:8px;margin-bottom:28px;padding:0 4px;min-width:0;}
-.sidebar-logo h2{font-size:15px;font-weight:800;white-space:nowrap;}
-.sidebar-logo .tag{font-size:9px;color:var(--accent);font-family:var(--mono);
-  background:rgba(0,194,255,.1);border:1px solid rgba(0,194,255,.2);
-  border-radius:4px;padding:2px 5px;white-space:nowrap;}
+.sidebar-logo h2{font-size:15px;font-weight:800;white-space:nowrap;color:#FFFFFF;letter-spacing:-.2px;}
+.sidebar-logo .tag{font-size:9px;color:#9FC8EC;font-family:var(--mono);font-weight:600;
+  background:rgba(159,200,236,.14);border:1px solid rgba(159,200,236,.30);
+  border-radius:4px;padding:2px 5px;white-space:nowrap;letter-spacing:.5px;}
 
 
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
@@ -97,8 +105,10 @@ body{font-family:var(--sans);background:radial-gradient(1200px 600px at 15% -5%,
   .sidebar{
     width:100% !important;flex-direction:row;align-items:center;
     padding:10px 14px !important;border-right:none;
-    border-bottom:1px solid var(--border);flex-shrink:0;
+    border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0;
     overflow-x:auto;gap:4px;
+    background:linear-gradient(90deg,#1D4B7C 0%,#163A61 60%,#102A47 100%);
+    box-shadow:0 2px 14px rgba(16,42,71,.20);
   }
   .sidebar.collapsed{width:100% !important;}
   .sidebar-logo{margin-bottom:0;margin-right:8px;}
@@ -244,15 +254,15 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 .th-admin-pill .pill-knob{width:14px;height:14px;border-radius:50%;background:var(--muted);transition:transform .2s,background .2s;}
 .th-admin-pill.pill-on .pill-knob{transform:translateX(16px);background:#fff;}
 
-.sidebar .nav-item{color:#E9EEF4 !important;}
-.sidebar .nav-item:hover{background:rgba(35,99,158,.08) !important;}
-.sidebar .nav-item.active{background:rgba(95,168,224,.15) !important;color:#5FA8E0 !important;}
-.sidebar .sidebar-logo h2{color:#fff !important;}
-.sidebar .sidebar-logo .tag{color:#5FA8E0 !important;border-color:#5FA8E0 !important;}
-.sidebar .nav-label{color:#E9EEF4 !important;}
-.sidebar .logout-btn{color:#E9EEF4 !important;border-color:rgba(35,99,158,.12) !important;}
-.sidebar .logout-btn:hover{background:rgba(200,72,60,.15) !important;color:#ff7b72 !important;}
-.sidebar .theme-row span{color:#A8C2DA !important;}
+.sidebar .nav-item{color:#D6E4F2 !important;border-radius:8px;font-weight:500;}
+.sidebar .nav-item:hover{background:rgba(255,255,255,.09) !important;color:#FFFFFF !important;}
+.sidebar .nav-item.active{background:rgba(255,255,255,.14) !important;color:#FFFFFF !important;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.14);}
+.sidebar .sidebar-logo h2{color:#FFFFFF !important;}
+.sidebar .sidebar-logo .tag{color:#9FC8EC !important;border-color:rgba(159,200,236,.30) !important;}
+.sidebar .nav-label{color:inherit !important;}
+.sidebar .logout-btn{color:#D6E4F2 !important;border:1px solid rgba(255,255,255,.16) !important;background:transparent !important;border-radius:8px;}
+.sidebar .logout-btn:hover{background:rgba(200,72,60,.22) !important;color:#FFC9C4 !important;border-color:rgba(200,72,60,.4) !important;}
+.sidebar .theme-row span{color:#9FC8EC !important;}
 
 .btn.primary,.btn.accent,.btn-primary{background:var(--btn-grad) !important;color:#fff !important;box-shadow:var(--btn-shadow) !important;border:none !important;}
 .btn.primary:hover,.btn.accent:hover{background:var(--btn-hover) !important;}
@@ -299,7 +309,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
     <!-- SIDEBAR -->
     <div class="sidebar" id="adminSidebar">
       <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics para PIN">
-        <img src="logo.png" style="width:24px;height:24px;object-fit:contain;border-radius:5px;flex-shrink:0;" alt="RCC"/>
+        <img src="logo.png" style="width:26px;height:26px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.94);padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.22);" alt="RCC"/>
         <h2>RCCapital</h2>
         <span class="tag">ADMIN</span>
       </div>
