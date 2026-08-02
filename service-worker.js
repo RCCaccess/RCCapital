@@ -1,7 +1,7 @@
-// RC Capital Service Worker v1.0
-const CACHE = 'rccapital-v1';
+// RC Capital Service Worker v1.1
+const CACHE = 'rccapital-v2';
 const ASSETS = [
-  '/RCCapital/index.html',
+  '/RCCapital/inversores.html',
   '/RCCapital/logo.png',
   '/RCCapital/manifest.json',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap',
