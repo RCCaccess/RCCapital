@@ -276,6 +276,20 @@ canvas{display:block;width:100% !important;}
 .tt-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
 .tt-chg{font-size:11px;margin-top:2px;font-family:var(--mono);}
 
+/* PDF notice toast */
+#pdfNotice{
+  position:fixed;left:16px;right:16px;bottom:16px;z-index:400;
+  background:var(--text);color:#fff;font-size:13px;line-height:1.4;
+  border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.28);
+  display:none;max-width:420px;margin:0 auto;
+}
+#pdfNotice.show{display:block;}
+#pdfNotice button{
+  margin-top:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+  color:#fff;font-family:var(--sans);font-size:12px;font-weight:600;
+  padding:6px 12px;border-radius:8px;cursor:pointer;
+}
+
 /* Mobile bottom bar */
 .bottom-bar-mob{display:none;}
 @media(max-width:768px){
@@ -407,6 +421,7 @@ canvas{display:block;width:100% !important;}
   </div>
 </div>
 <div id="tooltip"><div class="tt-date" id="ttDate">—</div><div class="tt-val" id="ttVal">—</div><div class="tt-chg" id="ttChg">—</div></div>
+<div id="pdfNotice"><div id="pdfNoticeMsg"></div><button onclick="$('pdfNotice').classList.remove('show')">Entendido</button></div>
 
 <script>
 var _logoB64=null;(function(){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){try{var v=document.createElement('canvas');v.width=i.width;v.height=i.height;var x=v.getContext('2d');x.drawImage(i,0,0);_logoB64=v.toDataURL('image/png');}catch(e){}};i.src='logo.png';})();
@@ -631,11 +646,16 @@ function drawEquityChart(){
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-async function tryPDF(){if(!CC.labels||!CC.labels.length){alert('Sin datos');return;}generarPDF();}
-function generarPDF(){
-  if(!CC.labels||!CC.labels.length||!CC.stats){alert('Sin datos');return;}
-  const btn=$('btnPDF')||document.querySelector('.bb-btn.gold');
-  if(btn){btn.textContent='⏳';btn.disabled=true;}
+function pdfNotice(msg){
+  const el=$('pdfNotice'); if(!el) return;
+  $('pdfNoticeMsg').textContent=msg;
+  el.classList.add('show');
+}
+async function tryPDF(){if(!CC.labels||!CC.labels.length){pdfNotice('Aún no hay datos de reporte para generar el PDF.');return;}await generarPDF();}
+async function generarPDF(){
+  if(!CC.labels||!CC.labels.length||!CC.stats){pdfNotice('Aún no hay datos de reporte para generar el PDF.');return;}
+  const allBtns=[$('btnPDF'),document.querySelector('.bm-btn.accent')].filter(Boolean);
+  allBtns.forEach(b=>{b.dataset._label=b.textContent;b.textContent='⏳';b.disabled=true;});
   try{
     const{jsPDF}=window.jspdf;
     const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
@@ -795,16 +815,52 @@ function generarPDF(){
     ln(M,PH-15,PW-M,PH-15,BORDER,0.2);
     // Download
     const fname='RC_Capital_'+nombre.replace(/[\s]+/g,'_')+'_'+bog.getUTCFullYear()+'.pdf';
+    const blob=doc.output('blob');
+    const isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
+    let done=false, sharedOk=false;
+
+    // Método 1: Web Share API — es el único método confiable para "descargar" archivos
+    // cuando la web está instalada como app (PWA) en modo standalone (iOS/Android),
+    // ya que ahí <a download> con blob: no dispara ninguna descarga ni error visible.
     try{
-      const blob=doc.output('blob'),url=URL.createObjectURL(blob);
-      const a=document.createElement('a');a.href=url;a.download=fname;a.style.display='none';
-      document.body.appendChild(a);a.click();
-      setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},2000);
-    }catch(e){try{doc.save(fname);}catch(e2){
-      const w=window.open();if(w)w.document.write('<iframe src="'+doc.output('datauristring')+'" width="100%" height="100%"></iframe>');
-    }}
-  }catch(err){alert('Error PDF: '+err.message);}
-  finally{if(btn){btn.textContent='↓ PDF';btn.disabled=false;}}
+      const file=new File([blob],fname,{type:'application/pdf'});
+      if(navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:fname});
+        done=true;sharedOk=true;
+      }
+    }catch(shareErr){
+      // Usuario canceló el share, o falló — seguimos con el siguiente método.
+    }
+
+    // Método 2: descarga directa vía blob + <a download> (navegador normal, no standalone)
+    if(!done){
+      try{
+        const url=URL.createObjectURL(blob);
+        const a=document.createElement('a');a.href=url;a.download=fname;a.style.display='none';
+        document.body.appendChild(a);a.click();
+        setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},4000);
+        done=true;
+      }catch(e){/* sigue al método 3 */}
+    }
+
+    // Método 3: jsPDF.save() nativo
+    if(!done){
+      try{doc.save(fname);done=true;}catch(e2){/* sigue al método 4 */}
+    }
+
+    // Método 4: abrir el PDF en una pestaña nueva vía data URI
+    if(!done){
+      const w=window.open(doc.output('datauristring'),'_blank');
+      done=!!w;
+    }
+
+    if(!sharedOk && (!done || isStandalone)){
+      pdfNotice(isStandalone
+        ? 'Si la descarga no se guardó, abre este reporte desde Safari o Chrome (no desde el ícono de la app instalada) e inténtalo de nuevo.'
+        : 'No se pudo descargar automáticamente. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.');
+    }
+  }catch(err){pdfNotice('Error al generar el PDF: '+err.message);}
+  finally{allBtns.forEach(b=>{b.textContent=b.dataset._label||b.textContent;b.disabled=false;});}
 }
 
 
