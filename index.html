@@ -363,7 +363,6 @@ canvas{display:block;width:100% !important;}
     </div>
   </div>
   <div class="report-wrap" id="reportWrap">
-    <div class="period-bar" id="periodBar" style="display:none;"><label>Período:</label><div id="periodBtns"></div></div>
     <div id="loadingState" style="text-align:center;padding:80px 20px;color:var(--muted);"><span class="spinner"></span><p style="margin-top:16px;font-size:14px;">Cargando tu reporte...</p></div>
     <div id="emptyState" class="empty-report" style="display:none;"><div class="ei">📊</div><h3>Sin reporte disponible</h3><p>Tu gestor aún no ha subido el reporte de este período.<br/>Contacta a RCCapital para más información.</p></div>
     <div id="reportContent" style="display:none;">
@@ -510,14 +509,11 @@ function showApp(){
 }
 
 async function loadReportes(){
-  $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
+  $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';
   const{data,error}=await db.from('reportes').select('*').eq('cliente_id',currentCliente.id).order('mes',{ascending:false});
   if(error||!data||!data.length){$('loadingState').style.display='none';$('emptyState').style.display='block';return;}
-  const pbc=$('periodBtns');pbc.innerHTML='';
-  data.forEach((rep,i)=>{const btn=document.createElement('button');btn.className='period-btn'+(i===0?' active':'');btn.textContent=mLabel(rep.mes);btn.onclick=()=>{document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderReporte(rep);};pbc.appendChild(btn);});
-  if(data.length>1)$('periodBar').style.display='flex';
   $('loadingState').style.display='none';
-  renderReporte(data[0]);
+  renderReporte(data[0]); // siempre el mes más reciente; el histórico se ve en el resumen por período
 }
 
 function detectSep(t){const l=(t.split(/\r?\n/)[0]||'');return(l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':',';}
