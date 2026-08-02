@@ -341,6 +341,18 @@ canvas{display:block;width:100% !important;}
 </div>
 
 <div id="appScreen">
+  <!-- Mobile bottom action bar -->
+  <div class="bottom-bar-mob">
+    <div class="bm-brand">
+      <img src="logo.png" alt="RC" style="width:20px;height:20px;object-fit:contain;border-radius:5px;flex-shrink:0;"/>
+      <span id="bmNombre">RC Capital</span>
+    </div>
+    <div class="bm-actions">
+      <button class="bm-btn accent" onclick="tryPDF()">⬇ PDF</button>
+      <button class="bm-btn" onclick="logout()">Salir</button>
+    </div>
+  </div>
+
   <div class="action-bar">
     <div class="ab-brand"><div class="dot"></div><span>RCCapital</span></div>
     <div class="ab-user">Bienvenido, <strong id="abNombre">—</strong></div>
@@ -401,20 +413,38 @@ var _logoB64=null;(function(){var i=new Image();i.crossOrigin='anonymous';i.onlo
 
 // Auto-login from remembered session
 document.addEventListener('DOMContentLoaded', function(){
+  // Make sure login screen is visible by default
+  var ls=document.getElementById('loginScreen');
+  var as=document.getElementById('appScreen');
+  if(ls) ls.style.display='flex';
+  if(as) as.style.display='none';
+
   try{
+    // Prefill saved credentials
     var saved = localStorage.getItem('rcSavedLogin');
-    if(saved){ var d=JSON.parse(saved);
-      var em=$('clientEmail'),pw=$('clientPass'),cb=document.getElementById('rememberMe');
-      if(em)em.value=d.email||'';if(pw)pw.value=d.pass||'';if(cb)cb.checked=true;
+    if(saved){
+      var d=JSON.parse(saved);
+      var em=document.getElementById('clientEmail');
+      var pw=document.getElementById('clientPass');
+      var cb=document.getElementById('rememberMe');
+      if(em&&d.email) em.value=d.email;
+      if(pw&&d.pass) pw.value=d.pass;
+      if(cb) cb.checked=true;
     }
+    // Restore active session only if valid and complete
     var sess = localStorage.getItem('rcActiveSession');
-    if(sess){ var sd=JSON.parse(sess);
-      if(sd&&sd.expires>Date.now()){
+    if(sess){
+      var sd=JSON.parse(sess);
+      if(sd && sd.id && sd.nombre && sd.expires && sd.expires>Date.now()){
         currentCliente={id:sd.id,nombre:sd.nombre,email:sd.email,password_hash:sd.password_hash};
-        showApp(); return;
-      } else { localStorage.removeItem('rcActiveSession'); }
+        showApp();
+      } else {
+        localStorage.removeItem('rcActiveSession');
+      }
     }
-  }catch(e){}
+  }catch(e){
+    try{localStorage.removeItem('rcActiveSession');}catch(e2){}
+  }
 });
 
 const SUPABASE_URL='https://bhyftbbohsjivhhjstbb.supabase.co';
@@ -456,8 +486,27 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
-function logout(){sessionStorage.removeItem('rc_client');currentCliente=null;$('appScreen').style.display='none';$('loginScreen').style.display='flex';$('clientPass').value='';}
-function showApp(){$('loginScreen').style.display='none';$('appScreen').style.display='block';$('abNombre').textContent=currentCliente.nombre;loadReportes();}
+function logout(){
+  try{
+    localStorage.removeItem('rcActiveSession');
+    sessionStorage.removeItem('rc_client');
+  }catch(e){}
+  currentCliente=null;
+  CC={};
+  $('appScreen').style.display='none';
+  $('loginScreen').style.display='flex';
+  $('clientPass').value='';
+  var pb=document.getElementById('periodBar'); if(pb) pb.style.display='none';
+  var rc=document.getElementById('reportContent'); if(rc) rc.style.display='none';
+}
+function showApp(){
+  $('loginScreen').style.display='none';
+  $('appScreen').style.display='block';
+  $('abNombre').textContent=currentCliente.nombre;
+  var bm=document.getElementById('bmNombre');
+  if(bm) bm.textContent=currentCliente.nombre;
+  loadReportes();
+}
 
 async function loadReportes(){
   $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
@@ -763,8 +812,7 @@ function generarPDF(){
 
 
 window.addEventListener('resize',()=>{if(CC.labels&&CC.labels.length){drawEquityChart();}});
-const saved=sessionStorage.getItem('rc_client');
-if(saved){try{currentCliente=JSON.parse(saved);showApp();}catch(e){}}
+// Session restore handled in DOMContentLoaded block above
 
 // ── SECRET ADMIN ACCESS ──────────────────────────────────────────
 const SECRET_PIN = '1128';
