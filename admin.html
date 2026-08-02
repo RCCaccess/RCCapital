@@ -2376,7 +2376,7 @@ async function openDetalle(clienteId, nombre){
   var rep = res.data;
   $('detPeriodo').textContent = 'Período: ' + rep.mes;
 
-  // Parse CSV and compute stats (reusing same logic as index.html)
+  // Parse CSV and compute stats (reusing same logic as inversores.html)
   try{
     var rows = parseCSVdet(rep.csv_data);
     var stats = computeStatsdet(rows);
