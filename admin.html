@@ -278,6 +278,39 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   #modalDetalle [style*="grid-template-columns:1fr auto"]{grid-template-columns:1fr !important;}
   #modalDetalle [style*="text-align:right"]{text-align:left !important;}
 }
+
+/* ===== RESPONSIVE OVERFLOW FIXES ===== */
+html,body{overflow-x:hidden;}
+.stats-row-4{grid-template-columns:repeat(4,1fr);}
+.stats-row-3{grid-template-columns:repeat(3,1fr);}
+.stats-row>*{min-width:0;}
+
+.roi-row{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid #E8EDF2;}
+.roi-numbers{display:grid;grid-template-columns:90px 90px 70px;gap:12px;}
+.roi-numbers>div{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+.bulk-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:10px;background:#F1F4F8;border:1px solid var(--border);margin-bottom:6px;}
+
+@media(max-width:900px){
+  #dashChartsRow{grid-template-columns:1fr !important;}
+}
+
+@media(max-width:768px){
+  .card-bd{padding:16px !important;}
+  .stats-row-4{grid-template-columns:repeat(2,1fr) !important;}
+  .stats-row-3{grid-template-columns:repeat(2,1fr) !important;}
+  #dashKpiRow{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}
+  .roi-row{grid-template-columns:1fr !important;row-gap:8px;padding:12px 0;}
+  .roi-numbers{grid-template-columns:repeat(3,1fr) !important;gap:8px;}
+  .bulk-row{grid-template-columns:auto 1fr !important;row-gap:8px;}
+  .bulk-row select{max-width:none !important;}
+}
+
+@media(max-width:420px){
+  .stats-row-4,.stats-row-3{grid-template-columns:1fr !important;}
+  .stat-box .sv{font-size:17px !important;word-break:break-word;}
+  #dashKpiRow{grid-template-columns:1fr !important;}
+}
 </style>
 </head>
 <body>
@@ -364,25 +397,25 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <div class="page-sub">Panorama general del fondo</div>
 
         <!-- KEY METRICS -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+        <div id="dashKpiRow" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">AUM Total</div>
-            <div id="statAUM" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);">—</div>
+            <div id="statAUM" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);overflow-wrap:break-word;">—</div>
             <div style="font-size:11px;color:#5A6675;margin-top:4px;">Capital bajo gestión</div>
           </div>
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">Capital Depositado</div>
-            <div id="statDeposited" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);">—</div>
+            <div id="statDeposited" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);overflow-wrap:break-word;">—</div>
             <div style="font-size:11px;color:#5A6675;margin-top:4px;">Suma de depósitos</div>
           </div>
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">P&L Agregado</div>
-            <div id="statPnL" style="font-size:24px;font-weight:700;font-family:var(--mono);">—</div>
+            <div id="statPnL" style="font-size:24px;font-weight:700;font-family:var(--mono);overflow-wrap:break-word;">—</div>
             <div id="statPnLPct" style="font-size:11px;color:#5A6675;margin-top:4px;">—</div>
           </div>
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">Inversores</div>
-            <div id="statClientes" style="font-size:24px;font-weight:700;color:#23639E;font-family:var(--mono);">—</div>
+            <div id="statClientes" style="font-size:24px;font-weight:700;color:#23639E;font-family:var(--mono);overflow-wrap:break-word;">—</div>
             <div id="statClientesSub" style="font-size:11px;color:#5A6675;margin-top:4px;">Cuentas activas</div>
           </div>
         </div>
@@ -390,16 +423,16 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <!-- CHARTS ROW -->
         <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:20px;" id="dashChartsRow">
           <!-- AUM per client bar chart -->
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:13px;font-weight:700;color:#0E1620;margin-bottom:4px;">Capital por Inversor</div>
             <div style="font-size:11px;color:#5A6675;margin-bottom:16px;">Distribución del AUM</div>
-            <canvas id="chartAUM" style="width:100%;height:220px;"></canvas>
+            <canvas id="chartAUM" style="display:block;width:100%;height:220px;max-width:100%;"></canvas>
           </div>
           <!-- Performance distribution -->
-          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);min-width:0;">
             <div style="font-size:13px;font-weight:700;color:#0E1620;margin-bottom:4px;">Rendimiento</div>
             <div style="font-size:11px;color:#5A6675;margin-bottom:16px;">Inversores en positivo vs negativo</div>
-            <canvas id="chartPerf" style="width:100%;height:180px;"></canvas>
+            <canvas id="chartPerf" style="display:block;width:100%;height:180px;max-width:100%;"></canvas>
             <div id="perfLegend" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;"></div>
           </div>
         </div>
@@ -450,7 +483,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
         <!-- KPIs gestor -->
         <div id="mcStats" style="display:none;">
-          <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+          <div class="stats-row stats-row-4">
             <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
             <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
             <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
@@ -459,7 +492,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
               <div class="sv" style="color:var(--bad);" id="mcWithdrawals">—</div>
             </div>
           </div>
-          <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:-4px;">
+          <div class="stats-row stats-row-3" style="margin-top:-4px;">
             <div class="stat-box"><div class="sl">Deposit fees</div><div class="sv" id="mcDepFees">—</div></div>
             <div class="stat-box good"><div class="sl">Balance disponible</div><div class="sv" id="mcBalance">—</div></div>
             <div class="stat-box"><div class="sl">Meses operados</div><div class="sv" id="mcMeses">—</div></div>
@@ -476,8 +509,8 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
               </div>
             </div>
             <div class="card-bd">
-              <div style="background:#F1F4F8;border:1px solid var(--border);border-radius:12px;padding:12px;">
-                <canvas id="mcChart" style="display:block;width:100%;height:220px;"></canvas>
+              <div style="background:#F1F4F8;border:1px solid var(--border);border-radius:12px;padding:12px;min-width:0;overflow:hidden;">
+                <canvas id="mcChart" style="display:block;width:100%;height:220px;max-width:100%;"></canvas>
               </div>
             </div>
           </div>
@@ -926,7 +959,7 @@ function drawAUMChart(portfolio){
   var canvas = $('chartAUM'); if(!canvas) return;
   var dpr = window.devicePixelRatio||1;
   var rect = canvas.getBoundingClientRect();
-  var W = Math.max(300, rect.width||500), H = 220;
+  var W = Math.max(120, rect.width||300), H = 220;
   canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
   var ctx = canvas.getContext('2d');
@@ -980,7 +1013,7 @@ function drawPerfChart(portfolio){
   var canvas = $('chartPerf'); if(!canvas) return;
   var dpr = window.devicePixelRatio||1;
   var rect = canvas.getBoundingClientRect();
-  var W = Math.max(200, rect.width||300), H = 180;
+  var W = Math.max(120, rect.width||260), H = 180;
   canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
   canvas.style.width = W+'px'; canvas.style.height = H+'px';
   var ctx = canvas.getContext('2d');
@@ -1052,16 +1085,18 @@ function renderROIRanking(portfolio){
   el.innerHTML = sorted.map(function(p){
     var isPos = p.roi>=0;
     var w = Math.min(100, Math.abs(p.roi)/maxAbs*100);
-    return '<div style="display:grid;grid-template-columns:1fr 90px 90px 70px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #E8EDF2;">'+
-      '<div>'+
-        '<div style="font-size:13px;font-weight:600;color:#0E1620;margin-bottom:5px;">'+p.nombre+'</div>'+
+    return '<div class="roi-row">'+
+      '<div style="min-width:0;">'+
+        '<div style="font-size:13px;font-weight:600;color:#0E1620;margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+p.nombre+'</div>'+
         '<div style="height:5px;background:#F1F4F8;border-radius:3px;overflow:hidden;">'+
           '<div style="height:100%;width:'+w+'%;background:'+(isPos?'#0B8A6B':'#C8483C')+';border-radius:3px;"></div>'+
         '</div>'+
       '</div>'+
-      '<div style="text-align:right;font-family:var(--mono);font-size:12px;color:#5A6675;">'+fmtUSD(p.dep)+'</div>'+
-      '<div style="text-align:right;font-family:var(--mono);font-size:12px;font-weight:600;color:#0E1620;">'+fmtUSD(p.equity)+'</div>'+
-      '<div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:'+(isPos?'#0B8A6B':'#C8483C')+';">'+(isPos?'+':'')+p.roi.toFixed(1)+'%</div>'+
+      '<div class="roi-numbers">'+
+        '<div style="text-align:right;font-family:var(--mono);font-size:12px;color:#5A6675;">'+fmtUSD(p.dep)+'</div>'+
+        '<div style="text-align:right;font-family:var(--mono);font-size:12px;font-weight:600;color:#0E1620;">'+fmtUSD(p.equity)+'</div>'+
+        '<div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:'+(isPos?'#0B8A6B':'#C8483C')+';">'+(isPos?'+':'')+p.roi.toFixed(1)+'%</div>'+
+      '</div>'+
     '</div>';
   }).join('');
 }
@@ -1889,7 +1924,7 @@ function renderBulkList(){
   var ready=0,noMatch=0;
   bulkFiles.forEach(function(bf,idx){
     var row=document.createElement('div');
-    row.style.cssText='display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:10px;background:#F1F4F8;border:1px solid var(--border);margin-bottom:6px;';
+    row.className='bulk-row';
     var icon='⏳',iconColor='var(--muted)';
     if(bf.status==='ok'){icon='✅';iconColor='var(--good)';}
     if(bf.status==='error'){icon='❌';iconColor='var(--bad)';}
@@ -1903,14 +1938,14 @@ function renderBulkList(){
     var dis=bf.status!=='pending'?'disabled':'';
     row.innerHTML=
       '<span style="font-size:20px;">'+icon+'</span>'+
-      '<div>'+
-        '<div style="font-size:12px;font-weight:600;margin-bottom:2px;">'+bf.file.name+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);">'+bf.investor+'</div>'+
+      '<div style="min-width:0;overflow:hidden;">'+
+        '<div style="font-size:12px;font-weight:600;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+bf.file.name+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+bf.investor+'</div>'+
         statusLine+
       '</div>'+
-      '<div style="display:flex;flex-direction:column;gap:5px;">'+
+      '<div style="display:flex;flex-direction:column;gap:5px;min-width:0;">'+
         '<select '+dis+' onchange="bulkFiles['+idx+'].clienteId=this.value;" '+
-          'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:#F8FAFC;border:1px solid var(--border);border-radius:6px;color:var(--text);min-width:170px;">'+
+          'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:#F8FAFC;border:1px solid var(--border);border-radius:6px;color:var(--text);width:100%;max-width:170px;">'+
           '<option value="">— Asignar cliente —</option>'+opts+
         '</select>'+
       '</div>'+
@@ -2238,7 +2273,7 @@ function mcDrawChart(monthKeys, monthly){
   var canvas=$('mcChart');
   var dpr=window.devicePixelRatio||1;
   var rect=canvas.getBoundingClientRect();
-  var W=Math.max(300,rect.width||700), H=220;
+  var W=Math.max(120,rect.width||500), H=220;
   canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   var ctx=canvas.getContext('2d');
@@ -2461,7 +2496,7 @@ function drawDetChart(stats){
   var canvas=$('detChart'); if(!canvas) return;
   var dpr=window.devicePixelRatio||1;
   var rect=canvas.getBoundingClientRect();
-  var W=Math.max(300,rect.width||700), H=240;
+  var W=Math.max(120,rect.width||500), H=240;
   canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   var ctx=canvas.getContext('2d');
@@ -2612,7 +2647,7 @@ function drawDetChart(stats){
     <div style="margin-bottom:20px;">
       <div style="font-size:15px;font-weight:700;letter-spacing:-.2px;color:#0E1620;margin-bottom:12px;">Evolución del Capital</div>
       <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(20,22,27,.07);">
-        <canvas id="detChart" style="display:block;width:100%;height:240px;"></canvas>
+        <canvas id="detChart" style="display:block;width:100%;height:240px;max-width:100%;"></canvas>
       </div>
     </div>
 
