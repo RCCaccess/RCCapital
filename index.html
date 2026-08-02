@@ -345,7 +345,7 @@ canvas{display:block;width:100% !important;}
     <div class="ab-brand"><div class="dot"></div><span>RCCapital</span></div>
     <div class="ab-user">Bienvenido, <strong id="abNombre">—</strong></div>
     <div class="ab-actions">
-      <button class="ab-btn accent" id="btnPDF" onclick="tryPDF()">⬇️ Guardar PDF</button>
+      <button class="ab-btn accent" id="btnPDF" onclick="tryPDF()">⬇ Descargar informe PDF</button>
       <button class="ab-btn" onclick="logout()">Salir</button>
     </div>
   </div>
@@ -386,8 +386,6 @@ canvas{display:block;width:100% !important;}
           
         </div>
       </div>
-      <div class="section fu fu4"><div class="section-title">Resultado Mensual</div><div class="chart-box"><canvas id="chartMonthly"></canvas></div></div>
-      <div class="divider"></div>
       <div class="section">
         <div class="section-title">Resumen por Período</div>
         <div class="scroll-wrap"><table><thead><tr><th>Mes</th><th style="text-align:right">P&L neto del mes</th><th style="text-align:right">Retorno %</th><th style="text-align:right">Equity final</th></tr></thead><tbody id="summaryBody"></tbody></table></div>
@@ -583,38 +581,6 @@ function drawEquityChart(){
   $('cstLow').textContent=fmtUSD(low);
   
 }
-
-function drawMonthlyChart(stats){
-  if(!stats.me.length)return;const canvas=$('chartMonthly');
-  const{ctx,W,H}=hiDPI(canvas,160);ctx.clearRect(0,0,W,H);
-  const labels=stats.me.map(([k])=>mLabel(k)),values=stats.me.map(([,v])=>v);
-  const pad={l:62,r:10,t:12,b:48},iw=W-pad.l-pad.r,ih=H-pad.t-pad.b;
-  const minV=Math.min(0,...values),maxV=Math.max(0,...values),span=(maxV-minV)||1,zero=pad.t+ih*(1-(0-minV)/span);
-  ctx.strokeStyle='rgba(255,255,255,.05)';ctx.lineWidth=1;
-  for(let i=0;i<=4;i++){const y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle='#6b809a';ctx.font='11px JetBrains Mono,monospace';ctx.textAlign='right';
-  for(let i=0;i<=4;i++){const v=maxV-span*(i/4),y=pad.t+ih*(i/4);ctx.fillText(Math.abs(v)>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-6,y+4);}
-  const n=labels.length,slot=iw/Math.max(1,n),bw=Math.max(6,slot*0.65);
-  for(let i=0;i<n;i++){const v=values[i],barH=Math.max(2,Math.abs(ih*(v/span))),x=pad.l+slot*(i+0.5)-bw/2,y=v>=0?zero-barH:zero;
-    const grd=ctx.createLinearGradient(0,y,0,y+barH);
-    if(v>=0){grd.addColorStop(0,'rgba(34,214,138,.85)');grd.addColorStop(1,'rgba(34,214,138,.25)');}else{grd.addColorStop(0,'rgba(255,79,106,.8)');grd.addColorStop(1,'rgba(255,79,106,.2)');}
-    ctx.fillStyle=grd;if(ctx.roundRect)ctx.roundRect(x,y,bw,barH,3);else ctx.rect(x,y,bw,barH);ctx.fill();}
-  ctx.fillStyle='#6b809a';ctx.font='10px Syne,sans-serif';ctx.textAlign='center';
-  for(let i=0;i<n;i++){const x=pad.l+slot*(i+0.5);ctx.save();ctx.translate(x,pad.t+ih+10);ctx.rotate(-Math.PI/5);ctx.fillText(labels[i],0,0);ctx.restore();}
-}
-
-$('chartEquity').addEventListener('mousemove',e=>{
-  const canvas=$('chartEquity');if(!canvas._d)return;
-  const{labels,equity,pad,iw}=canvas._d;
-  const rect=canvas.getBoundingClientRect(),mx=e.clientX-rect.left;
-  const n=labels.length,i=Math.max(0,Math.min(n-1,Math.round((mx-pad.l)/iw*(n-1))));
-  const prev=i>0?equity[i-1]:equity[0],chg=equity[i]-prev,pct=prev?(chg/Math.abs(prev)*100):0;
-  $('ttDate').textContent=labels[i];$('ttVal').textContent=fmtUSD(equity[i]);
-  $('ttChg').textContent=(chg>=0?'+':'')+fmtUSD(chg)+' ('+(chg>=0?'+':'')+fmtPct(pct)+')';
-  $('ttChg').style.color=chg>=0?'var(--good)':'var(--bad)';
-  const tt=$('tooltip');tt.style.display='block';tt.style.left=(e.clientX+14)+'px';tt.style.top=(e.clientY-44)+'px';
-});
-$('chartEquity').addEventListener('mouseleave',()=>$('tooltip').style.display='none');
 
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
