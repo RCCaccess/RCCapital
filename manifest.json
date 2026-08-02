@@ -2,7 +2,7 @@
   "name": "RC Capital",
   "short_name": "RC Capital",
   "description": "Portal de inversores RC Capital — consulta tu estado de cuenta y rendimiento.",
-  "start_url": "/RCCapital/index.html",
+  "start_url": "/RCCapital/inversores.html",
   "scope": "/RCCapital/",
   "display": "standalone",
   "orientation": "portrait",
@@ -46,7 +46,7 @@
       "name": "Mi Reporte",
       "short_name": "Reporte",
       "description": "Ver mi estado de cuenta",
-      "url": "/RCCapital/index.html",
+      "url": "/RCCapital/inversores.html",
       "icons": [
         {
           "src": "icons/icon-192.png",
