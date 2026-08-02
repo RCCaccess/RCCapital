@@ -339,12 +339,58 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <!-- DASHBOARD -->
       <div class="page active" id="page-dashboard">
         <div class="page-title">Dashboard</div>
-        <div class="page-sub">Resumen general de tu portafolio</div>
-        <div class="stats-row">
-          <div class="stat-box accent"><div class="sl">Clientes activos</div><div class="sv" id="statClientes">—</div></div>
-          <div class="stat-box good"><div class="sl">Reportes subidos</div><div class="sv" id="statReportes">—</div></div>
-          <div class="stat-box"><div class="sl">Último reporte</div><div class="sv" id="statUltimo" style="font-size:14px;margin-top:4px;">—</div></div>
+        <div class="page-sub">Panorama general del fondo</div>
+
+        <!-- KEY METRICS -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;">
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">AUM Total</div>
+            <div id="statAUM" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);">—</div>
+            <div style="font-size:11px;color:#5A6675;margin-top:4px;">Capital bajo gestión</div>
+          </div>
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">Capital Depositado</div>
+            <div id="statDeposited" style="font-size:24px;font-weight:700;color:#0E1620;font-family:var(--mono);">—</div>
+            <div style="font-size:11px;color:#5A6675;margin-top:4px;">Suma de depósitos</div>
+          </div>
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">P&L Agregado</div>
+            <div id="statPnL" style="font-size:24px;font-weight:700;font-family:var(--mono);">—</div>
+            <div id="statPnLPct" style="font-size:11px;color:#5A6675;margin-top:4px;">—</div>
+          </div>
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:18px 20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#5A6675;margin-bottom:8px;">Inversores</div>
+            <div id="statClientes" style="font-size:24px;font-weight:700;color:#23639E;font-family:var(--mono);">—</div>
+            <div id="statClientesSub" style="font-size:11px;color:#5A6675;margin-top:4px;">Cuentas activas</div>
+          </div>
         </div>
+
+        <!-- CHARTS ROW -->
+        <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:12px;margin-bottom:20px;" id="dashChartsRow">
+          <!-- AUM per client bar chart -->
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:13px;font-weight:700;color:#0E1620;margin-bottom:4px;">Capital por Inversor</div>
+            <div style="font-size:11px;color:#5A6675;margin-bottom:16px;">Distribución del AUM</div>
+            <canvas id="chartAUM" style="width:100%;height:220px;"></canvas>
+          </div>
+          <!-- Performance distribution -->
+          <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 8px rgba(20,22,27,.07);">
+            <div style="font-size:13px;font-weight:700;color:#0E1620;margin-bottom:4px;">Rendimiento</div>
+            <div style="font-size:11px;color:#5A6675;margin-bottom:16px;">Inversores en positivo vs negativo</div>
+            <canvas id="chartPerf" style="width:100%;height:180px;"></canvas>
+            <div id="perfLegend" style="display:flex;flex-direction:column;gap:8px;margin-top:16px;"></div>
+          </div>
+        </div>
+
+        <!-- ROI RANKING -->
+        <div class="card">
+          <div class="card-hd"><h3>Rendimiento por Inversor</h3><span style="font-size:11px;color:#5A6675;">Ordenado por ROI</span></div>
+          <div class="card-bd" id="roiRanking" style="padding:8px 20px 20px;">
+            <div style="text-align:center;padding:24px;color:#5A6675;font-size:13px;">Cargando...</div>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
         <div class="card">
           <div class="card-hd"><h3>Actividad reciente</h3></div>
           <div class="card-bd" id="actividadReciente">
@@ -787,32 +833,240 @@ async function loadReportes(){
 
 // ── DASHBOARD ────────────────────────────────────────────────────
 async function updateDashboard(){
+  // Basic counts
   $('statClientes').textContent = clientesCache.length;
-  const { data: reps } = await db.from('reportes').select('*,clientes(nombre)').order('created_at',{ascending:false}).limit(5);
-  const all = reps || [];
-  $('statReportes').textContent = all.length;
-  $('statUltimo').textContent = all[0] ? fmtDate(all[0].created_at) : '—';
+  var sub = $('statClientesSub');
+  if(sub) sub.textContent = clientesCache.length===1?'Cuenta activa':'Cuentas activas';
 
-  const act = $('actividadReciente');
-  if(!all.length){
-    act.innerHTML='<div class="empty"><div class="ei">📋</div><p>Sin actividad aún. Sube el primer reporte.</p></div>';
-    return;
+  // Fetch all reports to compute aggregate metrics
+  var portfolio = [];
+  try{
+    const {data:reps} = await db.from('reportes').select('cliente_id,csv_data,created_at,mes').order('mes',{ascending:false});
+    if(reps && reps.length){
+      // Keep only latest report per client
+      var latest = {};
+      reps.forEach(function(r){ if(!latest[r.cliente_id]) latest[r.cliente_id]=r; });
+
+      Object.keys(latest).forEach(function(cid){
+        var rep = latest[cid];
+        var cl = clientesCache.find(function(x){return x.id===cid;});
+        if(!cl || !rep.csv_data) return;
+        try{
+          var rows = parseCSVdet(rep.csv_data);
+          var st = computeStatsdet(rows);
+          if(st && isFinite(st.equity)){
+            portfolio.push({
+              id: cid,
+              nombre: cl.nombre,
+              dep: st.dep||0,
+              equity: st.equity||0,
+              roi: st.roi||0,
+              pnl: (st.runP||0)+(st.runF||0),
+              months: st.me?st.me.length:0,
+              firstDate: st.firstDate
+            });
+          }
+        }catch(e){}
+      });
+
+      // Recent activity
+      renderRecentActivity(reps.slice(0,6));
+    }
+  }catch(e){ console.warn('updateDashboard:',e); }
+
+  // Aggregate metrics
+  var totalAUM = portfolio.reduce(function(a,p){return a+p.equity;},0);
+  var totalDep = portfolio.reduce(function(a,p){return a+p.dep;},0);
+  var totalPnL = totalAUM - totalDep;
+  var aggROI = totalDep>0 ? (totalPnL/totalDep*100) : 0;
+
+  var fmtUSD = function(n){return (isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0});};
+
+  if($('statAUM')) $('statAUM').textContent = fmtUSD(totalAUM);
+  if($('statDeposited')) $('statDeposited').textContent = fmtUSD(totalDep);
+  if($('statPnL')){
+    $('statPnL').textContent = (totalPnL>=0?'+':'')+fmtUSD(totalPnL);
+    $('statPnL').style.color = totalPnL>=0?'#0B8A6B':'#C8483C';
   }
-  act.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
-    <thead><tr>
-      <th style="padding:8px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);">Cliente</th>
-      <th style="padding:8px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);">Período</th>
-      <th style="padding:8px 0;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);">Fecha subida</th>
-    </tr></thead>
-    <tbody>${all.map(r=>`<tr>
-      <td style="padding:10px 0;border-bottom:1px solid var(--border);">${r.clientes?.nombre||'—'}</td>
-      <td style="padding:10px 0;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--accent);">${r.mes||'—'}</td>
-      <td style="padding:10px 0;border-bottom:1px solid var(--border);color:var(--muted);font-size:12px;">${fmtDate(r.created_at)}</td>
-    </tr>`).join('')}</tbody>
-  </table>`;
+  if($('statPnLPct')){
+    $('statPnLPct').textContent = (aggROI>=0?'+':'')+aggROI.toFixed(2)+'% agregado';
+    $('statPnLPct').style.color = aggROI>=0?'#0B8A6B':'#C8483C';
+  }
+
+  // Draw charts
+  drawAUMChart(portfolio);
+  drawPerfChart(portfolio);
+  renderROIRanking(portfolio);
 }
 
-// ── CLIENTES TABLE ───────────────────────────────────────────────
+// ── AUM per client — horizontal bar chart ──
+function drawAUMChart(portfolio){
+  var canvas = $('chartAUM'); if(!canvas) return;
+  var dpr = window.devicePixelRatio||1;
+  var rect = canvas.getBoundingClientRect();
+  var W = Math.max(300, rect.width||500), H = 220;
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  if(!portfolio.length){
+    ctx.fillStyle='#A8C2DA';ctx.font='13px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Sin datos',W/2,H/2);return;
+  }
+
+  var sorted = portfolio.slice().sort(function(a,b){return b.equity-a.equity;}).slice(0,6);
+  var maxEq = Math.max.apply(null, sorted.map(function(p){return p.equity;}))||1;
+  var pad = {l:110,r:60,t:8,b:8};
+  var iw = W-pad.l-pad.r;
+  var barH = Math.min(28,(H-pad.t-pad.b)/sorted.length - 6);
+  var gap = ((H-pad.t-pad.b) - barH*sorted.length)/Math.max(1,sorted.length-1);
+
+  sorted.forEach(function(p,i){
+    var by = pad.t + i*(barH+gap);
+    var bw = Math.max(2, iw*(p.equity/maxEq));
+
+    // Name
+    ctx.fillStyle='#0E1620';ctx.font='500 12px Inter,sans-serif';ctx.textAlign='right';
+    var name = p.nombre.length>14 ? p.nombre.slice(0,13)+'…' : p.nombre;
+    ctx.fillText(name, pad.l-10, by+barH/2+4);
+
+    // Bar track
+    ctx.fillStyle='#F1F4F8';
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(pad.l, by, iw, barH, 5); else ctx.rect(pad.l, by, iw, barH);
+    ctx.fill();
+
+    // Bar fill — gradient
+    var grd = ctx.createLinearGradient(pad.l,0,pad.l+bw,0);
+    grd.addColorStop(0,'#2C74B4'); grd.addColorStop(1,'#23639E');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    if(ctx.roundRect) ctx.roundRect(pad.l, by, bw, barH, 5); else ctx.rect(pad.l, by, bw, barH);
+    ctx.fill();
+
+    // Value
+    ctx.fillStyle='#0E1620';ctx.font='600 11px "JetBrains Mono",monospace';ctx.textAlign='left';
+    var v = p.equity>=1000 ? '$'+(p.equity/1000).toFixed(1)+'k' : '$'+Math.round(p.equity);
+    ctx.fillText(v, pad.l+bw+8, by+barH/2+4);
+  });
+}
+
+// ── Performance donut chart ──
+function drawPerfChart(portfolio){
+  var canvas = $('chartPerf'); if(!canvas) return;
+  var dpr = window.devicePixelRatio||1;
+  var rect = canvas.getBoundingClientRect();
+  var W = Math.max(200, rect.width||300), H = 180;
+  canvas.width = Math.round(W*dpr); canvas.height = Math.round(H*dpr);
+  canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+
+  var pos = portfolio.filter(function(p){return p.roi>=0;}).length;
+  var neg = portfolio.length - pos;
+  var total = portfolio.length;
+
+  if(!total){
+    ctx.fillStyle='#A8C2DA';ctx.font='13px Inter,sans-serif';ctx.textAlign='center';
+    ctx.fillText('Sin datos',W/2,H/2);return;
+  }
+
+  var cx = W/2, cy = H/2, R = Math.min(W,H)/2 - 14, r = R*0.62;
+  var segs = [
+    {v:pos, c:'#0B8A6B', label:'En positivo'},
+    {v:neg, c:'#C8483C', label:'En negativo'}
+  ].filter(function(s){return s.v>0;});
+
+  var start = -Math.PI/2;
+  segs.forEach(function(s){
+    var ang = (s.v/total)*Math.PI*2;
+    ctx.beginPath();
+    ctx.arc(cx,cy,R,start,start+ang);
+    ctx.arc(cx,cy,r,start+ang,start,true);
+    ctx.closePath();
+    ctx.fillStyle=s.c;ctx.fill();
+    // subtle separator
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+    start += ang;
+  });
+
+  // Center text
+  ctx.fillStyle='#0E1620';ctx.font='700 22px Inter,sans-serif';ctx.textAlign='center';
+  ctx.fillText(String(total),cx,cy+2);
+  ctx.fillStyle='#5A6675';ctx.font='500 10px Inter,sans-serif';
+  ctx.fillText('inversores',cx,cy+16);
+
+  // Legend
+  var lg = $('perfLegend');
+  if(lg){
+    lg.innerHTML = '';
+    [{n:'En positivo',v:pos,c:'#0B8A6B'},{n:'En negativo',v:neg,c:'#C8483C'}].forEach(function(s){
+      var pct = total>0 ? (s.v/total*100).toFixed(0) : 0;
+      lg.innerHTML += '<div style="display:flex;align-items:center;justify-content:space-between;font-size:12px;">'+
+        '<div style="display:flex;align-items:center;gap:7px;">'+
+          '<span style="width:9px;height:9px;border-radius:2px;background:'+s.c+';display:inline-block;"></span>'+
+          '<span style="color:#0E1620;">'+s.n+'</span>'+
+        '</div>'+
+        '<span style="font-family:var(--mono);font-weight:600;color:#0E1620;">'+s.v+' <span style="color:#5A6675;font-weight:400;">('+pct+'%)</span></span>'+
+      '</div>';
+    });
+  }
+}
+
+// ── ROI ranking list ──
+function renderROIRanking(portfolio){
+  var el = $('roiRanking'); if(!el) return;
+  if(!portfolio.length){
+    el.innerHTML = '<div style="text-align:center;padding:24px;color:#5A6675;font-size:13px;">Sin datos aún</div>';
+    return;
+  }
+  var fmtUSD = function(n){return (isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
+  var sorted = portfolio.slice().sort(function(a,b){return b.roi-a.roi;});
+  var maxAbs = Math.max.apply(null, sorted.map(function(p){return Math.abs(p.roi);}))||1;
+
+  el.innerHTML = sorted.map(function(p){
+    var isPos = p.roi>=0;
+    var w = Math.min(100, Math.abs(p.roi)/maxAbs*100);
+    return '<div style="display:grid;grid-template-columns:1fr 90px 90px 70px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #E8EDF2;">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:600;color:#0E1620;margin-bottom:5px;">'+p.nombre+'</div>'+
+        '<div style="height:5px;background:#F1F4F8;border-radius:3px;overflow:hidden;">'+
+          '<div style="height:100%;width:'+w+'%;background:'+(isPos?'#0B8A6B':'#C8483C')+';border-radius:3px;"></div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="text-align:right;font-family:var(--mono);font-size:12px;color:#5A6675;">'+fmtUSD(p.dep)+'</div>'+
+      '<div style="text-align:right;font-family:var(--mono);font-size:12px;font-weight:600;color:#0E1620;">'+fmtUSD(p.equity)+'</div>'+
+      '<div style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:'+(isPos?'#0B8A6B':'#C8483C')+';">'+(isPos?'+':'')+p.roi.toFixed(1)+'%</div>'+
+    '</div>';
+  }).join('');
+}
+
+// ── Recent activity ──
+function renderRecentActivity(reps){
+  var el = $('actividadReciente'); if(!el) return;
+  if(!reps || !reps.length){
+    el.innerHTML = '<div class="empty"><div class="ei">📋</div><p>Sin actividad</p></div>';
+    return;
+  }
+  el.innerHTML = reps.map(function(r){
+    var cl = clientesCache.find(function(x){return x.id===r.cliente_id;});
+    return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #E8EDF2;">'+
+      '<div style="display:flex;align-items:center;gap:10px;">'+
+        '<span style="width:30px;height:30px;border-radius:8px;background:#EBF2F9;display:grid;place-items:center;font-size:13px;">📄</span>'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:500;color:#0E1620;">'+(cl?cl.nombre:'Cliente')+'</div>'+
+          '<div style="font-size:11px;color:#5A6675;">Reporte '+(r.mes||'')+'</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="font-size:11px;color:#5A6675;font-family:var(--mono);">'+fmtDate(r.created_at)+'</div>'+
+    '</div>';
+  }).join('');
+}
+
+
 function renderClientesTable(){
   const container = $('clientesBody') ? $('clientesBody').closest('.tbl-wrap')||$('clientesBody').parentElement : null;
   if(!container) return;
@@ -857,8 +1111,8 @@ function renderClientesTable(){
         '<div style="font-weight:600;color:#0E1620;margin-bottom:4px;">'+c.nombre+'</div>' +
         '<div style="display:flex;align-items:center;gap:4px;">' +
           '<span style="font-size:11px;color:#5A6675;font-family:var(--mono);">'+c.email+'</span>' +
-          '<button data-copy="'+c.email+'" onclick="navigator.clipboard.writeText(this.dataset.copy).then(()=>{this.textContent=\'✓\';setTimeout(()=>{this.textContent=\'⎘\';},1200);})" ' +
-            'style="background:none;border:none;cursor:pointer;color:#7C8B9C;font-size:11px;padding:1px 3px;border-radius:3px;transition:all .1s;" title="Copiar correo">⎘</button>' +
+          '<button data-copy="'+c.email+'" onclick="navigator.clipboard.writeText(this.dataset.copy).then(()=>{this.textContent=\'✓\';this.style.color=\'#0B8A6B\';setTimeout(()=>{this.textContent=\'⧉\';this.style.color=\'#23639E\';},1400);})" ' +
+            'style="background:#EBF2F9;border:1px solid #C5D9EC;cursor:pointer;color:#23639E;font-size:14px;padding:3px 7px;border-radius:5px;line-height:1;transition:all .12s;" title="Copiar correo">⧉</button>' +
         '</div>' +
       '</td>' +
       // Capital inicial
@@ -874,9 +1128,9 @@ function renderClientesTable(){
         '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
           '<span id="'+passId+'" data-pass="'+passEscaped+'" data-visible="0" style="font-family:var(--mono);font-size:12px;color:#23639E;letter-spacing:1px;">••••••••</span>' +
           '<button id="eye-'+safeId+'" data-pass-id="'+passId+'" data-eye-id="eye-'+safeId+'" data-pass-val="'+passEscaped+'" onclick="var e=this;togglePass(e.dataset.passId,e.dataset.eyeId,e.dataset.passVal);" ' +
-            'style="background:none;border:none;cursor:pointer;color:#7C8B9C;padding:2px;font-size:12px;" title="Ver contraseña">👁</button>' +
-          '<button data-copy-pass="'+passEscaped+'" onclick="navigator.clipboard.writeText(this.dataset.copyPass).then(()=>{this.textContent=\'✓\';setTimeout(()=>{this.textContent=\'⎘\';},1200);})" ' +
-            'style="background:none;border:none;cursor:pointer;color:#7C8B9C;padding:2px;font-size:11px;border-radius:3px;" title="Copiar contraseña">⎘</button>' +
+            'style="background:#F1F4F8;border:1px solid #D6DDE6;cursor:pointer;color:#5A6675;padding:3px 7px;font-size:13px;border-radius:5px;line-height:1;" title="Ver contraseña">👁</button>' +
+          '<button data-copy-pass="'+passEscaped+'" onclick="navigator.clipboard.writeText(this.dataset.copyPass).then(()=>{this.textContent=\'✓\';this.style.color=\'#0B8A6B\';setTimeout(()=>{this.textContent=\'⧉\';this.style.color=\'#23639E\';},1400);})" ' +
+            'style="background:#EBF2F9;border:1px solid #C5D9EC;cursor:pointer;color:#23639E;padding:3px 7px;font-size:14px;border-radius:5px;line-height:1;" title="Copiar contraseña">⧉</button>' +
         '</div>' +
       '</td>' +
       // Actions
@@ -2157,122 +2411,91 @@ function renderDetalle(stats, nombre){
 }
 
 function drawDetChart(stats){
-  var canvas=$('detChart');
+  var canvas=$('detChart'); if(!canvas) return;
   var dpr=window.devicePixelRatio||1;
   var rect=canvas.getBoundingClientRect();
-  var W=Math.max(300,rect.width||700), H=160;
+  var W=Math.max(300,rect.width||700), H=200;
   canvas.width=Math.round(W*dpr); canvas.height=Math.round(H*dpr);
   canvas.style.width=W+'px'; canvas.style.height=H+'px';
   var ctx=canvas.getContext('2d');
   ctx.setTransform(dpr,0,0,dpr,0,0);
-  ctx.clearRect(0,0,W,H);
+  // Pure white background
+  ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
+
   var labels=stats.es.map(function(s){return s.dk;});
   var equity=stats.es.map(function(s){return s.eq;});
   var dep=stats.dep;
-  var pad={l:60,r:10,t:10,b:28};
+  var pad={l:62,r:16,t:14,b:32};
   var iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
   var ext=equity.concat([dep]);
   var minV=Math.min.apply(null,ext), maxV=Math.max.apply(null,ext);
   var mg=(maxV-minV)*0.08||5; minV-=mg; maxV+=mg;
   var span=maxV-minV, n=labels.length;
-  if(!span) return;
-  // Grid
-  ctx.strokeStyle='rgba(255,255,255,.05)'; ctx.lineWidth=1;
-  for(var i=0;i<=4;i++){var y=pad.t+ih*(i/4);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+iw,y);ctx.stroke();}
-  ctx.fillStyle='#6b809a'; ctx.font='10px JetBrains Mono,monospace'; ctx.textAlign='right';
-  for(var i=0;i<=4;i++){var v=maxV-span*(i/4),y=pad.t+ih*(i/4);ctx.fillText(Math.abs(v)>=10000?'$'+(v/1000).toFixed(1)+'k':'$'+v.toFixed(0),pad.l-4,y+3);}
-  // Deposit line
+  if(!span||n<2) return;
+
+  // Grid — very light
+  ctx.strokeStyle='#EDF1F6'; ctx.lineWidth=1;
+  for(var i=0;i<=4;i++){
+    var gy=pad.t+ih*(i/4);
+    ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(pad.l+iw,gy);ctx.stroke();
+  }
+
+  // Y-axis labels — dark and clear
+  ctx.fillStyle='#5A6675'; ctx.font='600 11px "JetBrains Mono",monospace'; ctx.textAlign='right';
+  for(var i=0;i<=4;i++){
+    var v=maxV-span*(i/4), gy=pad.t+ih*(i/4);
+    var lbl = Math.abs(v)>=1000 ? '$'+(v/1000).toFixed(1)+'k' : '$'+Math.round(v);
+    ctx.fillText(lbl, pad.l-8, gy+4);
+  }
+
+  // Axis lines
+  ctx.strokeStyle='#C5CFD9'; ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+ih);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(pad.l,pad.t+ih);ctx.lineTo(pad.l+iw,pad.t+ih);ctx.stroke();
+
+  // X labels
+  var step=Math.max(1,Math.ceil(n/7));
+  ctx.fillStyle='#5A6675'; ctx.font='600 10px "JetBrains Mono",monospace'; ctx.textAlign='center';
+  for(var i=0;i<n;i+=step){
+    var ex=pad.l+iw*(i/Math.max(1,n-1));
+    ctx.fillText(labels[i].slice(5), ex, pad.t+ih+18);
+  }
+
+  // Deposit baseline — dashed blue
   var depY=pad.t+ih*(1-(dep-minV)/span);
-  ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.setLineDash([4,4]); ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(pad.l,depY); ctx.lineTo(pad.l+iw,depY); ctx.stroke(); ctx.setLineDash([]);
-  // Area
-  var lastVal=equity[n-1], isPos=lastVal>=dep;
-  ctx.beginPath();
-  for(var i=0;i<n;i++){var x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
-  ctx.lineTo(pad.l+iw,depY); ctx.lineTo(pad.l,depY); ctx.closePath();
+  ctx.strokeStyle='rgba(35,99,158,.45)'; ctx.lineWidth=1.5; ctx.setLineDash([6,4]);
+  ctx.beginPath();ctx.moveTo(pad.l,depY);ctx.lineTo(pad.l+iw,depY);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(35,99,158,.75)'; ctx.font='700 10px Inter,sans-serif'; ctx.textAlign='left';
+  ctx.fillText('Depósito', pad.l+5, depY-6);
+
+  // Area fill
+  var isPos = equity[n-1]>=dep;
   var grd=ctx.createLinearGradient(0,pad.t,0,pad.t+ih);
-  if(isPos){grd.addColorStop(0,'rgba(34,214,138,.2)');grd.addColorStop(1,'rgba(34,214,138,.02)');}
-  else{grd.addColorStop(0,'rgba(255,79,106,.15)');grd.addColorStop(1,'rgba(255,79,106,.02)');}
-  ctx.fillStyle=grd; ctx.fill();
-  // Line
-  ctx.lineWidth=2; ctx.strokeStyle=isPos?'#22d68a':'#ff4f6a'; ctx.lineJoin='round';
+  if(isPos){grd.addColorStop(0,'rgba(11,138,107,.18)');grd.addColorStop(1,'rgba(11,138,107,.01)');}
+  else{grd.addColorStop(0,'rgba(200,72,60,.14)');grd.addColorStop(1,'rgba(200,72,60,.01)');}
   ctx.beginPath();
-  for(var i=0;i<n;i++){var x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+  for(var i=0;i<n;i++){
+    var ex=pad.l+iw*(i/Math.max(1,n-1)), ey=pad.t+ih*(1-(equity[i]-minV)/span);
+    i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);
+  }
+  ctx.lineTo(pad.l+iw,depY);ctx.lineTo(pad.l,depY);ctx.closePath();
+  ctx.fillStyle=grd;ctx.fill();
+
+  // Main line
+  ctx.lineWidth=2.5; ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C'; ctx.lineJoin='round';
+  ctx.beginPath();
+  for(var i=0;i<n;i++){
+    var ex=pad.l+iw*(i/Math.max(1,n-1)), ey=pad.t+ih*(1-(equity[i]-minV)/span);
+    i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);
+  }
   ctx.stroke();
+
   // End dot
-  var ex=pad.l+iw, ey=pad.t+ih*(1-(lastVal-minV)/span);
-  ctx.fillStyle=isPos?'#22d68a':'#ff4f6a'; ctx.beginPath(); ctx.arc(ex,ey,3.5,0,Math.PI*2); ctx.fill();
+  var lx=pad.l+iw, ly=pad.t+ih*(1-(equity[n-1]-minV)/span);
+  ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);
+  ctx.fillStyle='#FFFFFF';ctx.fill();
+  ctx.strokeStyle=isPos?'#0B8A6B':'#C8483C';ctx.lineWidth=2.5;ctx.stroke();
 }
 
-</script>
-
-<!-- MODAL DETALLE CLIENTE -->
-<div class="modal-overlay" id="modalDetalle" style="display:none;">
-  <div class="modal" style="max-width:960px;width:98%;max-height:94vh;overflow-y:auto;padding:32px 36px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px;">Estado de cuenta</div>
-        <h3 id="detNombre" style="font-size:20px;font-weight:800;margin:0;">—</h3>
-        <div id="detPeriodo" style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-top:3px;">—</div>
-      </div>
-      <button onclick="closeDetalle()" style="background:rgba(35,99,158,.06);border:1px solid var(--border);color:var(--muted);width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;flex-shrink:0;">✕</button>
-    </div>
-
-    <!-- ROI Hero -->
-    <div style="background:#F1F4F8;border:1px solid #D6DDE6;border-radius:16px;padding:24px 28px;margin-bottom:16px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;">
-      <div>
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Rendimiento Total</div>
-        <div id="detROI" style="font-size:40px;font-weight:800;font-family:var(--mono);letter-spacing:-2px;line-height:1;">—</div>
-        <div id="detSub" style="font-size:11px;color:var(--muted);margin-top:8px;">—</div>
-      </div>
-      <div style="text-align:right;">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Valor de la cuenta</div>
-        <div id="detEquity" style="font-size:22px;font-weight:800;font-family:var(--mono);">—</div>
-        <div id="detDep" style="font-size:11px;color:var(--muted);margin-top:4px;font-family:var(--mono);">—</div>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
-      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Profit neto</div>
-        <div id="detProfit" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
-      </div>
-      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Días activo</div>
-        <div id="detDias" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--accent);">—</div>
-      </div>
-      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Mejor mes</div>
-        <div id="detBest" style="font-size:16px;font-weight:700;font-family:var(--mono);color:var(--good);">—</div>
-      </div>
-      <div style="background:#FFFFFF;border:1px solid #D6DDE6;border-radius:12px;padding:14px;box-shadow:0 1px 4px rgba(20,22,27,.07);">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Meses positivos</div>
-        <div id="detPosM" style="font-size:16px;font-weight:700;font-family:var(--mono);">—</div>
-      </div>
-    </div>
-
-    <!-- Chart -->
-    <div style="background:#F1F4F8;border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:10px;">Evolución del Capital</div>
-      <canvas id="detChart" style="display:block;width:100%;height:160px;"></canvas>
-    </div>
-
-    <!-- Table -->
-    <div style="font-size:11px;font-weight:700;color:var(--text);margin-bottom:8px;">Resumen por período</div>
-    <div style="overflow:auto;border:1px solid var(--border);border-radius:10px;max-height:240px;">
-      <table style="width:100%;border-collapse:collapse;font-size:12px;">
-        <thead><tr>
-          <th style="padding:8px 12px;text-align:left;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Mes</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">P&L neto</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Retorno %</th>
-          <th style="padding:8px 12px;text-align:right;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);">Equity final</th>
-        </tr></thead>
-        <tbody id="detTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-</body>
-</html>
+>
