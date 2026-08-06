@@ -8,7 +8,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 /* ── PALETTE ── */
 :root{
@@ -28,7 +27,7 @@
   --shadow-md:0 4px 20px rgba(20,22,27,.12);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{color-scheme:light;overflow-x:hidden;}
+html,body{color-scheme:light;}
 body{
   font-family:var(--sans);
   background:
@@ -89,12 +88,6 @@ canvas,.spinner{transition:none!important;}
 .btn-login:hover{filter:brightness(1.06);}
 .btn-login:disabled{opacity:.45;cursor:not-allowed;}
 #loginErr{font-size:12px;color:var(--bad);text-align:center;margin-top:8px;min-height:14px;}
-.forgot-row{text-align:center;margin-top:14px;}
-.forgot-row a{font-size:12px;color:var(--accent);text-decoration:none;}
-.forgot-row a:hover{text-decoration:underline;}
-.forgot-row a.disabled{pointer-events:none;opacity:.5;}
-#forgotMsg{font-size:12px;text-align:center;margin-top:8px;min-height:14px;color:var(--good);}
-#forgotMsg.err{color:var(--bad);}
 .login-foot{text-align:center;margin-top:18px;font-size:11px;color:var(--muted);opacity:.7;}
 
 /* ── APP ── */
@@ -173,7 +166,7 @@ canvas,.spinner{transition:none!important;}
   padding:24px 28px;margin-bottom:10px;
   box-shadow:var(--shadow-md);
   position:relative;overflow:hidden;
-  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center;
+  display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
 }
 .roi-hero::before{
   content:'';position:absolute;top:0;right:0;width:220px;height:220px;
@@ -182,13 +175,13 @@ canvas,.spinner{transition:none!important;}
 }
 @media(max-width:480px){.roi-hero{grid-template-columns:1fr;}}
 .hero-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.hero-value{font-size:52px;font-weight:700;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;overflow-wrap:break-word;}
+.hero-value{font-size:52px;font-weight:700;letter-spacing:-2px;line-height:1;font-variant-numeric:tabular-nums;}
 .hero-value.pos{color:var(--good);}
 .hero-value.neg{color:var(--bad);}
 .hero-sub{font-size:13px;color:var(--muted);margin-top:8px;}
 .hero-right{text-align:right;}
 .hero-eq-label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
-.hero-eq{font-size:26px;font-weight:700;letter-spacing:-.5px;color:var(--text);font-variant-numeric:tabular-nums;overflow-wrap:break-word;}
+.hero-eq{font-size:26px;font-weight:700;letter-spacing:-.5px;color:var(--text);font-variant-numeric:tabular-nums;}
 .hero-dep{font-size:12px;margin-top:8px;line-height:2;font-family:var(--mono);color:var(--muted);}
 .hero-dep .hero-dep-v{color:var(--text);font-weight:600;}
 .hero-dep .hero-dep-fee{color:var(--bad);}
@@ -197,9 +190,9 @@ canvas,.spinner{transition:none!important;}
 /* KPI row */
 .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
 @media(max-width:560px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
-.kpi-box{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(20,22,27,.06);min-width:0;}
+.kpi-box{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px;box-shadow:0 1px 6px rgba(20,22,27,.06);}
 .kb-label{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
-.kb-value{font-size:19px;font-weight:700;letter-spacing:-.3px;font-variant-numeric:tabular-nums;color:var(--text);overflow-wrap:break-word;}
+.kb-value{font-size:19px;font-weight:700;letter-spacing:-.3px;font-variant-numeric:tabular-nums;color:var(--text);}
 .kb-value.pos{color:var(--good);}
 .kb-value.neg{color:var(--bad);}
 .kb-value.accent{color:var(--accent);}
@@ -210,8 +203,7 @@ canvas,.spinner{transition:none!important;}
 
 /* Section */
 .section{margin-bottom:20px;}
-.section-title{font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--text);margin-bottom:12px;
-  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.section-title{font-size:15px;font-weight:700;letter-spacing:-.2px;color:var(--text);margin-bottom:12px;}
 
 /* Range control */
 .range-ctrl{display:flex;background:var(--surface);border-radius:var(--r);padding:2px;gap:1px;}
@@ -235,10 +227,10 @@ canvas{display:block;width:100% !important;}
 @media(max-width:520px){.chart-stats{grid-template-columns:repeat(2,1fr);}}
 .cst{
   background:var(--white);border:1px solid var(--border);border-radius:var(--r);
-  padding:10px 14px;box-shadow:0 1px 4px rgba(20,22,27,.05);min-width:0;
+  padding:10px 14px;box-shadow:0 1px 4px rgba(20,22,27,.05);
 }
 .cst-label{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-.cst-value{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);overflow-wrap:break-word;}
+.cst-value{font-size:13px;font-weight:700;font-family:var(--mono);color:var(--text);}
 .cst-value.pos{color:var(--good);}
 .cst-value.neg{color:var(--bad);}
 
@@ -282,20 +274,6 @@ canvas{display:block;width:100% !important;}
 .tt-date{font-size:11px;color:var(--muted);margin-bottom:2px;font-family:var(--mono);}
 .tt-val{font-size:15px;font-weight:700;font-variant-numeric:tabular-nums;}
 .tt-chg{font-size:11px;margin-top:2px;font-family:var(--mono);}
-
-/* PDF notice toast */
-#pdfNotice{
-  position:fixed;left:16px;right:16px;bottom:16px;z-index:400;
-  background:var(--text);color:#fff;font-size:13px;line-height:1.4;
-  border-radius:12px;padding:14px 16px;box-shadow:0 8px 28px rgba(0,0,0,.28);
-  display:none;max-width:420px;margin:0 auto;
-}
-#pdfNotice.show{display:block;}
-#pdfNotice button{
-  margin-top:8px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
-  color:#fff;font-family:var(--sans);font-size:12px;font-weight:600;
-  padding:6px 12px;border-radius:8px;cursor:pointer;
-}
 
 /* Mobile bottom bar */
 .bottom-bar-mob{display:none;}
@@ -357,8 +335,6 @@ canvas{display:block;width:100% !important;}
       </div>
       <button class="btn-login" id="loginBtn" onclick="login()">Acceder</button>
       <div id="loginErr"></div>
-      <div class="forgot-row"><a href="#" id="forgotLink" onclick="forgotPassword();return false;">¿Olvidaste tu contraseña?</a></div>
-      <div id="forgotMsg"></div>
     </div>
     <div class="login-foot">Acceso seguro · Solo tú puedes ver tu información</div>
   </div>
@@ -386,6 +362,7 @@ canvas{display:block;width:100% !important;}
     </div>
   </div>
   <div class="report-wrap" id="reportWrap">
+    <div class="period-bar" id="periodBar" style="display:none;"><label>Período:</label><div id="periodBtns"></div></div>
     <div id="loadingState" style="text-align:center;padding:80px 20px;color:var(--muted);"><span class="spinner"></span><p style="margin-top:16px;font-size:14px;">Cargando tu reporte...</p></div>
     <div id="emptyState" class="empty-report" style="display:none;"><div class="ei">📊</div><h3>Sin reporte disponible</h3><p>Tu gestor aún no ha subido el reporte de este período.<br/>Contacta a RCCapital para más información.</p></div>
     <div id="reportContent" style="display:none;">
@@ -430,7 +407,6 @@ canvas{display:block;width:100% !important;}
   </div>
 </div>
 <div id="tooltip"><div class="tt-date" id="ttDate">—</div><div class="tt-val" id="ttVal">—</div><div class="tt-chg" id="ttChg">—</div></div>
-<div id="pdfNotice"><div id="pdfNoticeMsg"></div><button onclick="$('pdfNotice').classList.remove('show')">Entendido</button></div>
 
 <script>
 var _logoB64=null;(function(){var i=new Image();i.crossOrigin='anonymous';i.onload=function(){try{var v=document.createElement('canvas');v.width=i.width;v.height=i.height;var x=v.getContext('2d');x.drawImage(i,0,0);_logoB64=v.toDataURL('image/png');}catch(e){}};i.src='logo.png';})();
@@ -475,17 +451,6 @@ const SUPABASE_URL='https://bhyftbbohsjivhhjstbb.supabase.co';
 const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 const{createClient}=supabase;
 const db=createClient(SUPABASE_URL,SUPABASE_KEY);
-
-// ── EmailJS (aviso de "olvidé mi contraseña") ──
-// 1) Crea una cuenta gratis en https://www.emailjs.com y conecta tu Gmail (Email Services).
-// 2) Crea una plantilla (Email Templates) cuyo "To email" sea oscar0180@gmail.com, y que
-//    use las variables {{investor_email}} y {{request_time}} en el cuerpo del mensaje.
-// 3) Reemplaza los 3 valores de abajo con los de tu cuenta (Account → General/API Keys).
-const EMAILJS_PUBLIC_KEY='TU_PUBLIC_KEY';
-const EMAILJS_SERVICE_ID='TU_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID='TU_TEMPLATE_ID';
-try{ if(window.emailjs) emailjs.init({publicKey:EMAILJS_PUBLIC_KEY}); }catch(e){}
-
 const $=id=>document.getElementById(id);
 let currentCliente=null,activeRange='ALL',CC={};
 const pad2=x=>String(x).padStart(2,'0');
@@ -513,20 +478,7 @@ function login(){
       showErr('Email o contraseña incorrectos.');return;
     }
     currentCliente=res.data;
-    try{
-      sessionStorage.setItem('rc_client',JSON.stringify(res.data));
-      if($('rememberMe').checked){
-        localStorage.setItem('rcActiveSession',JSON.stringify({
-          id:res.data.id,nombre:res.data.nombre,email:res.data.email,
-          password_hash:res.data.password_hash,
-          expires:Date.now()+30*24*60*60*1000 // 30 días
-        }));
-        localStorage.setItem('rcSavedLogin',JSON.stringify({email:email,pass:pass}));
-      } else {
-        localStorage.removeItem('rcActiveSession');
-        localStorage.removeItem('rcSavedLogin');
-      }
-    }catch(e){}
+    try{sessionStorage.setItem('rc_client',JSON.stringify(res.data));}catch(e){}
     showApp();
   }).catch(function(e){
     btn.textContent='Acceder a mi reporte →';btn.disabled=false;
@@ -534,24 +486,6 @@ function login(){
   });
 }
 function showErr(m){$('loginErr').textContent=m;$('loginErr').style.display='block';}
-
-function forgotPassword(){
-  const email=($('clientEmail').value||'').trim().toLowerCase();
-  const msgEl=$('forgotMsg'),link=$('forgotLink');
-  msgEl.className='';msgEl.textContent='';
-  if(!email){msgEl.className='err';msgEl.textContent='Escribe tu correo arriba primero.';return;}
-  if(!window.emailjs || EMAILJS_PUBLIC_KEY==='TU_PUBLIC_KEY'){
-    msgEl.className='err';
-    msgEl.textContent='El aviso automático no está configurado aún. Escribe a tu gestor directamente.';
-    return;
-  }
-  link.classList.add('disabled');
-  const now=new Date(),ts=now.toLocaleString('es-CO',{dateStyle:'medium',timeStyle:'short'});
-  emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{investor_email:email,request_time:ts})
-    .then(()=>{msgEl.className='';msgEl.textContent='Listo, se notificó a tu gestor. Te contactará pronto.';})
-    .catch(()=>{msgEl.className='err';msgEl.textContent='No se pudo enviar el aviso. Escribe a tu gestor directamente.';})
-    .finally(()=>{link.classList.remove('disabled');});
-}
 function logout(){
   try{
     localStorage.removeItem('rcActiveSession');
@@ -575,11 +509,14 @@ function showApp(){
 }
 
 async function loadReportes(){
-  $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';
+  $('loadingState').style.display='block';$('emptyState').style.display='none';$('reportContent').style.display='none';$('periodBar').style.display='none';
   const{data,error}=await db.from('reportes').select('*').eq('cliente_id',currentCliente.id).order('mes',{ascending:false});
   if(error||!data||!data.length){$('loadingState').style.display='none';$('emptyState').style.display='block';return;}
+  const pbc=$('periodBtns');pbc.innerHTML='';
+  data.forEach((rep,i)=>{const btn=document.createElement('button');btn.className='period-btn'+(i===0?' active':'');btn.textContent=mLabel(rep.mes);btn.onclick=()=>{document.querySelectorAll('.period-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderReporte(rep);};pbc.appendChild(btn);});
+  if(data.length>1)$('periodBar').style.display='flex';
   $('loadingState').style.display='none';
-  renderReporte(data[0]); // siempre el mes más reciente; el histórico se ve en el resumen por período
+  renderReporte(data[0]);
 }
 
 function detectSep(t){const l=(t.split(/\r?\n/)[0]||'');return(l.match(/;/g)||[]).length>(l.match(/,/g)||[]).length?';':',';}
@@ -697,223 +634,259 @@ function drawEquityChart(){
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-function pdfNotice(msg){
-  const el=$('pdfNotice'); if(!el) return;
-  $('pdfNoticeMsg').textContent=msg;
-  el.classList.add('show');
+async function tryPDF(){
+  if(typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF){
+    alert('El generador de PDF aún se está cargando. Intenta de nuevo en unos segundos.');
+    return;
+  }
+  if(!CC.labels || !CC.labels.length || !CC.stats){
+    alert('No hay datos para generar el informe.');
+    return;
+  }
+  generarPDF();
 }
-async function tryPDF(){if(!CC.labels||!CC.labels.length){pdfNotice('Aún no hay datos de reporte para generar el PDF.');return;}await generarPDF();}
-async function generarPDF(){
-  if(!CC.labels||!CC.labels.length||!CC.stats){pdfNotice('Aún no hay datos de reporte para generar el PDF.');return;}
-  const allBtns=[$('btnPDF'),document.querySelector('.bm-btn.accent')].filter(Boolean);
-  allBtns.forEach(b=>{b.dataset._label=b.textContent;b.textContent='⏳';b.disabled=true;});
+
+function generarPDF(){
+  var btn = document.getElementById('btnPDF');
+  var btnMob = document.querySelector('.bm-btn.accent');
+  var btnTxt = btn ? btn.textContent : '';
+  var btnMobTxt = btnMob ? btnMob.textContent : '';
+  if(btn){ btn.textContent = '⏳ Generando...'; btn.disabled = true; }
+  if(btnMob){ btnMob.textContent = '⏳'; btnMob.disabled = true; }
+
   try{
-    const{jsPDF}=window.jspdf;
-    const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'letter'});
-    const PW=215.9,PH=279.4,M=16;let y=M;
-    const s=CC.stats,nombre=currentCliente?currentCliente.nombre:'—';
-    const fmt=n=>(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});
-    const fmtP=n=>(isFinite(n)?n:0).toFixed(2)+'%';
-    const pad2=x=>String(x).padStart(2,'0');
-    const MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-    const mLbl=k=>{const p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
-    const bog=new Date(new Date().getTime()-5*3600000);
-    const todayStr=pad2(bog.getUTCDate())+'/'+pad2(bog.getUTCMonth()+1)+'/'+bog.getUTCFullYear();
-    const INK='#0E1620',INK2='#5A6675',BLUE='#23639E',GREEN='#0B8A6B',RED='#C8483C',
-          BORDER='#D6DDE6',BG2='#F1F4F8',WHITE='#FFFFFF',DARK='#1B222D';
-    const sf=(sz,wt,col)=>{doc.setFontSize(sz);doc.setFont('helvetica',wt||'normal');doc.setTextColor(col||INK);};
-    const ln=(x1,y1,x2,y2,col,w)=>{doc.setDrawColor(col||BORDER);doc.setLineWidth(w||0.2);doc.line(x1,y1,x2,y2);};
-    const fillRect=(x,yy,w,h,fill)=>{doc.setFillColor(fill);doc.rect(x,yy,w,h,'F');};
-    const strokeRect=(x,yy,w,h,fill,stroke)=>{
-      if(fill)doc.setFillColor(fill);if(stroke)doc.setDrawColor(stroke);
-      doc.setLineWidth(0.2);doc.rect(x,yy,w,h,fill&&stroke?'FD':fill?'F':'D');
+    var jsPDF = window.jspdf.jsPDF;
+    var doc = new jsPDF({orientation:'portrait', unit:'mm', format:'letter'});
+    var PW=215.9, PH=279.4, M=16, y=M;
+    var s = CC.stats;
+    var nombre = currentCliente ? currentCliente.nombre : '—';
+
+    var fmt=function(n){return (isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
+    var fmtP=function(n){return (isFinite(n)?n:0).toFixed(2)+'%';};
+    var pad2=function(x){return String(x).padStart(2,'0');};
+    var MN=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    var mLbl=function(k){var p=k.split('-');return MN[+p[1]-1]+" '"+p[0].slice(2);};
+    var dKey=function(d){return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
+    var today=new Date();
+    var todayStr=pad2(today.getDate())+'/'+pad2(today.getMonth()+1)+'/'+today.getFullYear();
+
+    var INK='#0E1620', INK2='#5A6675', BLUE='#23639E', GREEN='#0B8A6B', RED='#C8483C',
+        BORDER='#D6DDE6', BG2='#F1F4F8', WHITE='#FFFFFF', DARK='#1B222D';
+
+    var sf=function(sz,wt,col){doc.setFontSize(sz);doc.setFont('helvetica',wt||'normal');doc.setTextColor(col||INK);};
+    var ln=function(x1,y1,x2,y2,col,w){doc.setDrawColor(col||BORDER);doc.setLineWidth(w||0.2);doc.line(x1,y1,x2,y2);};
+    var box=function(x,yy,w,h,fill,stroke,r){
+      if(fill) doc.setFillColor(fill);
+      if(stroke) doc.setDrawColor(stroke);
+      doc.setLineWidth(0.2);
+      var mode = fill&&stroke ? 'FD' : (fill ? 'F' : 'D');
+      if(r) doc.roundedRect(x,yy,w,h,r,r,mode); else doc.rect(x,yy,w,h,mode);
     };
-    // Page border
-    doc.setDrawColor(BORDER);doc.setLineWidth(0.3);doc.rect(8,8,PW-16,PH-16);
-    // Header
-    fillRect(8,8,PW-16,20,DARK);
-    if(_logoB64){try{doc.addImage(_logoB64,'PNG',14,11,13,13);}catch(e){}}
-    sf(12,'bold','#FFFFFF');doc.text('RC Capital',31,18);
-    sf(7,'normal','#A8C2DA');doc.text('Portal de Inversores',31,23);
-    sf(7,'normal','#A8C2DA');doc.text('Estado de Cuenta · '+todayStr,PW-14,18,{align:'right'});
+
+    // ══ PAGE FRAME ══
+    doc.setDrawColor(BORDER); doc.setLineWidth(0.3);
+    doc.rect(8,8,PW-16,PH-16);
+
+    // ══ HEADER ══
+    doc.setFillColor(DARK); doc.rect(8,8,PW-16,20,'F');
+    if(_logoB64){ try{ doc.addImage(_logoB64,'PNG',14,11,13,13); }catch(e){} }
+    sf(12,'bold',WHITE); doc.text('RC Capital',31,18);
+    sf(7,'normal','#A8C2DA'); doc.text('Portal de Inversores',31,23);
+    sf(7,'normal','#A8C2DA'); doc.text('Estado de Cuenta  ·  '+todayStr,PW-14,18,{align:'right'});
     y=36;
-    // Investor
-    sf(7,'bold',INK2);doc.text('INVERSOR',M,y);y+=4;
-    sf(16,'bold',INK);doc.text(nombre,M,y);y+=4;
-    if(s.firstDate&&s.lastDate){
+
+    // ══ INVESTOR ══
+    sf(7,'bold',INK2); doc.text('ESTADO DE CUENTA',M,y); y+=5;
+    sf(17,'bold',INK); doc.text(nombre,M,y); y+=5;
+    if(s.firstDate && s.lastDate){
       sf(8,'normal',INK2);
-      doc.text(s.firstDate.getFullYear()+'-'+pad2(s.firstDate.getMonth()+1)+'-'+pad2(s.firstDate.getDate())+' → '+s.lastDate.getFullYear()+'-'+pad2(s.lastDate.getMonth()+1)+'-'+pad2(s.lastDate.getDate()),M,y);
+      doc.text(dKey(s.firstDate)+'   →   '+dKey(s.lastDate),M,y);
     }
-    y+=8;ln(M,y,PW-M,y,BORDER,0.3);y+=6;
-    // Hero
-    const heroH=s.depFeeAmt>0?38:32;
-    strokeRect(M,y,PW-M*2,heroH,BG2,BORDER);
-    const roi=s.roi||0,isPos=roi>=0;
-    sf(6,'bold',INK2);doc.text('RENDIMIENTO TOTAL',M+5,y+6);
-    sf(20,'bold',isPos?GREEN:RED);doc.text((isPos?'+':'')+fmtP(roi),M+5,y+18);
-    sf(7,'normal',INK2);doc.text(s.me.length+' meses bajo gestión',M+5,y+(heroH-5));
-    sf(6,'bold',BLUE);doc.text('CAPITAL ACTUAL EN GESTIÓN',PW-M-5,y+6,{align:'right'});
-    sf(15,'bold',INK);doc.text(fmt(s.equity||0),PW-M-5,y+17,{align:'right'});
-    sf(6.5,'normal',INK2);
+    y+=7; ln(M,y,PW-M,y,BORDER,0.3); y+=7;
+
+    // ══ HERO ══
+    var heroH = s.depFeeAmt>0 ? 40 : 33;
+    box(M,y,PW-M*2,heroH,BG2,BORDER,3);
+    var roi = s.roi||0, isPos = roi>=0;
+    sf(6.5,'bold',INK2); doc.text('RENDIMIENTO TOTAL',M+6,y+7);
+    sf(21,'bold',isPos?GREEN:RED); doc.text((isPos?'+':'')+fmtP(roi),M+6,y+19);
+    sf(7,'normal',INK2); doc.text(s.days+' días · Rendimiento neto (incluye comisiones)',M+6,y+(heroH-6));
+    sf(6.5,'bold',BLUE); doc.text('VALOR DE LA CUENTA',PW-M-6,y+7,{align:'right'});
+    sf(15,'bold',INK); doc.text(fmt(s.equity||0),PW-M-6,y+18,{align:'right'});
     if(s.depFeeAmt>0){
-      doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-5,y+23,{align:'right'});
-      sf(6.5,'normal',RED);doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-5,y+27,{align:'right'});
-      sf(6.5,'bold',GREEN);doc.text('Capital inicial: '+fmt(s.dep),PW-M-5,y+31,{align:'right'});
+      sf(6.5,'normal',INK2); doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-6,y+24,{align:'right'});
+      sf(6.5,'normal',RED);  doc.text('Activation fee: -'+fmt(s.depFeeAmt),PW-M-6,y+29,{align:'right'});
+      sf(6.5,'bold',BLUE);   doc.text('Capital a gestionar: '+fmt(s.dep),PW-M-6,y+34,{align:'right'});
     } else {
-      sf(6.5,'normal',INK2);doc.text('Depósito inicial: '+fmt(s.dep),PW-M-5,y+23,{align:'right'});
+      sf(6.5,'normal',INK2); doc.text('Depósito inicial: '+fmt(s.depGross),PW-M-6,y+25,{align:'right'});
     }
-    y+=heroH+5;
-    // KPIs
-    const kw=(PW-M*2-9)/4,netP=s.runP+s.runF;
-    const kpis=[
-      {l:'BENEFICIO ACTUAL',v:(netP>=0?'+':'')+fmt(netP),c:netP>=0?GREEN:RED},
-      {l:'MESES EN GESTIÓN',v:String(s.me.length),c:INK},
-      {l:'MEJOR MES',v:s.best&&s.best[0]?'+'+fmt(s.best[1]):'—',c:GREEN},
-      {l:'MESES POSITIVOS',v:s.posM+'/'+s.me.length,c:INK}
+    y += heroH+6;
+
+    // ══ KPIs ══
+    var kw=(PW-M*2-9)/4, netP=s.runP+s.runF;
+    var kpis=[
+      {l:'PROFIT NETO', v:(netP>=0?'+':'')+fmt(netP), c:netP>=0?GREEN:RED, s:''},
+      {l:'DÍAS ACTIVO', v:String(s.days), c:INK, s:s.firstDate?'Desde '+dKey(s.firstDate):''},
+      {l:'MEJOR MES', v:(s.best&&s.best[0])?'+'+fmt(s.best[1]):'—', c:GREEN, s:(s.best&&s.best[0])?mLbl(s.best[0]):''},
+      {l:'MESES POSITIVOS', v:s.posM+' / '+s.me.length, c:INK, s:'De los meses operados'}
     ];
-    kpis.forEach((k,i)=>{
-      const kx=M+i*(kw+3);
-      strokeRect(kx,y,kw,15,WHITE,BORDER);
-      sf(5.5,'bold',INK2);doc.text(k.l,kx+3,y+5);
-      sf(9,'bold',k.c);doc.text(k.v,kx+3,y+12);
-    });
-    y+=20;
-    // Chart
+    for(var ki=0; ki<kpis.length; ki++){
+      var k=kpis[ki], kx=M+ki*(kw+3);
+      box(kx,y,kw,19,WHITE,BORDER,2);
+      sf(5.5,'bold',INK2); doc.text(k.l,kx+3,y+5.5);
+      sf(9.5,'bold',k.c);  doc.text(k.v,kx+3,y+12);
+      if(k.s){ sf(5,'normal',INK2); doc.text(k.s,kx+3,y+16.5); }
+    }
+    y += 24;
+
+    // ══ EQUITY CHART ══
+    sf(9,'bold',INK); doc.text('Evolución del Capital',M,y); y+=4;
+    var cW=PW-M*2, cH=54;
+    box(M,y,cW,cH,WHITE,BORDER,2);
     try{
-      const cW=PW-M*2,cH=54;
-      strokeRect(M,y,cW,cH,WHITE,BORDER);
-      sf(7,'bold',INK);doc.text('Evolución del Capital',M+4,y+7);
-      sf(6,'normal',INK2);doc.text('Línea base: depósito inicial',PW-M-4,y+7,{align:'right'});
-      const tmp=document.createElement('canvas');
-      tmp.width=900;tmp.height=310;
-      const ctx=tmp.getContext('2d');
-      ctx.fillStyle='#FFFFFF';ctx.fillRect(0,0,900,310);
-      const labels=CC.labels,equity=CC.equity,deposit=CC.deposit,n=labels.length;
+      var tmp=document.createElement('canvas');
+      tmp.width=980; tmp.height=340;
+      var ctx=tmp.getContext('2d');
+      ctx.fillStyle=WHITE; ctx.fillRect(0,0,980,340);
+      var labels=CC.labels, equity=CC.equity, deposit=CC.deposit, n=labels.length;
       if(n>1){
-        const pp={l:60,r:14,t:16,b:38},iw=900-pp.l-pp.r,ih=310-pp.t-pp.b;
-        let minV=Math.min(...equity,deposit),maxV=Math.max(...equity,deposit);
-        const mg=(maxV-minV)*0.08||5;minV-=mg;maxV+=mg;const span=maxV-minV||1;
-        // Grid
-        for(let i=0;i<=5;i++){
-          const gy=pp.t+ih*(i/5);
-          ctx.strokeStyle='#EBF0F5';ctx.lineWidth=1;
-          ctx.beginPath();ctx.moveTo(pp.l,gy);ctx.lineTo(pp.l+iw,gy);ctx.stroke();
-          const val=maxV-span*(i/5);
-          ctx.fillStyle='#5A6675';ctx.font='600 12px Inter,sans-serif';ctx.textAlign='right';
-          ctx.fillText(Math.abs(val)>=1000?'$'+(val/1000).toFixed(1)+'k':'$'+Math.round(val),pp.l-8,gy+4);
+        var pp={l:66,r:18,t:18,b:40}, iw=980-pp.l-pp.r, ih=340-pp.t-pp.b;
+        var allV=equity.concat([deposit]);
+        var minV=Math.min.apply(null,allV), maxV=Math.max.apply(null,allV);
+        var mg=(maxV-minV)*0.08||5; minV-=mg; maxV+=mg;
+        var span=maxV-minV||1;
+        for(var g=0; g<=5; g++){
+          var gy=pp.t+ih*(g/5);
+          ctx.strokeStyle='#EBF0F5'; ctx.lineWidth=1;
+          ctx.beginPath(); ctx.moveTo(pp.l,gy); ctx.lineTo(pp.l+iw,gy); ctx.stroke();
+          var gv=maxV-span*(g/5);
+          ctx.fillStyle='#5A6675'; ctx.font='600 13px Inter,Helvetica,sans-serif'; ctx.textAlign='right';
+          ctx.fillText(Math.abs(gv)>=1000 ? '$'+(gv/1000).toFixed(1)+'k' : '$'+Math.round(gv), pp.l-9, gy+4);
         }
-        // Axes
-        ctx.strokeStyle='#C5CFD9';ctx.lineWidth=1.5;
-        ctx.beginPath();ctx.moveTo(pp.l,pp.t);ctx.lineTo(pp.l,pp.t+ih);ctx.stroke();
-        ctx.beginPath();ctx.moveTo(pp.l,pp.t+ih);ctx.lineTo(pp.l+iw,pp.t+ih);ctx.stroke();
-        // X labels
-        const step=Math.max(1,Math.ceil(n/8));
-        ctx.fillStyle='#5A6675';ctx.font='600 11px Inter,sans-serif';ctx.textAlign='center';
-        for(let i=0;i<n;i+=step){ctx.fillText(labels[i].slice(5),pp.l+iw*(i/Math.max(1,n-1)),pp.t+ih+22);}
-        // Deposit line
-        const depY=pp.t+ih*(1-(deposit-minV)/span);
-        ctx.strokeStyle='rgba(35,99,158,.45)';ctx.lineWidth=1.5;ctx.setLineDash([7,5]);
-        ctx.beginPath();ctx.moveTo(pp.l,depY);ctx.lineTo(pp.l+iw,depY);ctx.stroke();
+        ctx.strokeStyle='#C5CFD9'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.moveTo(pp.l,pp.t); ctx.lineTo(pp.l,pp.t+ih); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(pp.l,pp.t+ih); ctx.lineTo(pp.l+iw,pp.t+ih); ctx.stroke();
+        var stp=Math.max(1,Math.ceil(n/8));
+        ctx.fillStyle='#5A6675'; ctx.font='600 12px Inter,Helvetica,sans-serif'; ctx.textAlign='center';
+        for(var xi=0; xi<n; xi+=stp){
+          ctx.fillText(labels[xi].slice(5), pp.l+iw*(xi/Math.max(1,n-1)), pp.t+ih+24);
+        }
+        var depY=pp.t+ih*(1-(deposit-minV)/span);
+        ctx.strokeStyle='rgba(35,99,158,.45)'; ctx.lineWidth=1.6; ctx.setLineDash([7,5]);
+        ctx.beginPath(); ctx.moveTo(pp.l,depY); ctx.lineTo(pp.l+iw,depY); ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle='rgba(35,99,158,.75)';ctx.font='700 11px Inter,sans-serif';ctx.textAlign='left';
-        ctx.fillText('Depósito',pp.l+6,depY-8);
-        // Gradient
-        const posC=equity[n-1]>=deposit;
-        const grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih);
-        if(posC){grd.addColorStop(0,'rgba(11,138,107,.2)');grd.addColorStop(1,'rgba(11,138,107,.01)');}
-        else{grd.addColorStop(0,'rgba(200,72,60,.15)');grd.addColorStop(1,'rgba(200,72,60,.01)');}
+        ctx.fillStyle='rgba(35,99,158,.8)'; ctx.font='700 12px Inter,Helvetica,sans-serif'; ctx.textAlign='left';
+        ctx.fillText('Depósito', pp.l+7, depY-8);
+        var pc = equity[n-1] >= deposit;
+        var grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih);
+        if(pc){ grd.addColorStop(0,'rgba(11,138,107,.20)'); grd.addColorStop(1,'rgba(11,138,107,.01)'); }
+        else  { grd.addColorStop(0,'rgba(200,72,60,.16)');  grd.addColorStop(1,'rgba(200,72,60,.01)'); }
         ctx.beginPath();
-        for(let i=0;i<n;i++){const ex=pp.l+iw*(i/Math.max(1,n-1)),ey=pp.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);}
-        ctx.lineTo(pp.l+iw,depY);ctx.lineTo(pp.l,depY);ctx.closePath();ctx.fillStyle=grd;ctx.fill();
-        // Line
-        ctx.lineWidth=2.5;ctx.strokeStyle=posC?'#0B8A6B':'#C8483C';ctx.lineJoin='round';
+        for(var ai=0; ai<n; ai++){
+          var ax=pp.l+iw*(ai/Math.max(1,n-1)), ay=pp.t+ih*(1-(equity[ai]-minV)/span);
+          if(ai===0) ctx.moveTo(ax,ay); else ctx.lineTo(ax,ay);
+        }
+        ctx.lineTo(pp.l+iw,depY); ctx.lineTo(pp.l,depY); ctx.closePath();
+        ctx.fillStyle=grd; ctx.fill();
+        ctx.lineWidth=2.6; ctx.strokeStyle=pc?GREEN:RED; ctx.lineJoin='round';
         ctx.beginPath();
-        for(let i=0;i<n;i++){const ex=pp.l+iw*(i/Math.max(1,n-1)),ey=pp.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(ex,ey):ctx.lineTo(ex,ey);}
+        for(var li=0; li<n; li++){
+          var lx2=pp.l+iw*(li/Math.max(1,n-1)), ly2=pp.t+ih*(1-(equity[li]-minV)/span);
+          if(li===0) ctx.moveTo(lx2,ly2); else ctx.lineTo(lx2,ly2);
+        }
         ctx.stroke();
-        // End dot
-        const lx=pp.l+iw,ly=pp.t+ih*(1-(equity[n-1]-minV)/span);
-        ctx.beginPath();ctx.arc(lx,ly,5,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-        ctx.strokeStyle=posC?'#0B8A6B':'#C8483C';ctx.lineWidth=2.5;ctx.stroke();
-        doc.addImage(tmp.toDataURL('image/png',1.0),'PNG',M+1,y+10,cW-2,cH-12);
+        var ex=pp.l+iw, ey=pp.t+ih*(1-(equity[n-1]-minV)/span);
+        ctx.beginPath(); ctx.arc(ex,ey,5.5,0,Math.PI*2);
+        ctx.fillStyle=WHITE; ctx.fill();
+        ctx.strokeStyle=pc?GREEN:RED; ctx.lineWidth=2.6; ctx.stroke();
+        doc.addImage(tmp.toDataURL('image/png',1.0),'PNG',M+1.5,y+1.5,cW-3,cH-3);
       }
-      y+=cH+5;
-    }catch(e){y+=5;}
-    // Table
-    sf(8,'bold',INK);doc.text('Resultado Mensual',M,y);y+=5;
-    const tW=PW-M*2;
-    fillRect(M,y,tW,8,DARK);
+    }catch(chartErr){ console.warn('PDF chart:',chartErr); }
+    y += cH+5;
+
+    // ══ CHART STATS ══
+    var eqArr=CC.equity, sw=(PW-M*2-9)/4;
+    var vOpen=eqArr[0], vClose=eqArr[eqArr.length-1];
+    var vHigh=Math.max.apply(null,eqArr), vLow=Math.min.apply(null,eqArr);
+    var cstats=[
+      {l:'CAPITAL INICIAL', v:fmt(s.dep), c:INK},
+      {l:'VALOR ACTUAL',    v:fmt(vClose), c:INK},
+      {l:'MÁXIMO',          v:fmt(vHigh), c:GREEN},
+      {l:'MÍNIMO',          v:fmt(vLow),  c:RED}
+    ];
+    for(var si=0; si<cstats.length; si++){
+      var st=cstats[si], sx=M+si*(sw+3);
+      box(sx,y,sw,13,WHITE,BORDER,2);
+      sf(5.5,'bold',INK2); doc.text(st.l,sx+3,y+5);
+      sf(8,'bold',st.c);   doc.text(st.v,sx+3,y+10.5);
+    }
+    y += 19;
+
+    // ══ TABLE ══
+    sf(9,'bold',INK); doc.text('Resumen por Período',M,y); y+=5;
+    var tW=PW-M*2;
+    doc.setFillColor(DARK); doc.rect(M,y,tW,8,'F');
     sf(6,'bold',WHITE);
-    doc.text('MES',M+3,y+5.5);
-    doc.text('P&L NETO',M+70,y+5.5,{align:'right'});
-    doc.text('RETORNO',M+98,y+5.5,{align:'right'});
-    doc.text('CAPITAL FINAL',M+tW-3,y+5.5,{align:'right'});
+    doc.text('MES',M+4,y+5.5);
+    doc.text('P&L NETO',M+72,y+5.5,{align:'right'});
+    doc.text('RETORNO %',M+104,y+5.5,{align:'right'});
+    doc.text('EQUITY FINAL',M+tW-4,y+5.5,{align:'right'});
     y+=8;
-    let row=0;
-    for(const[mk,pnl]of s.me){
-      if(y+7>PH-18){doc.addPage();y=18;}
-      const eq=s.mEq[mk]||s.dep,prev=eq-pnl,pct=prev>0?(pnl/Math.abs(prev)*100):0;
-      if(row%2===0)fillRect(M,y,tW,7,BG2);
-      doc.setDrawColor(BORDER);doc.setLineWidth(0.15);doc.rect(M,y,tW,7,'D');
-      sf(7,'normal',INK);doc.text(mLbl(mk),M+3,y+5);
-      sf(7,'bold',pnl>=0?GREEN:RED);doc.text((pnl>=0?'+':'')+fmt(pnl),M+70,y+5,{align:'right'});
-      sf(7,'normal',pct>=0?GREEN:RED);doc.text((pct>=0?'+':'')+fmtP(pct),M+98,y+5,{align:'right'});
-      sf(7,'normal',INK);doc.text(fmt(eq),M+tW-3,y+5,{align:'right'});
-      y+=7;row++;
-    }
-    ln(M,y,M+tW,y,BORDER,0.3);
-    // Footer
-    sf(6,'normal',INK2);doc.text('RC Capital · Documento confidencial · '+todayStr,PW/2,PH-11,{align:'center'});
-    ln(M,PH-15,PW-M,PH-15,BORDER,0.2);
-    // Download
-    const fname='RC_Capital_'+nombre.replace(/[\s]+/g,'_')+'_'+bog.getUTCFullYear()+'.pdf';
-    const blob=doc.output('blob');
-    const isStandalone=(window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches)||window.navigator.standalone===true;
-    let done=false, sharedOk=false;
 
-    // Método 1: Web Share API — es el único método confiable para "descargar" archivos
-    // cuando la web está instalada como app (PWA) en modo standalone (iOS/Android),
-    // ya que ahí <a download> con blob: no dispara ninguna descarga ni error visible.
-    try{
-      const file=new File([blob],fname,{type:'application/pdf'});
-      if(navigator.canShare && navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:fname});
-        done=true;sharedOk=true;
+    for(var ri=0; ri<s.me.length; ri++){
+      var mk=s.me[ri][0], pnl=s.me[ri][1];
+      if(y+7 > PH-20){
+        doc.addPage();
+        doc.setDrawColor(BORDER); doc.setLineWidth(0.3); doc.rect(8,8,PW-16,PH-16);
+        y=20;
       }
-    }catch(shareErr){
-      // Usuario canceló el share, o falló — seguimos con el siguiente método.
+      var eqm=(s.mEq && s.mEq[mk]) ? s.mEq[mk] : s.dep;
+      var prev=eqm-pnl, pct=prev>0 ? (pnl/Math.abs(prev)*100) : 0;
+      if(ri%2===0){ doc.setFillColor(BG2); doc.rect(M,y,tW,7,'F'); }
+      ln(M,y+7,M+tW,y+7,BORDER,0.15);
+      sf(7.5,'normal',INK); doc.text(mLbl(mk),M+4,y+5);
+      sf(7.5,'bold',pnl>=0?GREEN:RED); doc.text((pnl>=0?'+':'')+fmt(pnl),M+72,y+5,{align:'right'});
+      sf(7.5,'normal',pct>=0?GREEN:RED); doc.text((pct>=0?'+':'')+fmtP(pct),M+104,y+5,{align:'right'});
+      sf(7.5,'normal',INK); doc.text(fmt(eqm),M+tW-4,y+5,{align:'right'});
+      y+=7;
     }
 
-    // Método 2: descarga directa vía blob + <a download> (navegador normal, no standalone)
-    if(!done){
-      try{
-        const url=URL.createObjectURL(blob);
-        const a=document.createElement('a');a.href=url;a.download=fname;a.style.display='none';
-        document.body.appendChild(a);a.click();
-        setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},4000);
-        done=true;
-      }catch(e){/* sigue al método 3 */}
-    }
+    // ══ FOOTER ══
+    sf(6,'normal',INK2);
+    doc.text('RC Capital  ·  Documento confidencial  ·  Generado el '+todayStr, PW/2, PH-11, {align:'center'});
+    ln(M,PH-15,PW-M,PH-15,BORDER,0.2);
 
-    // Método 3: jsPDF.save() nativo
-    if(!done){
-      try{doc.save(fname);done=true;}catch(e2){/* sigue al método 4 */}
-    }
+    // ══ DOWNLOAD ══
+    var safeName = nombre.replace(/[^A-Za-z0-9]+/g,'_').replace(/^_|_$/g,'');
+    var fname = 'RC_Capital_' + safeName + '_' + today.getFullYear() + '.pdf';
 
-    // Método 4: abrir el PDF en una pestaña nueva vía data URI
-    if(!done){
-      const w=window.open(doc.output('datauristring'),'_blank');
-      done=!!w;
-    }
+    var ab = doc.output('arraybuffer');
+    var blob = new Blob([ab], {type:'application/pdf'});
 
-    if(!sharedOk && (!done || isStandalone)){
-      pdfNotice(isStandalone
-        ? 'Si la descarga no se guardó, abre este reporte desde Safari o Chrome (no desde el ícono de la app instalada) e inténtalo de nuevo.'
-        : 'No se pudo descargar automáticamente. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.');
+    if(window.navigator && window.navigator.msSaveOrOpenBlob){
+      window.navigator.msSaveOrOpenBlob(blob, fname);
+    } else {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = fname;
+      a.rel = 'noopener';
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        if(a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 3000);
     }
-  }catch(err){pdfNotice('Error al generar el PDF: '+err.message);}
-  finally{allBtns.forEach(b=>{b.textContent=b.dataset._label||b.textContent;b.disabled=false;});}
+  }catch(err){
+    console.error('PDF error:',err);
+    alert('Error generando el PDF: '+(err && err.message ? err.message : err));
+  }finally{
+    if(btn){ btn.textContent = btnTxt || '⬇ Descargar informe PDF'; btn.disabled = false; }
+    if(btnMob){ btnMob.textContent = btnMobTxt || '⬇ PDF'; btnMob.disabled = false; }
+  }
 }
-
 
 window.addEventListener('resize',()=>{if(CC.labels&&CC.labels.length){drawEquityChart();}});
 // Session restore handled in DOMContentLoaded block above
