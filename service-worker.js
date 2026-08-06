@@ -1,26 +1,22 @@
-// RC Capital Service Worker v1.2
-const CACHE = 'rccapital-v3';
-const ASSETS = [
-  '/RCCapital/inversores.html',
+// RC Capital Service Worker v3.0
+const CACHE = 'rccapital-v4';
+const SHELL = [
+  '/RCCapital/index.html',
   '/RCCapital/logo.png',
   '/RCCapital/manifest.json',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2',
-  'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
-  'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js'
+  '/RCCapital/icons/icon-192.png',
+  '/RCCapital/icons/icon-512.png',
 ];
 
-// Install: cache core assets
 self.addEventListener('install', e => {
+  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      // Cache what we can, ignore failures (external CDNs may block)
-      return Promise.allSettled(ASSETS.map(url => cache.add(url).catch(() => {})));
-    }).then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache =>
+      Promise.allSettled(SHELL.map(url => cache.add(url).catch(()=>{})))
+    )
   );
 });
 
-// Activate: clean old caches
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
@@ -29,24 +25,77 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Fetch: network first, cache fallback
 self.addEventListener('fetch', e => {
-  // Skip non-GET and chrome-extension requests
   if(e.request.method !== 'GET') return;
   if(e.request.url.startsWith('chrome-extension')) return;
-  // Skip Supabase API calls (always need network)
-  if(e.request.url.includes('supabase.co')) return;
-
+  if(e.request.url.includes('supabase.co')){
+    e.respondWith(fetch(e.request));
+    return;
+  }
+  // Never serve stale HTML — always go to network for pages
+  if(e.request.mode === 'navigate' || e.request.destination === 'document'){
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match(e.request))
+    );
+    return;
+  }
+  if(e.request.url.includes('rccaccess.github.io')){
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          if(res.ok){
+            const clone = res.clone();
+            caches.open(CACHE).then(c => c.put(e.request, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
   e.respondWith(
-    fetch(e.request)
-      .then(res => {
-        // Cache successful responses for our own files
-        if(res.ok && e.request.url.includes('rccaccess.github.io')){
+    caches.match(e.request).then(cached => {
+      if(cached) return cached;
+      return fetch(e.request).then(res => {
+        if(res.ok){
           const clone = res.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          caches.open(CACHE).then(c => c.put(e.request, clone));
         }
         return res;
-      })
-      .catch(() => caches.match(e.request))
+      });
+    })
   );
+});
+
+// ── PUSH NOTIFICATIONS ──
+self.addEventListener('push', e => {
+  let data = { title: 'RC Capital', body: 'Tienes un nuevo reporte disponible.' };
+  try{ if(e.data) data = e.data.json(); }catch(err){}
+  e.waitUntil(
+    self.registration.showNotification(data.title||'RC Capital', {
+      body: data.body,
+      icon: '/RCCapital/icons/icon-192.png',
+      badge: '/RCCapital/icons/icon-192.png',
+      tag: 'rc-report',
+      renotify: true,
+      data: { url: '/RCCapital/index.html' }
+    })
+  );
+});
+
+// Tap notification → open app
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({type:'window'}).then(list => {
+      for(const c of list){
+        if(c.url.includes('RCCapital') && 'focus' in c) return c.focus();
+      }
+      if(clients.openWindow) return clients.openWindow('/RCCapital/index.html');
+    })
+  );
+});
+
+self.addEventListener('message', e => {
+  if(e.data === 'SKIP_WAITING') self.skipWaiting();
 });
