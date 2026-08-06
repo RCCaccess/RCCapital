@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- RC Capital index build 2026-07-12-v4 -->
 <html lang="es">
 <head>
 <meta charset="utf-8"/>
@@ -634,7 +635,9 @@ function drawEquityChart(){
 function updateRangeUI(){document.querySelectorAll('#rangeBar .rc-btn').forEach(b=>b.classList.toggle('active',b.dataset.range===activeRange));}
 $('rangeBar').addEventListener('click',e=>{const b=e.target.closest('[data-range]');if(!b)return;activeRange=b.dataset.range;updateRangeUI();drawEquityChart();});
 
-async function tryPDF(){
+console.log("RC Capital build 2026-07-12-v4");
+
+function tryPDF(){
   if(typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF){
     alert('El generador de PDF aún se está cargando. Intenta de nuevo en unos segundos.');
     return;
