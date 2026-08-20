@@ -1125,25 +1125,27 @@ button{font-family:inherit;color:inherit;}
     <button class="sheet-x" data-x>×</button>
     <div class="sheet-hd">
       <h3>Construye tu capital</h3>
-      <p>Elige cuánto quieres sumar a tu capital en gestión.</p>
+      <p>Elige cuánto quieres sumar a tu capital en gestión. El aporte mínimo es de $50.</p>
     </div>
     <div class="sheet-bd">
       <div class="opts" id="depOpts">
+        <button class="opt" data-v="50">$50</button>
+        <button class="opt" data-v="100">$100</button>
+        <button class="opt" data-v="250">$250</button>
         <button class="opt" data-v="500">$500</button>
         <button class="opt" data-v="1000">$1,000</button>
-        <button class="opt" data-v="2500">$2,500</button>
-        <button class="opt" data-v="custom">Personalizado</button>
+        <button class="opt" data-v="custom">Otro monto</button>
       </div>
       <div class="fld" id="depCustom" style="display:none;">
         <label>Monto a depositar</label>
-        <input type="number" id="depInput" placeholder="500" min="500" step="100"/>
+        <input type="number" id="depInput" placeholder="50.00" min="50" step="10" inputmode="decimal"/>
       </div>
       <div class="recap" id="depRecap" style="display:none;">
         <div class="recap-row"><span>Aportas</span><b id="depR1">—</b></div>
         <div class="recap-row"><span>Capital estimado tras el aporte</span><b id="depR2">—</b></div>
       </div>
       <button class="btn btn-fill btn-wide" id="depGo">Enviar solicitud</button>
-      <p class="hint">Depósito mínimo: $500. Recibimos tu solicitud y te contactamos para coordinar el aporte.</p>
+      <p class="hint">Aporte mínimo: <b>$50</b>. Recibimos tu solicitud y te contactamos para coordinar el aporte.</p>
     </div>
   </div>
 </div>
@@ -1154,7 +1156,7 @@ button{font-family:inherit;color:inherit;}
     <button class="sheet-x" data-x>×</button>
     <div class="sheet-hd">
       <h3>Retira fondos de tu cuenta</h3>
-      <p>Capital disponible: <b class="num" id="wdAvail">—</b></p>
+      <p>Capital disponible: <b class="num" id="wdAvail">—</b> · Mínimo $25</p>
     </div>
     <div class="sheet-bd">
       <div class="opts" id="wdOpts">
@@ -1165,23 +1167,14 @@ button{font-family:inherit;color:inherit;}
       </div>
       <div class="fld">
         <label>Monto a retirar</label>
-        <input type="number" id="wdInput" placeholder="0.00" min="1" step="10" inputmode="decimal"/>
-      </div>
-      <div class="fld">
-        <label>Método de retiro</label>
-        <select id="wdMethod">
-          <option>Transferencia bancaria</option>
-          <option>USDT (TRC-20)</option>
-          <option>Skrill</option>
-          <option>Otro (lo coordinamos contigo)</option>
-        </select>
+        <input type="number" id="wdInput" placeholder="25.00" min="25" step="5" inputmode="decimal"/>
       </div>
       <div class="recap" id="wdRecap" style="display:none;">
         <div class="recap-row"><span>Retiras</span><b id="wdR1">—</b></div>
         <div class="recap-row"><span>Capital que sigue en gestión</span><b id="wdR2">—</b></div>
       </div>
       <button class="btn btn-fill btn-wide" id="wdGo">Enviar solicitud</button>
-      <p class="hint">Recibimos tu solicitud y te contactamos para coordinar el retiro. No se mueve dinero desde esta pantalla.</p>
+      <p class="hint">Retiro mínimo: <b>$25</b>. Recibimos tu solicitud y te contactamos para coordinar el método y los detalles.</p>
     </div>
   </div>
 </div>
@@ -1288,7 +1281,9 @@ button{font-family:inherit;color:inherit;}
    el correo salga solo. Sin key, se abre el
    cliente de correo del inversor como respaldo. */
 const AVISO_EMAIL = 'mentorycap@gmail.com';
-const W3F_KEY = '5d5d4a97-33df-4df7-8519-4dd22054d66d';   // ← pega aquí tu access key
+const MIN_DEPOSITO = 50;    // aporte adicional mínimo
+const MIN_RETIRO   = 25;    // retiro mínimo
+const W3F_KEY = '';   // ← pega aquí tu access key
 
 const SB_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
@@ -2096,7 +2091,6 @@ function cuerpoSolicitud(tipo, monto, extra, ref){
   L.push('Inversor:        ' + D.nombre);
   L.push('Correo:          ' + (cliente ? cliente.email : '—'));
   L.push('Monto:           ' + usd(monto));
-  if(extra) L.push('Método:          ' + extra);
   L.push('');
   L.push('— Situación actual —');
   L.push('Capital actual:  ' + usd(D.capital));
@@ -2134,7 +2128,6 @@ async function enviarSolicitud(tipo, monto, extra){
           Inversor: D.nombre,
           Correo: cliente ? cliente.email : '',
           Monto: usd(monto),
-          Metodo: extra || '—',
           Capital_actual: usd(D.capital),
           Detalle: cuerpo
         })
@@ -2187,7 +2180,10 @@ function recapDep(){
   if(!sel){ $('#depRecap').style.display = 'none'; return; }
   const v = sel.dataset.v === 'custom' ? parseFloat($('#depInput').value) : +sel.dataset.v;
   if(!v || v <= 0){ $('#depRecap').style.display = 'none'; return; }
-  $('#depR1').textContent = usd(v);
+  const bajo = v < MIN_DEPOSITO;
+  $('#depR1').innerHTML = bajo
+    ? '<span class="neg">'+usd(v)+' · mínimo '+usd(MIN_DEPOSITO)+'</span>'
+    : usd(v);
   $('#depR2').textContent = usd(D.capital + v);
   $('#depRecap').style.display = 'block';
 }
@@ -2205,7 +2201,8 @@ $('#depGo').addEventListener('click', async () => {
   const sel = $('#depOpts .opt.on');
   if(!sel){ aviso('Elige un monto'); return; }
   const v = sel.dataset.v === 'custom' ? parseFloat($('#depInput').value) : +sel.dataset.v;
-  if(!v || v < 500){ aviso('El depósito mínimo es $500'); return; }
+  if(!v || v <= 0){ aviso('Escribe el monto a aportar'); return; }
+  if(v < MIN_DEPOSITO){ aviso('El aporte mínimo es ' + usd(MIN_DEPOSITO)); return; }
   const b = $('#depGo');
   b.disabled = true; b.innerHTML = '<span class="spin"></span>';
   const {ref, enviado} = await enviarSolicitud('deposito', v, null);
@@ -2218,7 +2215,10 @@ $('#depGo').addEventListener('click', async () => {
 function recapWd(){
   const v = parseFloat($('#wdInput').value);
   if(!v || v <= 0){ $('#wdRecap').style.display = 'none'; return; }
-  $('#wdR1').textContent = usd(v);
+  const bajo = v < MIN_RETIRO, alto = v > D.capital;
+  $('#wdR1').innerHTML = bajo ? '<span class="neg">'+usd(v)+' · mínimo '+usd(MIN_RETIRO)+'</span>'
+                       : alto ? '<span class="neg">'+usd(v)+' · supera tu capital</span>'
+                       : usd(v);
   $('#wdR2').textContent = usd(Math.max(0, D.capital - v));
   $('#wdRecap').style.display = 'block';
 }
@@ -2234,7 +2234,10 @@ $$('#wdOpts .opt').forEach(o => o.addEventListener('click', () => {
   o.classList.add('on');
   const q = o.dataset.q;
   if(q === 'custom'){ $('#wdInput').value = ''; $('#wdInput').focus(); }
-  else $('#wdInput').value = (D.capital * (+q/100)).toFixed(2);
+  else {
+    const monto = D.capital * (+q/100);
+    $('#wdInput').value = monto.toFixed(2);
+  }
   recapWd();
 }));
 $('#wdInput').addEventListener('input', () => {
@@ -2245,10 +2248,11 @@ $('#wdInput').addEventListener('input', () => {
 $('#wdGo').addEventListener('click', async () => {
   const v = parseFloat($('#wdInput').value);
   if(!v || v <= 0){ aviso('Escribe el monto a retirar'); return; }
+  if(v < MIN_RETIRO){ aviso('El retiro mínimo es ' + usd(MIN_RETIRO)); return; }
   if(v > D.capital){ aviso('Supera tu capital disponible'); return; }
   const b = $('#wdGo');
   b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  const {ref, enviado} = await enviarSolicitud('retiro', v, $('#wdMethod').value);
+  const {ref, enviado} = await enviarSolicitud('retiro', v, null);
   b.disabled = false; b.textContent = 'Enviar solicitud';
   cerrar($('#mWd'));
   mostrarOk('retiro', v, ref, enviado);
