@@ -566,6 +566,117 @@ button{font-family:inherit;color:inherit;}
 }
 .sw.on i{transform:translateX(18px);}
 
+/* categorías de milestones */
+.cat-tabs{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
+.cat-tab{
+  flex-shrink:0;border:1px solid var(--line);background:var(--panel);
+  padding:7px 14px;border-radius:999px;cursor:pointer;
+  font-size:12.5px;font-weight:500;color:var(--muted);
+  display:flex;align-items:center;gap:6px;transition:all .14s;
+}
+.cat-tab:hover{border-color:#A8C2DA;color:var(--ink);}
+.cat-tab.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.cat-tab b{font-family:var(--mono);font-size:10.5px;font-weight:600;opacity:.75;}
+.cat-group{margin-bottom:22px;}
+.cat-group:last-child{margin-bottom:0;}
+.cat-head{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:11px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);
+}
+.cat-name{
+  font-family:var(--mono);font-size:10px;letter-spacing:1.4px;
+  text-transform:uppercase;color:var(--muted);
+  display:flex;align-items:center;gap:7px;
+}
+.cat-count{font-family:var(--mono);font-size:10.5px;color:var(--faint);}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+
+/* puntos y tiempo restante en la insignia */
+.badge-pts{
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  color:var(--brass);margin-top:6px;
+}
+.badge.locked .badge-pts{color:#B9C3CE;}
+.badge-eta{
+  font-family:var(--mono);font-size:9.5px;color:var(--faint);
+  margin-top:5px;padding-top:5px;border-top:1px solid var(--line-soft);
+}
+
+/* insignias de longevidad */
+.badge.legacy{
+  border-color:rgba(168,121,44,.34);
+  background:linear-gradient(160deg,#FFFDF8,#FAF4E8);
+  box-shadow:0 2px 12px rgba(168,121,44,.14);
+}
+.badge.legacy .badge-ico{
+  background:linear-gradient(150deg,#C9A050,#A8792C);
+  border-color:transparent;
+  box-shadow:0 3px 12px rgba(168,121,44,.34);
+}
+.badge.legacy .badge-n{color:#7A5A20;}
+.badge.legacy.locked{
+  background:var(--panel2);border-color:var(--line-soft);box-shadow:none;
+}
+.badge.legacy.locked .badge-ico{background:#E9EEF3;box-shadow:none;}
+.badge.legacy.locked .badge-n{color:var(--faint);}
+
+/* modal de milestone */
+.ms-pts{
+  display:inline-block;font-family:var(--mono);font-size:12.5px;font-weight:600;
+  color:var(--brass);background:var(--brass-tint);
+  border:1px solid rgba(168,121,44,.24);
+  padding:5px 14px;border-radius:999px;margin-bottom:16px;
+}
+.ms-ico.legacy-ico{
+  background:linear-gradient(150deg,#C9A050,#A8792C)!important;
+  border-color:transparent!important;
+  box-shadow:0 6px 22px rgba(168,121,44,.36);
+}
+.ms-ico.pend{background:var(--panel2)!important;border-color:var(--line)!important;filter:grayscale(1);opacity:.65;}
+
+/* progreso en el perfil */
+.pf-prog{margin-top:20px;padding-top:20px;border-top:1px solid var(--line-soft);}
+.pf-prog-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:3px;}
+.pf-prog-hd h4{font-family:var(--display);font-size:14.5px;font-weight:600;}
+.pf-prog-hd span{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--brass);}
+.pf-lvl{
+  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
+}
+.pf-lvl-gap{font-size:12px;color:var(--muted);margin-top:9px;}
+.pf-lvl-gap b{font-family:var(--mono);color:var(--brass);font-weight:600;}
+.pf-next-hd{
+  font-family:var(--mono);font-size:10px;letter-spacing:1.3px;
+  text-transform:uppercase;color:var(--muted);
+  margin:20px 0 10px;padding-top:16px;border-top:1px solid var(--line-soft);
+}
+.nx{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line-soft);}
+.nx:last-child{border-bottom:none;}
+.nx-ico{
+  width:32px;height:32px;border-radius:9px;flex-shrink:0;
+  display:grid;place-items:center;font-size:13px;
+  background:var(--panel2);border:1px solid var(--line);filter:grayscale(1);opacity:.7;
+}
+.nx-b{flex:1;min-width:0;}
+.nx-n{font-size:13px;font-weight:500;}
+.nx-e{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;}
+.nx-p{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--brass);flex-shrink:0;}
+
+/* hitos futuros en la línea de tiempo */
+.stop.soon::before{border-color:var(--line);border-style:dashed;background:var(--panel);}
+.stop.soon .stop-t{color:var(--muted);}
+.stop.soon .stop-d{color:var(--faint);}
+
+/* resumen de solicitud */
+.recap{
+  background:var(--panel2);border:1px solid var(--line-soft);
+  border-radius:var(--r-m);padding:13px 15px;margin-bottom:15px;
+}
+.recap-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:4px 0;font-size:13px;}
+.recap-row span{color:var(--muted);}
+.recap-row b{font-family:var(--mono);font-weight:600;}
+.ok-ico-ok{background:var(--green-tint)!important;border-color:rgba(11,138,107,.24)!important;color:var(--green);}
+
 /* aviso */
 .snack{
   position:fixed;left:50%;bottom:96px;z-index:120;
@@ -875,10 +986,11 @@ button{font-family:inherit;color:inherit;}
       <span class="sec-note">Toca uno para ver el detalle</span>
     </div>
     <div class="card">
-      <div class="badges" id="badges"></div>
+      <div class="cat-tabs" id="catTabs"></div>
+      <div id="badgeGroups"></div>
       <div class="badge-tally">
         <span>Milestones desbloqueados</span>
-        <b id="msCount">0 / 9</b>
+        <b id="msCount">— / —</b>
       </div>
     </div>
   </section>
@@ -927,6 +1039,11 @@ button{font-family:inherit;color:inherit;}
           <div class="rw-lock">🔒</div>
           <div class="rw-n">Beneficio premium</div>
           <div class="rw-p">5,000 pts</div>
+        </div>
+        <div class="reward">
+          <div class="rw-lock">🔒</div>
+          <div class="rw-n">Beneficio Legacy</div>
+          <div class="rw-p">10,000 pts</div>
         </div>
       </div>
     </div>
@@ -1021,8 +1138,12 @@ button{font-family:inherit;color:inherit;}
         <label>Monto a depositar</label>
         <input type="number" id="depInput" placeholder="500" min="500" step="100"/>
       </div>
-      <button class="btn btn-fill btn-wide" id="depGo">Continuar</button>
-      <p class="hint">Depósito mínimo: $500. Este prototipo no procesa pagos reales.</p>
+      <div class="recap" id="depRecap" style="display:none;">
+        <div class="recap-row"><span>Aportas</span><b id="depR1">—</b></div>
+        <div class="recap-row"><span>Capital estimado tras el aporte</span><b id="depR2">—</b></div>
+      </div>
+      <button class="btn btn-fill btn-wide" id="depGo">Enviar solicitud</button>
+      <p class="hint">Depósito mínimo: $500. Recibimos tu solicitud y te contactamos para coordinar el aporte.</p>
     </div>
   </div>
 </div>
@@ -1036,9 +1157,15 @@ button{font-family:inherit;color:inherit;}
       <p>Capital disponible: <b class="num" id="wdAvail">—</b></p>
     </div>
     <div class="sheet-bd">
+      <div class="opts" id="wdOpts">
+        <button class="opt" data-q="25">25%</button>
+        <button class="opt" data-q="50">50%</button>
+        <button class="opt" data-q="100">Todo</button>
+        <button class="opt" data-q="custom">Otro monto</button>
+      </div>
       <div class="fld">
         <label>Monto a retirar</label>
-        <input type="number" id="wdInput" placeholder="0.00" min="1" step="10"/>
+        <input type="number" id="wdInput" placeholder="0.00" min="1" step="10" inputmode="decimal"/>
       </div>
       <div class="fld">
         <label>Método de retiro</label>
@@ -1046,10 +1173,15 @@ button{font-family:inherit;color:inherit;}
           <option>Transferencia bancaria</option>
           <option>USDT (TRC-20)</option>
           <option>Skrill</option>
+          <option>Otro (lo coordinamos contigo)</option>
         </select>
       </div>
-      <button class="btn btn-fill btn-wide" id="wdGo">Confirmar retiro</button>
-      <p class="hint">Los retiros se procesan en 1 a 3 días hábiles. Este prototipo no mueve dinero real.</p>
+      <div class="recap" id="wdRecap" style="display:none;">
+        <div class="recap-row"><span>Retiras</span><b id="wdR1">—</b></div>
+        <div class="recap-row"><span>Capital que sigue en gestión</span><b id="wdR2">—</b></div>
+      </div>
+      <button class="btn btn-fill btn-wide" id="wdGo">Enviar solicitud</button>
+      <p class="hint">Recibimos tu solicitud y te contactamos para coordinar el retiro. No se mueve dinero desde esta pantalla.</p>
     </div>
   </div>
 </div>
@@ -1060,10 +1192,12 @@ button{font-family:inherit;color:inherit;}
     <button class="sheet-x" data-x>×</button>
     <div class="ms-sheet">
       <div class="ms-ico" id="msIco">🚀</div>
-      <div class="ms-tag">Milestone desbloqueado</div>
+      <div class="ms-tag" id="msTag">Milestone desbloqueado</div>
       <div class="ms-n" id="msName">—</div>
       <div class="ms-s" id="msDesc">—</div>
+      <div class="ms-pts" id="msPts" style="display:none;">—</div>
       <div class="ms-d" id="msDate">—</div>
+      <button class="btn btn-fill btn-wide" id="msGo" style="margin-top:18px;">Continuar journey</button>
     </div>
   </div>
 </div>
@@ -1087,6 +1221,18 @@ button{font-family:inherit;color:inherit;}
         <div class="pf-cell"><div class="k">Partner Points</div><div class="v num" id="pfPts">—</div></div>
         <div class="pf-cell"><div class="k">Milestones</div><div class="v num" id="pfMs">—</div></div>
         <div class="pf-cell"><div class="k">Tiempo</div><div class="v num" id="pfDias">—</div></div>
+      </div>
+
+      <div class="pf-prog">
+        <div class="pf-prog-hd">
+          <h4>🏆 Mi progreso</h4>
+          <span class="num" id="pfXp">—</span>
+        </div>
+        <div class="pf-lvl" id="pfLvlName">—</div>
+        <div class="bar"><div class="bar-fill" id="pfBar"></div></div>
+        <div class="pf-lvl-gap" id="pfGap">—</div>
+        <div class="pf-next-hd">Próximos milestones</div>
+        <div id="pfNext"></div>
       </div>
     </div>
   </div>
@@ -1114,6 +1260,20 @@ button{font-family:inherit;color:inherit;}
   </div>
 </div>
 
+<!-- ══ MODAL · SOLICITUD ENVIADA ══ -->
+<div class="veil" id="mOk">
+  <div class="sheet sheet-pos">
+    <button class="sheet-x" data-x>×</button>
+    <div class="ms-sheet">
+      <div class="ms-ico" id="okIco">✓</div>
+      <div class="ms-tag" id="okTag">Solicitud enviada</div>
+      <div class="ms-n" id="okName">—</div>
+      <div class="ms-s" id="okDesc">—</div>
+      <div class="ms-d" id="okRef">—</div>
+    </div>
+  </div>
+</div>
+
 <div class="snack" id="snack"></div>
 
 <script>
@@ -1123,6 +1283,13 @@ button{font-family:inherit;color:inherit;}
    El cálculo replica exactamente el del estado
    de cuenta para que las cifras coincidan.
    ═══════════════════════════════════════════ */
+/* ── AVISOS DE SOLICITUDES ──────────────────
+   Pega tu access key de web3forms.com para que
+   el correo salga solo. Sin key, se abre el
+   cliente de correo del inversor como respaldo. */
+const AVISO_EMAIL = 'mentorycap@gmail.com';
+const W3F_KEY = '';   // ← pega aquí tu access key
+
 const SB_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
 const db = supabase.createClient(SB_URL, SB_KEY);
@@ -1217,29 +1384,99 @@ function computeStats(rows){
    ═══════════════════════════════════════════ */
 const NIVELES = [
   {n:1, k:'Begin',   min:0},
-  {n:2, k:'Build',   min:500},
-  {n:3, k:'Grow',    min:1000},
-  {n:4, k:'Partner', min:1750},
-  {n:5, k:'Legacy',  min:2200}
+  {n:2, k:'Build',   min:700},
+  {n:3, k:'Grow',    min:1950},
+  {n:4, k:'Partner', min:4450},
+  {n:5, k:'Legacy',  min:9450}
 ];
 const TITULO = {1:'Nuevo Partner', 2:'Capital Builder', 3:'Growth Partner', 4:'Senior Partner', 5:'Legacy Partner'};
 
-function reglasPuntos(dias, tieneObjetivo){
-  return [
-    {t:'Completar tu perfil',     p:100,  got:true},
-    {t:'Completar el onboarding', p:150,  got:true},
-    {t:'Definir tu objetivo',     p:100,  got:!!tieneObjetivo},
-    {t:'30 días como Partner',    p:100,  got:dias >= 30},
-    {t:'90 días como Partner',    p:250,  got:dias >= 90},
-    {t:'6 meses como Partner',    p:500,  got:dias >= 182},
-    {t:'1 año como Partner',      p:1000, got:dias >= 365}
-  ];
+const CATEGORIAS = [
+  {id:'permanencia', ico:'🕐', n:'Permanencia'},
+  {id:'journey',     ico:'🎯', n:'Journey'},
+  {id:'capital',     ico:'💎', n:'Capital'}
+];
+
+/* ── CATÁLOGO ────────────────────────────────
+   Para agregar un milestone basta con sumar una
+   entrada aquí. Nada más en el archivo cambia.
+     cat      permanencia | journey | capital
+     pts      solo permanencia y participación
+     legacy   diseño destacado
+     dias     desbloquea por antigüedad
+     monto    desbloquea al alcanzar ese capital
+     cond(m)  regla propia
+   ──────────────────────────────────────────── */
+const MILESTONES = [
+  // ── Permanencia ──
+  {id:'d30',  cat:'permanencia', ico:'⭐', n:'30 Days',          s:'30 días como Partner',   pts:100,  dias:30},
+  {id:'d90',  cat:'permanencia', ico:'⭐', n:'90 Days',          s:'90 días como Partner',   pts:250,  dias:90},
+  {id:'m6',   cat:'permanencia', ico:'🌱', n:'6 Months',         s:'6 meses como Partner',   pts:500,  dias:182},
+  {id:'m9',   cat:'permanencia', ico:'🌿', n:'9 Months',         s:'9 meses como Partner',   pts:750,  dias:274},
+  {id:'y1',   cat:'permanencia', ico:'⭐', n:'1 Year Partner',   s:'Un año formando parte de MentoryCap Partners', pts:1000, dias:365, legacy:true},
+  {id:'m18',  cat:'permanencia', ico:'🔆', n:'18 Months',        s:'18 meses como Partner',  pts:1500, dias:548},
+  {id:'y2',   cat:'permanencia', ico:'💎', n:'Long-Term Partner',s:'Dos años como Partner',  pts:2000, dias:730, legacy:true},
+  {id:'y3',   cat:'permanencia', ico:'🏆', n:'Legacy Partner',   s:'Tres años como Partner', pts:3000, dias:1095, legacy:true},
+  {id:'y5',   cat:'permanencia', ico:'👑', n:'Founding Partner', s:'Cinco años como Partner', pts:5000, dias:1825, legacy:true},
+
+  // ── Journey ──
+  {id:'first',   cat:'journey', ico:'🚀', n:'First Step',       s:'Tu primer depósito',        pts:0,   cond:m => ({on: !!m.inicio, f: m.inicio})},
+  {id:'perfil',  cat:'journey', ico:'👤', n:'Profile Complete', s:'Perfil completado',         pts:100, cond:m => ({on:true, f:m.inicio})},
+  {id:'onboard', cat:'journey', ico:'✅', n:'Onboarding',       s:'Onboarding completado',     pts:150, cond:m => ({on:true, f:m.inicio})},
+  {id:'goal',    cat:'journey', ico:'🎯', n:'Goal Setter',      s:'Definiste tu primer objetivo', pts:100, cond:m => ({on:m.objetivoPropio, f:m.corte})},
+  {id:'growth',  cat:'journey', ico:'📈', n:'First Growth',     s:'Tu primer período en positivo', pts:0, cond:m => {
+      const p = m.meses.find(([,v]) => v > 0);
+      if(!p) return {on:false};
+      const [y,mm] = p[0].split('-');
+      return {on:true, f:new Date(+y, +mm, 0)};
+    }},
+  {id:'wd1',     cat:'journey', ico:'💰', n:'First Withdrawal', s:'Tu primer retiro',          pts:0,   cond:m => ({on: m.retiros > 0, f: m.corte})},
+
+  // ── Capital · solo registran, no otorgan puntos ──
+  {id:'c1k',   cat:'capital', ico:'🏆', n:'$1K Capital',   s:'Tu capital alcanza $1,000',  pts:0, monto:1000},
+  {id:'c25k',  cat:'capital', ico:'💎', n:'$2.5K Capital', s:'Tu capital alcanza $2,500',  pts:0, monto:2500},
+  {id:'c5k',   cat:'capital', ico:'🔷', n:'$5K Capital',   s:'Tu capital alcanza $5,000',  pts:0, monto:5000},
+  {id:'c10k',  cat:'capital', ico:'🔶', n:'$10K Capital',  s:'Tu capital alcanza $10,000', pts:0, monto:10000},
+  {id:'c25kk', cat:'capital', ico:'👑', n:'$25K Capital',  s:'Tu capital alcanza $25,000', pts:0, monto:25000, legacy:true}
+];
+
+/* Resuelve el catálogo contra los datos del inversor */
+function resolverMilestones(m){
+  return MILESTONES.map(def => {
+    const r = {...def, on:false, f:null, faltan:null, meta:null};
+    if(def.dias != null){
+      const fecha = m.inicio ? new Date(m.inicio.getTime() + def.dias*DIA) : null;
+      r.f = fecha;
+      r.on = !!(fecha && m.corte && fecha <= m.corte);
+      if(!r.on && fecha && m.corte) r.faltan = Math.ceil((fecha - m.corte)/DIA);
+    } else if(def.monto != null){
+      r.on = m.capital >= def.monto;
+      r.f = r.on ? m.corte : null;
+      r.meta = def.monto;
+    } else if(def.cond){
+      const o = def.cond(m);
+      r.on = !!o.on; r.f = o.f || null;
+    }
+    return r;
+  });
 }
+
 function nivelDe(p){
   let cur = NIVELES[0];
   for(const l of NIVELES) if(p >= l.min) cur = l;
   const sig = NIVELES.find(l => l.min > p) || null;
   return {cur, sig, falta: sig ? sig.min - p : 0};
+}
+
+function textoEspera(dias){
+  if(dias == null) return '';
+  if(dias <= 0) return 'Disponible';
+  if(dias === 1) return 'Falta 1 día';
+  if(dias < 45) return 'Faltan ' + dias + ' días';
+  const meses = Math.round(dias/30.4);
+  if(meses < 12) return 'En ' + meses + ' meses';
+  const anios = (dias/365).toFixed(1).replace('.0','');
+  return 'En ' + anios + (anios === '1' ? ' año' : ' años');
 }
 
 /* ═══════════════════════════════════════════
@@ -1257,8 +1494,6 @@ function objetivoGuardado(id, equity){
 function construirModelo(st, cli){
   const g = objetivoGuardado(cli.id, st.equity);
   const dias = st.firstDate && st.lastDate ? Math.round((st.lastDate - st.firstDate)/DIA) + 1 : 0;
-  const reglas = reglasPuntos(dias, g.propio);
-  const puntos = reglas.filter(r => r.got).reduce((a,r) => a + r.p, 0);
   const gestion = st.runP + st.runF;
 
   const m = {
@@ -1280,33 +1515,18 @@ function construirModelo(st, cli){
     mejorMes: st.best,
     objetivo: g.valor,
     objetivoPropio: g.propio,
-    puntos: puntos,
-    reglas: reglas,
     serie: st.es.map(p => ({f: new Date(p.dk + 'T00:00:00'), v: p.eq}))
   };
   m.faltan = +(m.objetivo - m.capital).toFixed(2);
   m.progreso = m.objetivo > 0 ? Math.min(100, m.capital / m.objetivo * 100) : 0;
+  recalcular(m);
   return m;
 }
 
-function construirMilestones(m){
-  const ini = m.inicio, corte = m.corte;
-  const enDias = d => ini ? new Date(ini.getTime() + d*DIA) : null;
-  const alcanzado = f => f && corte && f <= corte;
-  const primerPositivo = m.meses.find(([,v]) => v > 0);
-  const fechaMes = k => { const [y,mm] = k.split('-'); return new Date(+y, +mm, 0); };
-
-  return [
-    {i:'🚀', n:'First Step',      s:'Tu primer depósito',              on: !!ini,                       f: ini},
-    {i:'⭐', n:'30 Days',         s:'30 días como Partner',            on: alcanzado(enDias(30)),       f: enDias(30)},
-    {i:'📈', n:'Growth',          s:'Tu primer mes en positivo',       on: !!primerPositivo,            f: primerPositivo ? fechaMes(primerPositivo[0]) : null},
-    {i:'⭐', n:'90 Days',         s:'90 días como Partner',            on: alcanzado(enDias(90)),       f: enDias(90)},
-    {i:'🎯', n:'Goal Setter',     s:'Definiste tu primer objetivo',    on: m.objetivoPropio,            f: corte},
-    {i:'💰', n:'First Withdrawal',s:'Tu primer retiro',                on: m.retiros > 0,               f: corte},
-    {i:'🏆', n:'$1K Capital',     s:'Tu capital alcanza $1,000',       on: m.capital >= 1000,           f: corte},
-    {i:'💎', n:'$2.5K Capital',   s:'Tu capital alcanza $2,500',       on: m.capital >= 2500,           f: corte},
-    {i:'👑', n:'1 Year Partner',  s:'Un año como Partner',             on: alcanzado(enDias(365)),      f: enDias(365)}
-  ];
+function recalcular(m){
+  m.ms = resolverMilestones(m);
+  m.puntos = m.ms.filter(x => x.on).reduce((a,x) => a + x.pts, 0);
+  return m;
 }
 
 function construirJourney(m){
@@ -1325,7 +1545,16 @@ function construirJourney(m){
   if(m.corte) j.push({f:m.corte, i:'📊', t:'Dónde estás hoy', v:'Capital: <b>'+usd(m.capital)+'</b>', now:true});
 
   j.sort((a,b) => a.f - b.f);
-  j.push({f:null, i:'🎯', t:'Próximo milestone', v:'Alcanzar <b>'+usd0(m.objetivo)+'</b>', next:true});
+
+  // hacia adelante: los próximos hitos de permanencia
+  const futuros = m.ms
+    .filter(x => !x.on && x.dias != null && x.f)
+    .sort((a,b) => a.f - b.f)
+    .slice(0,3);
+  for(const f of futuros){
+    j.push({f:f.f, i:f.ico, t:f.n, v:textoEspera(f.faltan) + ' · <b>+'+miles(f.pts)+' puntos</b>', soon:true});
+  }
+  j.push({f:null, i:'🎯', t:'Tu objetivo de capital', v:'Alcanzar <b>'+usd0(m.objetivo)+'</b>', next:true});
   return j;
 }
 
@@ -1556,42 +1785,99 @@ function pintarObjetivo(){
 
 function pintarJourney(){
   const J = construirJourney(D);
-  $('#journeyCount').textContent = (J.length-1) + (J.length-1 === 1 ? ' hito' : ' hitos');
+  const hechos = J.filter(s => !s.next && !s.soon).length;
+  $('#journeyCount').textContent = hechos + (hechos === 1 ? ' hito alcanzado' : ' hitos alcanzados');
   $('#trail').innerHTML = J.map(s =>
-    '<div class="stop'+(s.now?' now':'')+(s.next?' next':'')+'">'+
+    '<div class="stop'+(s.now?' now':'')+(s.next?' next':'')+(s.soon?' soon':'')+'">'+
       '<div class="stop-d">'+(s.f ? fechaCorta(s.f) : 'Próximo')+'</div>'+
       '<div class="stop-t"><i>'+s.i+'</i>'+s.t+'</div>'+
       '<div class="stop-v">'+s.v+'</div>'+
     '</div>').join('');
 }
 
+let catActiva = 'todas';
+
 function pintarMilestones(){
-  const MS = construirMilestones(D);
-  window._MS = MS;
-  $('#msCount').textContent = MS.filter(m => m.on).length + ' / ' + MS.length;
-  $('#badges').innerHTML = MS.map((m,i) =>
-    '<button class="badge'+(m.on?'':' locked')+'" data-ms="'+i+'"'+(m.on?'':' disabled')+'>'+
-      '<div class="badge-ico">'+(m.on?m.i:'🔒')+'</div>'+
-      '<div class="badge-n">'+m.n+'</div>'+
-      '<div class="badge-s">'+m.s+'</div>'+
-    '</button>').join('');
-  $$('#badges .badge').forEach(b => b.addEventListener('click', () => {
-    const m = window._MS[+b.dataset.ms];
-    if(!m || !m.on) return;
-    $('#msIco').textContent = m.i;
-    $('#msName').textContent = m.n;
-    $('#msDesc').textContent = m.s;
-    $('#msDate').textContent = m.f ? 'Desbloqueado el ' + fechaCorta(m.f) : 'Desbloqueado';
-    abrir('#mMs');
+  const MS = D.ms;
+  const abiertos = MS.filter(m => m.on).length;
+  $('#msCount').textContent = abiertos + ' / ' + MS.length;
+
+  // pestañas
+  const tabs = [{id:'todas', ico:'✦', n:'Todos'}].concat(CATEGORIAS);
+  $('#catTabs').innerHTML = tabs.map(t => {
+    const lista = t.id === 'todas' ? MS : MS.filter(m => m.cat === t.id);
+    const n = lista.filter(m => m.on).length;
+    return '<button class="cat-tab'+(catActiva===t.id?' on':'')+'" data-cat="'+t.id+'">'+
+             t.ico+' '+t.n+' <b>'+n+'/'+lista.length+'</b></button>';
+  }).join('');
+  $$('#catTabs .cat-tab').forEach(b => b.addEventListener('click', () => {
+    catActiva = b.dataset.cat; pintarMilestones();
+  }));
+
+  // grupos
+  const cats = catActiva === 'todas' ? CATEGORIAS : CATEGORIAS.filter(x => x.id === catActiva);
+  $('#badgeGroups').innerHTML = cats.map(cat => {
+    const lista = MS.filter(m => m.cat === cat.id);
+    const n = lista.filter(m => m.on).length;
+    return '<div class="cat-group">'+
+      '<div class="cat-head">'+
+        '<span class="cat-name">'+cat.ico+' '+cat.n+'</span>'+
+        '<span class="cat-count">'+n+' de '+lista.length+'</span>'+
+      '</div>'+
+      '<div class="badges">'+ lista.map(m => tarjeta(m)).join('') +'</div>'+
+    '</div>';
+  }).join('');
+
+  $$('#badgeGroups .badge').forEach(b => b.addEventListener('click', () => {
+    const m = D.ms.find(x => x.id === b.dataset.ms);
+    if(m) abrirMilestone(m);
   }));
 }
 
+function tarjeta(m){
+  const cls = 'badge' + (m.on ? '' : ' locked') + (m.legacy ? ' legacy' : '');
+  let pie = '';
+  if(m.pts > 0) pie += '<div class="badge-pts">+'+miles(m.pts)+' pts</div>';
+  if(!m.on){
+    if(m.faltan != null) pie += '<div class="badge-eta">'+textoEspera(m.faltan)+'</div>';
+    else if(m.meta != null) pie += '<div class="badge-eta">Al alcanzar '+usd0(m.meta)+'</div>';
+  }
+  return '<button class="'+cls+'" data-ms="'+m.id+'">'+
+    '<div class="badge-ico">'+(m.on ? m.ico : '🔒')+'</div>'+
+    '<div class="badge-n">'+m.n+'</div>'+
+    '<div class="badge-s">'+m.s+'</div>'+ pie +
+  '</button>';
+}
+
+function abrirMilestone(m){
+  const ico = $('#msIco');
+  ico.textContent = m.on ? m.ico : '🔒';
+  ico.className = 'ms-ico' + (m.on && m.legacy ? ' legacy-ico' : '') + (m.on ? '' : ' pend');
+  $('#msTag').textContent = m.on ? 'Milestone desbloqueado' : 'Aún por desbloquear';
+  $('#msName').textContent = m.n;
+  $('#msDesc').textContent = m.s;
+
+  const pts = $('#msPts');
+  if(m.pts > 0){ pts.style.display = 'inline-block'; pts.textContent = '+' + miles(m.pts) + ' Partner Points'; }
+  else pts.style.display = 'none';
+
+  let pie;
+  if(m.on) pie = m.f ? 'Desbloqueado el ' + fechaCorta(m.f) : 'Desbloqueado';
+  else if(m.faltan != null) pie = textoEspera(m.faltan) + ' · ' + fechaCorta(m.f);
+  else if(m.meta != null) pie = 'Se registra al alcanzar ' + usd0(m.meta);
+  else pie = 'Pendiente';
+  $('#msDate').textContent = pie;
+  abrir('#mMs');
+}
+
 function pintarPuntos(){
-  $('#earn').innerHTML = D.reglas.map(p =>
-    '<div class="earn-row'+(p.got?' got':'')+'">'+
+  const conPuntos = D.ms.filter(m => m.pts > 0)
+    .sort((a,b) => (a.on === b.on) ? a.pts - b.pts : (a.on ? -1 : 1));
+  $('#earn').innerHTML = conPuntos.map(m =>
+    '<div class="earn-row'+(m.on?' got':'')+'">'+
       '<span class="earn-chk">✓</span>'+
-      '<span class="earn-t">'+p.t+'</span>'+
-      '<span class="earn-p">+'+miles(p.p)+'</span>'+
+      '<span class="earn-t">'+m.s+(!m.on && m.faltan != null ? ' <span style="color:var(--faint);font-size:11.5px;">· '+textoEspera(m.faltan)+'</span>' : '')+'</span>'+
+      '<span class="earn-p">+'+miles(m.pts)+'</span>'+
     '</div>').join('');
 }
 
@@ -1647,7 +1933,29 @@ function pintarIdentidad(){
   $('#pfTier').textContent = TITULO[cur.n];
   $('#pfLvl').textContent = pad2(cur.n) + ' · ' + cur.k;
   $('#pfPts').textContent = miles(D.puntos);
-  $('#pfMs').textContent = construirMilestones(D).filter(m => m.on).length + ' / 9';
+  $('#pfMs').textContent = D.ms.filter(m => m.on).length + ' / ' + D.ms.length;
+
+  // Mi progreso
+  const {cur:lv, sig, falta} = nivelDe(D.puntos);
+  $('#pfXp').textContent = miles(D.puntos) + ' XP';
+  $('#pfLvlName').textContent = 'Level ' + pad2(lv.n) + ' — ' + lv.k.toUpperCase();
+  const dentro = sig ? Math.max(0, Math.min(100, (D.puntos - lv.min)/(sig.min - lv.min)*100)) : 100;
+  $('#pfBar').style.width = '0%';
+  setTimeout(() => { $('#pfBar').style.width = dentro + '%'; }, 120);
+  $('#pfGap').innerHTML = sig
+    ? '<b>'+miles(falta)+' puntos</b> para Level '+pad2(sig.n)+' — '+sig.k.toUpperCase()
+    : 'Has alcanzado el nivel más alto.';
+
+  const prox = D.ms.filter(m => !m.on && m.pts > 0)
+    .sort((a,b) => (a.faltan ?? 9e9) - (b.faltan ?? 9e9)).slice(0,4);
+  $('#pfNext').innerHTML = prox.length ? prox.map(m =>
+    '<div class="nx">'+
+      '<div class="nx-ico">🔒</div>'+
+      '<div class="nx-b"><div class="nx-n">'+m.n+'</div>'+
+      '<div class="nx-e">'+(m.faltan != null ? textoEspera(m.faltan) : 'Pendiente')+'</div></div>'+
+      '<div class="nx-p">+'+miles(m.pts)+'</div>'+
+    '</div>').join('')
+    : '<div class="nx"><div class="nx-b"><div class="nx-n">Has desbloqueado todos.</div></div></div>';
   $('#pfDias').textContent = miles(D.dias) + ' días';
   if(D.inicio){
     $('#pfSince').textContent = 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear();
@@ -1766,37 +2074,187 @@ $('#goalSave').addEventListener('click', () => {
   D.objetivoPropio = true;
   D.faltan = +(v - D.capital).toFixed(2);
   D.progreso = Math.min(100, D.capital/v*100);
-  D.reglas = reglasPuntos(D.dias, true);
-  D.puntos = D.reglas.filter(r => r.got).reduce((a,r) => a+r.p, 0);
+  recalcular(D);
   pintarObjetivo(); pintarJourney(); pintarMilestones(); pintarPuntos(); pintarMeridiano();
   contar($('#ptsTop'), D.puntos, miles); contar($('#ptsBig'), D.puntos, miles);
   cerrar($('#mGoal'));
   aviso(D.puntos > antesPuntos ? 'Objetivo guardado · +100 puntos' : 'Objetivo actualizado a ' + usd0(v));
 });
 
+/* ── SOLICITUDES DE DEPÓSITO Y RETIRO ────── */
+function refSolicitud(){
+  const d = new Date();
+  return 'RC-' + String(d.getFullYear()).slice(2) + pad2(d.getMonth()+1) + pad2(d.getDate())
+       + '-' + Math.random().toString(36).slice(2,6).toUpperCase();
+}
+
+function cuerpoSolicitud(tipo, monto, extra, ref){
+  const L = [];
+  L.push((tipo === 'retiro' ? 'SOLICITUD DE RETIRO' : 'SOLICITUD DE DEPÓSITO'));
+  L.push('');
+  L.push('Referencia:      ' + ref);
+  L.push('Inversor:        ' + D.nombre);
+  L.push('Correo:          ' + (cliente ? cliente.email : '—'));
+  L.push('Monto:           ' + usd(monto));
+  if(extra) L.push('Método:          ' + extra);
+  L.push('');
+  L.push('— Situación actual —');
+  L.push('Capital actual:  ' + usd(D.capital));
+  L.push('Capital inicial: ' + usd(D.capitalInicial));
+  L.push('Rendimiento:     ' + (D.rendimiento >= 0 ? '+' : '−') + Math.abs(D.rendimiento).toFixed(2) + '%');
+  if(tipo === 'retiro'){
+    L.push('Queda en gestión:' + usd(Math.max(0, D.capital - monto)));
+  } else {
+    L.push('Capital estimado:' + usd(D.capital + monto));
+  }
+  L.push('');
+  L.push('Enviado el ' + new Date().toLocaleString('es-MX'));
+  return L.join('\n');
+}
+
+async function enviarSolicitud(tipo, monto, extra){
+  const ref = refSolicitud();
+  const asunto = (tipo === 'retiro' ? 'Retiro' : 'Depósito') + ' · ' + D.nombre + ' · ' + usd(monto);
+  const cuerpo = cuerpoSolicitud(tipo, monto, extra, ref);
+  let enviado = false;
+
+  // 1) Correo automático
+  if(W3F_KEY){
+    try{
+      const r = await fetch('https://api.web3forms.com/submit', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', Accept:'application/json'},
+        body: JSON.stringify({
+          access_key: W3F_KEY,
+          subject: asunto,
+          from_name: 'RC Capital · Journey',
+          replyto: cliente ? cliente.email : undefined,
+          Referencia: ref,
+          Tipo: tipo === 'retiro' ? 'Retiro' : 'Depósito',
+          Inversor: D.nombre,
+          Correo: cliente ? cliente.email : '',
+          Monto: usd(monto),
+          Metodo: extra || '—',
+          Capital_actual: usd(D.capital),
+          Detalle: cuerpo
+        })
+      });
+      const j = await r.json();
+      enviado = !!j.success;
+    }catch(e){ enviado = false; }
+  }
+
+  // 2) Registro en Supabase (si existe la tabla)
+  try{
+    await db.from('solicitudes').insert({
+      cliente_id: D.id,
+      nombre: D.nombre,
+      email: cliente ? cliente.email : null,
+      tipo: tipo,
+      monto: monto,
+      metodo: extra || null,
+      referencia: ref,
+      capital_actual: D.capital,
+      estado: 'pendiente'
+    });
+  }catch(e){ /* la tabla es opcional */ }
+
+  // 3) Respaldo: abrir el correo del inversor
+  if(!enviado){
+    const url = 'mailto:' + AVISO_EMAIL
+      + '?subject=' + encodeURIComponent(asunto)
+      + '&body=' + encodeURIComponent(cuerpo);
+    window.location.href = url;
+  }
+  return {ref, enviado};
+}
+
+function mostrarOk(tipo, monto, ref, enviado){
+  $('#okIco').textContent = tipo === 'retiro' ? '💰' : '📥';
+  $('#okIco').className = 'ms-ico ok-ico-ok';
+  $('#okTag').textContent = 'Solicitud enviada';
+  $('#okName').textContent = (tipo === 'retiro' ? 'Retiro de ' : 'Depósito de ') + usd(monto);
+  $('#okDesc').textContent = enviado
+    ? 'Ya la recibimos. Te contactamos para coordinar los detalles.'
+    : 'Se abrió tu correo con la solicitud lista. Envíala y te contactamos.';
+  $('#okRef').textContent = 'Referencia ' + ref;
+  abrir('#mOk');
+}
+
+/* depósito */
+function recapDep(){
+  const sel = $('#depOpts .opt.on');
+  if(!sel){ $('#depRecap').style.display = 'none'; return; }
+  const v = sel.dataset.v === 'custom' ? parseFloat($('#depInput').value) : +sel.dataset.v;
+  if(!v || v <= 0){ $('#depRecap').style.display = 'none'; return; }
+  $('#depR1').textContent = usd(v);
+  $('#depR2').textContent = usd(D.capital + v);
+  $('#depRecap').style.display = 'block';
+}
 $('#depBtn').addEventListener('click', () => {
   $$('#depOpts .opt').forEach(o => o.classList.remove('on'));
   $('#depCustom').style.display = 'none';
+  $('#depRecap').style.display = 'none';
+  $('#depInput').value = '';
   abrir('#mDep');
 });
-$('#depGo').addEventListener('click', () => {
+$$('#depOpts .opt').forEach(o => o.addEventListener('click', recapDep));
+$('#depInput').addEventListener('input', recapDep);
+
+$('#depGo').addEventListener('click', async () => {
   const sel = $('#depOpts .opt.on');
   if(!sel){ aviso('Elige un monto'); return; }
   const v = sel.dataset.v === 'custom' ? parseFloat($('#depInput').value) : +sel.dataset.v;
   if(!v || v < 500){ aviso('El depósito mínimo es $500'); return; }
+  const b = $('#depGo');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  const {ref, enviado} = await enviarSolicitud('deposito', v, null);
+  b.disabled = false; b.textContent = 'Enviar solicitud';
   cerrar($('#mDep'));
-  aviso('Solicitud de depósito por ' + usd0(v) + ' registrada');
+  mostrarOk('deposito', v, ref, enviado);
 });
 
-$('#wdBtn').addEventListener('click', () => { $('#wdInput').value = ''; abrir('#mWd'); });
-$('#wdGo').addEventListener('click', () => {
+/* retiro */
+function recapWd(){
+  const v = parseFloat($('#wdInput').value);
+  if(!v || v <= 0){ $('#wdRecap').style.display = 'none'; return; }
+  $('#wdR1').textContent = usd(v);
+  $('#wdR2').textContent = usd(Math.max(0, D.capital - v));
+  $('#wdRecap').style.display = 'block';
+}
+$('#wdBtn').addEventListener('click', () => {
+  $('#wdInput').value = '';
+  $('#wdRecap').style.display = 'none';
+  $$('#wdOpts .opt').forEach(o => o.classList.remove('on'));
+  $('#wdAvail').textContent = usd(D.capital);
+  abrir('#mWd');
+});
+$$('#wdOpts .opt').forEach(o => o.addEventListener('click', () => {
+  $$('#wdOpts .opt').forEach(x => x.classList.remove('on'));
+  o.classList.add('on');
+  const q = o.dataset.q;
+  if(q === 'custom'){ $('#wdInput').value = ''; $('#wdInput').focus(); }
+  else $('#wdInput').value = (D.capital * (+q/100)).toFixed(2);
+  recapWd();
+}));
+$('#wdInput').addEventListener('input', () => {
+  $$('#wdOpts .opt').forEach(x => x.classList.remove('on'));
+  recapWd();
+});
+
+$('#wdGo').addEventListener('click', async () => {
   const v = parseFloat($('#wdInput').value);
   if(!v || v <= 0){ aviso('Escribe el monto a retirar'); return; }
   if(v > D.capital){ aviso('Supera tu capital disponible'); return; }
+  const b = $('#wdGo');
+  b.disabled = true; b.innerHTML = '<span class="spin"></span>';
+  const {ref, enviado} = await enviarSolicitud('retiro', v, $('#wdMethod').value);
+  b.disabled = false; b.textContent = 'Enviar solicitud';
   cerrar($('#mWd'));
-  aviso('Retiro de ' + usd(v) + ' solicitado');
+  mostrarOk('retiro', v, ref, enviado);
 });
 
+$('#msGo').addEventListener('click', () => cerrar($('#mMs')));
 $$('[data-sw]').forEach(s => s.addEventListener('click', () => s.classList.toggle('on')));
 
 /* ═══════════════════════════════════════════
