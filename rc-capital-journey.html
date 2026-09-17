@@ -51,8 +51,11 @@
   --gut:20px;
 }
 
+
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;}
+
 body{
   font-family:var(--body);
   background:
@@ -66,14 +69,21 @@ body{
   -webkit-font-smoothing:antialiased;
   padding-bottom:96px;
 }
+
 button{font-family:inherit;color:inherit;}
+
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px;}
 
+
 .num{font-family:var(--mono);font-variant-numeric:tabular-nums;}
+
 .pos{color:var(--green);}
+
 .neg{color:var(--red);}
 
+
 .shell{max-width:760px;margin:0 auto;padding:0 var(--gut);}
+
 
 /* ── HEADER ─────────────────────────────────── */
 .hdr{
@@ -83,33 +93,44 @@ button{font-family:inherit;color:inherit;}
   -webkit-backdrop-filter:saturate(1.6) blur(14px);
   border-bottom:1px solid var(--line);
 }
+
 .hdr-in{
   max-width:760px;margin:0 auto;padding:0 var(--gut);
   height:62px;display:flex;align-items:center;gap:12px;
 }
+
 .mark{display:flex;align-items:center;gap:10px;min-width:0;}
+
 .mark-badge{
   width:34px;height:34px;border-radius:10px;flex-shrink:0;
   background:linear-gradient(150deg,#1D4B7C,#102A47);
   display:grid;place-items:center;
   box-shadow:0 3px 10px rgba(16,42,71,.26);
 }
+
 .mark-badge span{
   font-family:var(--display);font-weight:700;font-size:13px;
   color:#fff;letter-spacing:-.4px;
 }
+
 .mark-name{font-family:var(--display);font-size:15px;font-weight:700;letter-spacing:-.25px;line-height:1.15;}
+
 .mark-sub{font-size:10px;color:var(--muted);letter-spacing:.34px;text-transform:uppercase;font-weight:500;}
 
+
 .who{margin-left:auto;position:relative;flex-shrink:0;}
+
 .who-btn{
   display:flex;align-items:center;gap:9px;
   background:none;border:1px solid transparent;
   padding:5px 6px 5px 10px;border-radius:999px;cursor:pointer;
   transition:background .15s,border-color .15s;
 }
+
 .who-btn:hover{background:var(--panel2);border-color:var(--line);}
+
 .who-name{font-size:13px;font-weight:500;}
+
 .avatar{
   width:34px;height:34px;border-radius:50%;flex-shrink:0;
   background:linear-gradient(150deg,#2C74B4,#1D5488);
@@ -117,6 +138,7 @@ button{font-family:inherit;color:inherit;}
   font-family:var(--display);font-size:12.5px;font-weight:700;letter-spacing:.3px;
   box-shadow:0 2px 8px rgba(35,99,158,.32);
 }
+
 .menu{
   position:absolute;top:calc(100% + 10px);right:0;width:232px;
   background:var(--panel);border:1px solid var(--line);border-radius:var(--r-l);
@@ -124,94 +146,67 @@ button{font-family:inherit;color:inherit;}
   opacity:0;visibility:hidden;transform:translateY(-6px) scale(.97);
   transform-origin:top right;transition:all .18s cubic-bezier(.16,1,.3,1);
 }
+
 .menu.on{opacity:1;visibility:visible;transform:none;}
+
 .menu-head{padding:10px 12px 9px;border-bottom:1px solid var(--line-soft);margin-bottom:5px;}
+
 .menu-head b{display:block;font-family:var(--display);font-size:14px;font-weight:600;}
+
 .menu-head span{font-size:11.5px;color:var(--muted);}
+
 .menu-item{
   display:flex;align-items:center;gap:10px;width:100%;
   padding:9px 12px;border:none;background:none;border-radius:var(--r-s);
   font-size:13.5px;text-align:left;cursor:pointer;transition:background .12s;
 }
+
 .menu-item:hover{background:var(--panel2);}
+
 .menu-item i{font-style:normal;font-size:14px;width:18px;text-align:center;opacity:.85;}
+
 .menu-sep{height:1px;background:var(--line-soft);margin:5px 8px;}
+
 .menu-item.leave{color:var(--red);}
+
 .menu-item.leave:hover{background:var(--red-tint);}
+
 
 /* ── HERO ───────────────────────────────────── */
 .hero{padding:34px 0 8px;}
+
 .hello{font-size:14px;color:var(--muted);margin-bottom:24px;}
+
 .hello b{color:var(--ink);font-weight:600;}
+
 .cap-label{
   font-family:var(--mono);font-size:10px;font-weight:500;
   letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);
   margin-bottom:9px;
 }
+
 .cap-figure{
   font-family:var(--display);font-weight:700;
   font-size:clamp(52px,15vw,74px);letter-spacing:-3.4px;line-height:.94;
   font-variant-numeric:tabular-nums;
 }
+
 .cap-delta{display:flex;align-items:baseline;gap:11px;margin-top:14px;flex-wrap:wrap;}
+
 .cap-delta .amt{font-family:var(--mono);font-size:19px;font-weight:600;}
+
 .cap-delta .pct{
   font-family:var(--mono);font-size:13px;font-weight:600;
   padding:3px 10px;border-radius:999px;
   background:var(--green-tint);color:var(--green);
 }
+
 .cap-note{font-size:12.5px;color:var(--muted);margin-top:9px;}
+
 
 /* ── SIGNATURE · MERIDIANO ──────────────────── */
 .meridian{margin:34px 0 6px;}
-.mer-top{
-  display:flex;justify-content:space-between;align-items:baseline;
-  margin-bottom:20px;gap:12px;
-}
-.mer-tier{display:flex;align-items:center;gap:8px;}
-.mer-tier-dot{width:7px;height:7px;border-radius:50%;background:var(--brass);flex-shrink:0;}
-.mer-tier b{font-family:var(--display);font-size:14px;font-weight:600;letter-spacing:-.15px;}
-.mer-tier span{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:1.1px;text-transform:uppercase;}
-.mer-points{text-align:right;}
-.mer-points b{font-family:var(--mono);font-size:14px;font-weight:600;color:var(--brass);}
-.mer-points span{display:block;font-size:11px;color:var(--muted);margin-top:1px;}
 
-.rail{position:relative;height:44px;}
-.rail-track{
-  position:absolute;left:0;right:0;top:7px;height:2px;
-  background:var(--line);border-radius:2px;
-}
-.rail-fill{
-  position:absolute;left:0;top:7px;height:2px;width:0;
-  background:linear-gradient(90deg,var(--blue-deep),var(--blue));
-  border-radius:2px;transition:width 1.1s cubic-bezier(.16,1,.3,1);
-}
-.station{
-  position:absolute;top:0;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:9px;
-}
-.station-dot{
-  width:16px;height:16px;border-radius:50%;
-  background:var(--panel);border:2px solid var(--line);
-  transition:all .4s ease;
-}
-.station.done .station-dot{background:var(--blue);border-color:var(--blue);}
-.station.here .station-dot{
-  background:var(--blue);border-color:var(--blue);
-  box-shadow:0 0 0 5px rgba(35,99,158,.16);
-}
-.station-txt{
-  font-family:var(--mono);font-size:9.5px;letter-spacing:.7px;
-  text-transform:uppercase;color:var(--faint);white-space:nowrap;
-  transition:color .3s;
-}
-.station.done .station-txt,.station.here .station-txt{color:var(--muted);}
-.station.here .station-txt{color:var(--blue);font-weight:600;}
-.mer-gap{
-  font-size:12px;color:var(--muted);margin-top:16px;
-  padding-top:15px;border-top:1px solid var(--line-soft);
-}
-.mer-gap b{font-family:var(--mono);color:var(--brass);font-weight:600;}
 
 /* ── CARDS / SECTIONS ───────────────────────── */
 .card{
@@ -219,35 +214,53 @@ button{font-family:inherit;color:inherit;}
   border-radius:var(--r-l);box-shadow:var(--sh-2);
   padding:22px;margin-bottom:12px;
 }
+
 .sec{margin-top:38px;}
+
 .sec-head{
   display:flex;align-items:center;justify-content:space-between;
   gap:12px;margin-bottom:15px;flex-wrap:wrap;
 }
+
 .sec-title{
   font-family:var(--display);font-size:17px;font-weight:600;
   letter-spacing:-.3px;display:flex;align-items:center;gap:9px;
 }
+
 .sec-title i{font-style:normal;font-size:15px;}
+
 .sec-note{font-size:12px;color:var(--muted);}
+
 
 /* ── OBJETIVO ───────────────────────────────── */
 .goal-row{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:16px;}
+
 .goal-now .k{font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+
 .goal-now .v{font-family:var(--display);font-size:26px;font-weight:700;letter-spacing:-.9px;font-variant-numeric:tabular-nums;}
+
 .goal-tgt{text-align:right;}
+
 .goal-tgt .k{font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--blue);margin-bottom:5px;}
+
 .goal-tgt .v{font-family:var(--display);font-size:20px;font-weight:600;letter-spacing:-.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
 .bar{height:9px;background:var(--panel2);border-radius:999px;overflow:hidden;border:1px solid var(--line-soft);}
+
 .bar-fill{
   height:100%;width:0;border-radius:999px;
   background:linear-gradient(90deg,var(--blue-deep),var(--blue));
   transition:width 1.2s cubic-bezier(.16,1,.3,1);
 }
+
 .goal-foot{display:flex;justify-content:space-between;align-items:center;margin-top:13px;gap:12px;flex-wrap:wrap;}
+
 .goal-left{font-size:13px;color:var(--muted);}
+
 .goal-left b{font-family:var(--mono);color:var(--ink);font-weight:600;}
+
 .goal-pct{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--blue);}
+
 
 /* ── BOTONES ────────────────────────────────── */
 .btn{
@@ -256,23 +269,35 @@ button{font-family:inherit;color:inherit;}
   font-size:13.5px;font-weight:500;cursor:pointer;
   box-shadow:var(--sh-1);transition:all .14s;
 }
+
 .btn:hover{background:var(--panel2);}
+
 .btn-fill{background:var(--btn);border:none;color:#fff;box-shadow:var(--btn-sh);}
+
 .btn-fill:hover{background:var(--btn-hi);}
+
 .btn-sm{padding:6px 13px;font-size:12.5px;}
+
 .btn-wide{width:100%;padding:13px;font-size:15px;font-weight:600;}
+
 
 /* ── GRÁFICO ────────────────────────────────── */
 .ranges{display:flex;gap:2px;background:var(--panel2);padding:3px;border-radius:var(--r-s);border:1px solid var(--line-soft);}
+
 .range{
   border:none;background:none;padding:5px 11px;border-radius:6px;
   font-family:var(--mono);font-size:11px;font-weight:500;
   color:var(--muted);cursor:pointer;transition:all .13s;
 }
+
 .range:hover{color:var(--ink);}
+
 .range.on{background:var(--panel);color:var(--blue);font-weight:600;box-shadow:var(--sh-1);}
+
 .chart-wrap{position:relative;}
+
 #spark{display:block;width:100%;height:230px;touch-action:pan-y;}
+
 .tip{
   position:absolute;z-index:20;pointer-events:none;
   background:var(--panel);border:1px solid var(--line);
@@ -280,75 +305,46 @@ button{font-family:inherit;color:inherit;}
   padding:11px 14px;min-width:152px;
   opacity:0;transition:opacity .12s;
 }
+
 .tip.on{opacity:1;}
+
 .tip-d{font-family:var(--mono);font-size:9.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+
 .tip-k{font-size:10.5px;color:var(--muted);}
+
 .tip-v{font-family:var(--mono);font-size:16px;font-weight:600;line-height:1.35;}
+
 .tip-r{font-family:var(--mono);font-size:12px;font-weight:600;margin-top:3px;}
+
 
 /* ── GRID DE MÉTRICAS ───────────────────────── */
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+
 .stat{
   background:var(--panel);border:1px solid var(--line);
   border-radius:var(--r-m);padding:15px;box-shadow:var(--sh-1);
 }
+
 .stat .k{font-family:var(--mono);font-size:9px;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;line-height:1.3;}
+
 .stat .v{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.5px;font-variant-numeric:tabular-nums;}
+
 .stat .s{font-size:11px;color:var(--muted);margin-top:3px;}
+
 .stat-wide{grid-column:span 4;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+
 .stat-wide .k{margin-bottom:0;}
+
 .stat-wide .v{font-size:22px;}
+
 
 /* ── JOURNEY (riel vertical) ────────────────── */
 .trail{position:relative;padding-left:30px;}
-.trail::before{
-  content:'';position:absolute;left:7px;top:6px;bottom:26px;
-  width:2px;background:var(--line);border-radius:2px;
-}
-.stop{position:relative;padding-bottom:26px;}
-.stop::before{
-  content:'';position:absolute;left:-30px;top:4px;
-  width:16px;height:16px;border-radius:50%;
-  background:var(--panel);border:2px solid var(--blue);
-  box-shadow:0 0 0 4px var(--bg);
-}
-.stop.now::before{background:var(--blue);box-shadow:0 0 0 4px var(--bg),0 0 0 8px rgba(35,99,158,.15);}
-.stop.next::before{border-color:var(--line);border-style:dashed;}
-.stop:last-child{padding-bottom:0;}
-.stop-d{font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
-.stop.next .stop-d{color:var(--brass);}
-.stop-t{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;margin-bottom:3px;}
-.stop-t i{font-style:normal;font-size:14px;}
-.stop-v{font-size:13px;color:var(--muted);}
-.stop-v b{font-family:var(--mono);color:var(--ink);font-weight:600;}
+
 
 /* ── MILESTONES ─────────────────────────────── */
 .badges{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.badge{
-  background:var(--panel);border:1px solid var(--line);
-  border-radius:var(--r-m);padding:16px 11px;text-align:center;
-  cursor:pointer;box-shadow:var(--sh-1);
-  transition:transform .16s,box-shadow .16s,border-color .16s;
-}
-.badge:hover{transform:translateY(-2px);box-shadow:var(--sh-2);border-color:#BFCEDD;}
-.badge-ico{
-  width:42px;height:42px;margin:0 auto 10px;border-radius:12px;
-  display:grid;place-items:center;font-size:19px;
-  background:var(--brass-tint);border:1px solid rgba(168,121,44,.2);
-}
-.badge-n{font-size:12.5px;font-weight:600;line-height:1.25;margin-bottom:3px;}
-.badge-s{font-size:10.5px;color:var(--muted);line-height:1.3;}
-.badge.locked{background:var(--panel2);border-color:var(--line-soft);cursor:default;box-shadow:none;}
-.badge.locked:hover{transform:none;box-shadow:none;border-color:var(--line-soft);}
-.badge.locked .badge-ico{background:#E9EEF3;border-color:transparent;filter:grayscale(1);opacity:.5;}
-.badge.locked .badge-n{color:var(--faint);}
-.badge.locked .badge-s{color:#AAB6C2;}
-.badge-tally{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-top:13px;padding-top:13px;border-top:1px solid var(--line-soft);
-  font-size:12px;color:var(--muted);
-}
-.badge-tally b{font-family:var(--mono);color:var(--ink);}
+
 
 /* ── PUNTOS ─────────────────────────────────── */
 .pts-hero{
@@ -357,79 +353,54 @@ button{font-family:inherit;color:inherit;}
   border-radius:var(--r-l);padding:20px 22px;margin-bottom:12px;
   display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
 }
-.pts-n{font-family:var(--display);font-size:32px;font-weight:700;letter-spacing:-1.2px;color:var(--brass);font-variant-numeric:tabular-nums;}
-.pts-l{font-family:var(--mono);font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:#8A6524;margin-top:2px;}
-.pts-next{text-align:right;font-size:12.5px;color:#7A5A20;}
-.pts-next b{font-family:var(--mono);font-weight:600;}
-.earn{display:flex;flex-direction:column;}
-.earn-row{
-  display:flex;align-items:center;gap:12px;
-  padding:11px 0;border-bottom:1px solid var(--line-soft);
-}
-.earn-row:last-child{border-bottom:none;}
-.earn-chk{
-  width:19px;height:19px;border-radius:50%;flex-shrink:0;
-  display:grid;place-items:center;font-size:10px;
-  background:var(--panel2);border:1px solid var(--line);color:transparent;
-}
-.earn-row.got .earn-chk{background:var(--green);border-color:var(--green);color:#fff;}
-.earn-t{flex:1;font-size:13.5px;}
-.earn-row.got .earn-t{color:var(--muted);}
-.earn-p{font-family:var(--mono);font-size:12.5px;font-weight:600;color:var(--brass);}
-.earn-note{
-  margin-top:14px;padding:12px 14px;background:var(--panel2);
-  border-radius:var(--r-s);font-size:12px;color:var(--muted);line-height:1.55;
-}
+
 
 /* ── REWARDS ────────────────────────────────── */
 .rw-intro{font-size:13.5px;color:var(--muted);margin-bottom:14px;line-height:1.55;}
-.rewards{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.reward{
-  background:var(--panel2);border:1px dashed var(--line);
-  border-radius:var(--r-m);padding:17px 12px;text-align:center;
-}
-.rw-lock{font-size:17px;opacity:.4;margin-bottom:8px;}
-.rw-n{font-size:12.5px;font-weight:600;color:var(--muted);line-height:1.3;margin-bottom:5px;}
-.rw-p{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--brass);}
+
 
 /* ── RETIROS ────────────────────────────────── */
 .wd-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:16px;}
-.wd-k{font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.wd-v{font-family:var(--display);font-size:25px;font-weight:700;letter-spacing:-.9px;font-variant-numeric:tabular-nums;}
-.wd-empty{
-  padding:22px;background:var(--panel2);border-radius:var(--r-m);
-  text-align:center;font-size:13.5px;color:var(--muted);
-}
-.wd-item{
-  display:flex;justify-content:space-between;align-items:center;gap:14px;
-  padding:13px 0;border-bottom:1px solid var(--line-soft);
-}
-.wd-item:last-child{border-bottom:none;}
+
 .ledger{
   margin-top:16px;padding-top:16px;border-top:1px solid var(--line-soft);
 }
+
 .ledger-row{display:flex;justify-content:space-between;gap:14px;padding:7px 0;font-size:13px;}
+
 .ledger-row span{color:var(--muted);}
+
 .ledger-row b{font-family:var(--mono);font-weight:600;}
+
 .ledger-row.total{
   margin-top:7px;padding-top:12px;border-top:1px solid var(--line);
   font-size:13.5px;
 }
+
 .ledger-row.total span{color:var(--ink);font-weight:600;}
+
 
 /* ── ACTIVIDAD ──────────────────────────────── */
 .feed-row{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line-soft);}
+
 .feed-row:last-child{border-bottom:none;}
+
 .feed-ico{
   width:34px;height:34px;border-radius:10px;flex-shrink:0;
   display:grid;place-items:center;font-size:14px;
   background:var(--blue-tint);
 }
+
 .feed-ico.b{background:var(--brass-tint);}
+
 .feed-b{flex:1;min-width:0;}
+
 .feed-t{font-size:13.5px;font-weight:500;}
+
 .feed-d{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.4px;}
+
 .feed-v{font-family:var(--mono);font-size:13.5px;font-weight:600;flex-shrink:0;}
+
 
 /* ── BARRA DE ACCIÓN ────────────────────────── */
 .dock{
@@ -442,8 +413,11 @@ button{font-family:inherit;color:inherit;}
   padding-bottom:max(12px,env(safe-area-inset-bottom));
   box-shadow:0 -2px 16px rgba(20,22,27,.06);
 }
+
 .dock-in{max-width:760px;margin:0 auto;display:flex;gap:10px;}
+
 .dock .btn{flex:1;padding:13px;font-size:14.5px;font-weight:600;}
+
 
 /* ── MODALES ────────────────────────────────── */
 .veil{
@@ -453,7 +427,9 @@ button{font-family:inherit;color:inherit;}
   display:flex;align-items:center;justify-content:center;padding:20px;
   opacity:0;visibility:hidden;transition:opacity .2s;
 }
+
 .veil.on{opacity:1;visibility:visible;}
+
 .sheet{
   background:var(--panel);border-radius:var(--r-xl);
   box-shadow:var(--sh-4);width:100%;max-width:400px;
@@ -461,32 +437,49 @@ button{font-family:inherit;color:inherit;}
   transform:translateY(14px) scale(.97);
   transition:transform .24s cubic-bezier(.16,1,.3,1);
 }
+
 .veil.on .sheet{transform:none;}
+
 .sheet-hd{padding:22px 24px 0;}
+
 .sheet-hd h3{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.4px;}
+
 .sheet-hd p{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.5;}
+
 .sheet-bd{padding:20px 24px 24px;}
+
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px;}
+
 .opt{
   padding:15px 12px;border:1px solid var(--line);border-radius:var(--r-m);
   background:var(--panel);cursor:pointer;text-align:center;
   font-family:var(--mono);font-size:15px;font-weight:600;
   transition:all .14s;
 }
+
 .opt:hover{border-color:#A8C2DA;background:var(--blue-tint);}
+
 .opt.on{border-color:var(--blue);background:var(--blue-tint);color:var(--blue);box-shadow:0 0 0 3px rgba(35,99,158,.11);}
+
 .opt.wide{grid-column:span 2;font-family:var(--body);font-size:13.5px;font-weight:500;}
+
 .fld{margin-bottom:14px;}
+
 .fld label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:1.1px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+
 .fld input,.fld select{
   width:100%;padding:12px 14px;border:1px solid var(--line);
   border-radius:var(--r-s);background:var(--bg);
   font-family:var(--mono);font-size:15px;color:var(--ink);outline:none;
   transition:border-color .14s,box-shadow .14s;
 }
+
 .fld select{font-family:var(--body);}
+
 .fld input:focus,.fld select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(35,99,158,.12);}
+
 .hint{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.5;}
+
 .sheet-x{
   position:absolute;top:16px;right:16px;
   width:30px;height:30px;border-radius:50%;
@@ -494,42 +487,52 @@ button{font-family:inherit;color:inherit;}
   cursor:pointer;font-size:15px;color:var(--muted);
   display:grid;place-items:center;
 }
+
 .sheet-pos{position:relative;}
+
 
 /* modal de milestone */
 .ms-sheet{text-align:center;padding:30px 26px 26px;}
+
 .ms-ico{
   width:78px;height:78px;margin:0 auto 18px;border-radius:24px;
   display:grid;place-items:center;font-size:34px;
   background:var(--brass-tint);border:1px solid rgba(168,121,44,.24);
   animation:rise .5s cubic-bezier(.16,1,.3,1);
 }
-@keyframes rise{
+
   from{transform:scale(.86);opacity:0;}
+
   to{transform:scale(1);opacity:1;}
-}
+
 .ms-ico::after{
   content:'';position:absolute;width:78px;height:78px;border-radius:24px;
   border:2px solid var(--brass);opacity:0;
   animation:halo 1.5s cubic-bezier(.16,1,.3,1) .18s;
 }
-@keyframes halo{
+
   0%{transform:scale(1);opacity:.55;}
+
   100%{transform:scale(1.5);opacity:0;}
-}
+
 .ms-tag{
   font-family:var(--mono);font-size:10px;letter-spacing:1.6px;
   text-transform:uppercase;color:var(--brass);margin-bottom:9px;
 }
+
 .ms-n{font-family:var(--display);font-size:21px;font-weight:600;letter-spacing:-.4px;margin-bottom:7px;}
+
 .ms-s{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:15px;}
+
 .ms-d{
   font-family:var(--mono);font-size:11.5px;color:var(--muted);
   padding-top:15px;border-top:1px solid var(--line-soft);
 }
 
+
 /* perfil */
 .pf-top{display:flex;align-items:center;gap:15px;margin-bottom:20px;}
+
 .pf-av{
   width:58px;height:58px;border-radius:50%;flex-shrink:0;
   background:linear-gradient(150deg,#2C74B4,#1D5488);
@@ -537,70 +540,62 @@ button{font-family:inherit;color:inherit;}
   font-family:var(--display);font-size:19px;font-weight:700;
   box-shadow:0 3px 12px rgba(35,99,158,.3);
 }
+
 .pf-n{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:-.35px;}
+
 .pf-tier{display:flex;align-items:center;gap:6px;margin-top:4px;}
+
 .pf-tier span{font-size:12.5px;color:var(--brass);font-weight:500;}
+
 .pf-since{font-size:12px;color:var(--muted);margin-top:2px;}
+
 .pf-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+
 .pf-cell{background:var(--panel2);border-radius:var(--r-m);padding:14px;}
+
 .pf-cell .k{font-family:var(--mono);font-size:9px;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+
 .pf-cell .v{font-family:var(--display);font-size:17px;font-weight:600;letter-spacing:-.4px;font-variant-numeric:tabular-nums;}
+
 
 /* ajustes */
 .set-row{
   display:flex;justify-content:space-between;align-items:center;gap:14px;
   padding:14px 0;border-bottom:1px solid var(--line-soft);
 }
+
 .set-row:last-child{border-bottom:none;}
+
 .set-t{font-size:14px;font-weight:500;}
+
 .set-s{font-size:12px;color:var(--muted);margin-top:2px;}
+
 .sw{
   width:44px;height:26px;border-radius:999px;flex-shrink:0;
   background:var(--line);border:none;cursor:pointer;padding:3px;
   display:flex;align-items:center;transition:background .2s;
 }
+
 .sw.on{background:var(--blue);}
+
 .sw i{
   display:block;width:20px;height:20px;border-radius:50%;background:#fff;
   box-shadow:0 1px 3px rgba(0,0,0,.2);transition:transform .2s;
 }
+
 .sw.on i{transform:translateX(18px);}
+
 
 /* categorías de milestones */
 .cat-tabs{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;-webkit-overflow-scrolling:touch;}
-.cat-tab{
-  flex-shrink:0;border:1px solid var(--line);background:var(--panel);
-  padding:7px 14px;border-radius:999px;cursor:pointer;
-  font-size:12.5px;font-weight:500;color:var(--muted);
-  display:flex;align-items:center;gap:6px;transition:all .14s;
-}
-.cat-tab:hover{border-color:#A8C2DA;color:var(--ink);}
-.cat-tab.on{background:var(--ink);border-color:var(--ink);color:#fff;}
-.cat-tab b{font-family:var(--mono);font-size:10.5px;font-weight:600;opacity:.75;}
-.cat-group{margin-bottom:22px;}
-.cat-group:last-child{margin-bottom:0;}
-.cat-head{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-  margin-bottom:11px;padding-bottom:9px;border-bottom:1px solid var(--line-soft);
-}
-.cat-name{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.4px;
-  text-transform:uppercase;color:var(--muted);
-  display:flex;align-items:center;gap:7px;
-}
-.cat-count{font-family:var(--mono);font-size:10.5px;color:var(--faint);}
-.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+
 
 /* puntos y tiempo restante en la insignia */
 .badge-pts{
   font-family:var(--mono);font-size:10px;font-weight:600;
   color:var(--brass);margin-top:6px;
 }
-.badge.locked .badge-pts{color:#B9C3CE;}
-.badge-eta{
-  font-family:var(--mono);font-size:9.5px;color:var(--faint);
-  margin-top:5px;padding-top:5px;border-top:1px solid var(--line-soft);
-}
+
 
 /* insignias de longevidad */
 .badge.legacy{
@@ -608,17 +603,7 @@ button{font-family:inherit;color:inherit;}
   background:linear-gradient(160deg,#FFFDF8,#FAF4E8);
   box-shadow:0 2px 12px rgba(168,121,44,.14);
 }
-.badge.legacy .badge-ico{
-  background:linear-gradient(150deg,#C9A050,#A8792C);
-  border-color:transparent;
-  box-shadow:0 3px 12px rgba(168,121,44,.34);
-}
-.badge.legacy .badge-n{color:#7A5A20;}
-.badge.legacy.locked{
-  background:var(--panel2);border-color:var(--line-soft);box-shadow:none;
-}
-.badge.legacy.locked .badge-ico{background:#E9EEF3;box-shadow:none;}
-.badge.legacy.locked .badge-n{color:var(--faint);}
+
 
 /* modal de milestone */
 .ms-pts{
@@ -627,55 +612,83 @@ button{font-family:inherit;color:inherit;}
   border:1px solid rgba(168,121,44,.24);
   padding:5px 14px;border-radius:999px;margin-bottom:16px;
 }
-.ms-ico.legacy-ico{
-  background:linear-gradient(150deg,#C9A050,#A8792C)!important;
-  border-color:transparent!important;
-  box-shadow:0 6px 22px rgba(168,121,44,.36);
-}
-.ms-ico.pend{background:var(--panel2)!important;border-color:var(--line)!important;filter:grayscale(1);opacity:.65;}
+
 
 /* progreso en el perfil */
 .pf-prog{margin-top:20px;padding-top:20px;border-top:1px solid var(--line-soft);}
-.pf-prog-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:3px;}
-.pf-prog-hd h4{font-family:var(--display);font-size:14.5px;font-weight:600;}
-.pf-prog-hd span{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--brass);}
-.pf-lvl{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--muted);margin-bottom:10px;
-}
-.pf-lvl-gap{font-size:12px;color:var(--muted);margin-top:9px;}
-.pf-lvl-gap b{font-family:var(--mono);color:var(--brass);font-weight:600;}
-.pf-next-hd{
-  font-family:var(--mono);font-size:10px;letter-spacing:1.3px;
-  text-transform:uppercase;color:var(--muted);
-  margin:20px 0 10px;padding-top:16px;border-top:1px solid var(--line-soft);
-}
-.nx{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--line-soft);}
-.nx:last-child{border-bottom:none;}
-.nx-ico{
-  width:32px;height:32px;border-radius:9px;flex-shrink:0;
-  display:grid;place-items:center;font-size:13px;
-  background:var(--panel2);border:1px solid var(--line);filter:grayscale(1);opacity:.7;
-}
-.nx-b{flex:1;min-width:0;}
-.nx-n{font-size:13px;font-weight:500;}
-.nx-e{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;}
-.nx-p{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--brass);flex-shrink:0;}
+
 
 /* hitos futuros en la línea de tiempo */
 .stop.soon::before{border-color:var(--line);border-style:dashed;background:var(--panel);}
-.stop.soon .stop-t{color:var(--muted);}
-.stop.soon .stop-d{color:var(--faint);}
+
+
+/* acentos del desglose del hero */
+.dv{color:var(--ink);font-weight:600;}
+.cap{color:var(--blue);font-weight:600;}
+.fee{color:var(--red);}
+.mer-tier-dot{width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block;flex-shrink:0;}
+
+/* movimientos */
+.mov-block{margin-top:18px;padding-top:16px;border-top:1px solid var(--line-soft);}
+
+.mov-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px;}
+
+.mov-title{font-family:var(--mono);font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);}
+
+.mov-sum{font-size:13px;font-weight:600;}
+
+.mov-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+
+.mov-row:last-child{border-bottom:none;}
+
+.mov-ico{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  display:grid;place-items:center;font-size:14px;background:var(--blue-tint);
+}
+
+.mov-ico.out{background:var(--brass-tint);}
+
+.mov-b{flex:1;min-width:0;}
+
+.mov-t{font-size:13.5px;font-weight:500;}
+
+.mov-d{font-family:var(--mono);font-size:10.5px;color:var(--muted);margin-top:2px;letter-spacing:.4px;}
+
+.mov-v{font-family:var(--mono);font-size:14px;font-weight:600;flex-shrink:0;}
+
+.mov-none{
+  padding:16px;background:var(--panel2);border-radius:var(--r-m);
+  font-size:12.5px;color:var(--muted);text-align:center;
+}
+
+.mov-first{
+  background:var(--panel2);border:1px solid var(--line-soft);
+  border-radius:var(--r-m);padding:15px 17px;
+}
+
+.mov-first .mf-k{font-family:var(--mono);font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+
+.mov-first .mf-v{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.6px;font-variant-numeric:tabular-nums;}
+
+.mov-first .mf-d{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px;}
+
+.mov-first .mf-fee{font-family:var(--mono);font-size:11.5px;color:var(--red);margin-top:7px;padding-top:7px;border-top:1px solid var(--line);}
+
 
 /* resumen de solicitud */
 .recap{
   background:var(--panel2);border:1px solid var(--line-soft);
   border-radius:var(--r-m);padding:13px 15px;margin-bottom:15px;
 }
+
 .recap-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:4px 0;font-size:13px;}
+
 .recap-row span{color:var(--muted);}
+
 .recap-row b{font-family:var(--mono);font-weight:600;}
+
 .ok-ico-ok{background:var(--green-tint)!important;border-color:rgba(11,138,107,.24)!important;color:var(--green);}
+
 
 /* aviso */
 .snack{
@@ -688,97 +701,127 @@ button{font-family:inherit;color:inherit;}
   opacity:0;visibility:hidden;transition:all .24s cubic-bezier(.16,1,.3,1);
   max-width:calc(100vw - 40px);text-align:center;
 }
+
 .snack.on{opacity:1;visibility:visible;transform:translate(-50%,0);}
+
 
 .legal{
   margin:34px 0 10px;padding-top:20px;border-top:1px solid var(--line-soft);
   font-size:11px;color:var(--faint);line-height:1.65;text-align:center;
 }
 
+
 /* ── REVEAL ─────────────────────────────────── */
 .rv{opacity:0;transform:translateY(14px);transition:opacity .55s cubic-bezier(.16,1,.3,1),transform .55s cubic-bezier(.16,1,.3,1);}
+
 .rv.in{opacity:1;transform:none;}
 
-/* ── MÓVIL ──────────────────────────────────── */
-@media(max-width:640px){
   :root{--gut:16px;}
-  .mark-sub{display:none;}
-  .who-name{display:none;}
-  .stats{grid-template-columns:1fr 1fr;}
-  .stat-wide{grid-column:span 2;}
-  .badges{grid-template-columns:1fr 1fr;}
-  .rewards{grid-template-columns:1fr;}
-  .reward{display:flex;align-items:center;gap:13px;text-align:left;padding:14px 16px;}
-  .rw-lock{margin-bottom:0;}
-  .rw-n{margin-bottom:0;flex:1;}
-  .card{padding:18px;}
-  .station-txt{font-size:8.5px;letter-spacing:.4px;}
-  .cap-figure{letter-spacing:-2.4px;}
-  .sheet{max-width:none;border-radius:var(--r-xl) var(--r-xl) 0 0;align-self:flex-end;max-height:92vh;}
-  .veil{padding:0;align-items:flex-end;}
-  .veil.on .sheet{transform:none;}
-  .sheet{transform:translateY(100%);}
-  .goal-row{flex-wrap:wrap;}
-}
-@media(max-width:380px){
-  .badges{grid-template-columns:1fr 1fr;}
-  .station:nth-child(even) .station-txt{opacity:0;}
-}
 
-@media(prefers-reduced-motion:reduce){
+  .mark-sub{display:none;}
+
+  .who-name{display:none;}
+
+  .stats{grid-template-columns:1fr 1fr;}
+
+  .stat-wide{grid-column:span 2;}
+
+  .card{padding:18px;}
+
+  .cap-figure{letter-spacing:-2.4px;}
+
+  .sheet{max-width:none;border-radius:var(--r-xl) var(--r-xl) 0 0;align-self:flex-end;max-height:92vh;}
+
+  .veil{padding:0;align-items:flex-end;}
+
+  .veil.on .sheet{transform:none;}
+
+  .sheet{transform:translateY(100%);}
+
+  .goal-row{flex-wrap:wrap;}
+
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important;}
+
   html{scroll-behavior:auto;}
+
   .rv{opacity:1;transform:none;}
-}
+
 
 /* ── LOGIN ──────────────────────────────────── */
 #gate{
   min-height:100vh;display:flex;align-items:center;justify-content:center;
   padding:24px;padding-top:max(24px,env(safe-area-inset-top));
 }
+
 .gate-box{width:100%;max-width:372px;}
+
 .gate-mark{text-align:center;margin-bottom:30px;}
+
 .gate-badge{
   width:66px;height:66px;border-radius:19px;margin:0 auto 17px;
   background:linear-gradient(150deg,#1D4B7C,#102A47);
   display:grid;place-items:center;
   box-shadow:0 10px 34px rgba(16,42,71,.26);
 }
+
 .gate-badge span{font-family:var(--display);font-size:22px;font-weight:700;color:#fff;letter-spacing:-.8px;}
+
 .gate-mark h1{font-family:var(--display);font-size:23px;font-weight:700;letter-spacing:-.6px;}
+
 .gate-mark p{font-size:12px;color:var(--muted);margin-top:4px;letter-spacing:.3px;}
+
 .gate-card{
   background:var(--panel);border:1px solid var(--line);
   border-radius:var(--r-xl);padding:28px;
   box-shadow:0 10px 44px rgba(35,99,158,.10);
 }
+
 .gate-card .fld{margin-bottom:15px;}
+
 .gate-card .fld input{font-family:var(--body);font-size:15.5px;}
+
 .gate-remember{display:flex;align-items:center;gap:9px;margin-bottom:18px;}
+
 .gate-remember input{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;}
+
 .gate-remember label{font-size:13px;color:var(--muted);cursor:pointer;}
+
 #gateErr{
   font-size:12.5px;color:var(--red);text-align:center;
   margin-top:11px;min-height:16px;line-height:1.45;
 }
+
 .gate-foot{text-align:center;margin-top:20px;font-size:11px;color:var(--faint);line-height:1.6;}
+
 .spin{
   display:inline-block;width:15px;height:15px;vertical-align:-2px;
   border:2px solid rgba(255,255,255,.4);border-top-color:#fff;
   border-radius:50%;animation:sp .7s linear infinite;
 }
-@keyframes sp{to{transform:rotate(360deg);}}
+to{transform:rotate(360deg);}
+
 .boot{
   min-height:100vh;display:flex;flex-direction:column;
   align-items:center;justify-content:center;gap:15px;color:var(--muted);
 }
+
 .boot .spin{border-color:var(--line);border-top-color:var(--blue);width:22px;height:22px;}
+
 .empty-state{
   text-align:center;padding:60px 24px;
 }
+
 .empty-state h3{font-family:var(--display);font-size:19px;font-weight:600;margin-bottom:8px;}
+
 .empty-state p{font-size:13.5px;color:var(--muted);line-height:1.6;}
-</style>
+
+.ms-ico.legacy-ico{
+  background:linear-gradient(150deg,#C9A050,#A8792C)!important;
+  border-color:transparent!important;
+  box-shadow:0 6px 22px rgba(168,121,44,.36);
+}
+
+.ms-ico.pend{background:var(--panel2)!important;border-color:var(--line)!important;filter:grayscale(1);opacity:.65;}</style>
 </head>
 <body>
 
@@ -839,9 +882,7 @@ button{font-family:inherit;color:inherit;}
           <span id="menuSub">—</span>
         </div>
         <button class="menu-item" role="menuitem" data-go="perfil"><i>👤</i>Mi perfil</button>
-        <button class="menu-item" role="menuitem" data-go="#journey"><i>📖</i>Mi Journey</button>
-        <button class="menu-item" role="menuitem" data-go="#milestones"><i>🏆</i>Mis milestones</button>
-        <button class="menu-item" role="menuitem" data-go="#retiros"><i>💰</i>Mis retiros</button>
+        <button class="menu-item" role="menuitem" data-go="#movimientos"><i>💳</i>Mis movimientos</button>
         <button class="menu-item" role="menuitem" data-go="ajustes"><i>⚙️</i>Configuración</button>
         <div class="menu-sep"></div>
         <button class="menu-item leave" role="menuitem" data-go="salir"><i>→</i>Cerrar sesión</button>
@@ -863,27 +904,6 @@ button{font-family:inherit;color:inherit;}
     </div>
     <p class="cap-note" id="capNote">Rendimiento acumulado</p>
 
-    <!-- SIGNATURE · MERIDIANO -->
-    <div class="meridian rv">
-      <div class="mer-top">
-        <div class="mer-tier">
-          <span class="mer-tier-dot"></span>
-          <div>
-            <b id="tierName">—</b>
-            <span id="tierLvl">—</span>
-          </div>
-        </div>
-        <div class="mer-points">
-          <b id="ptsTop">0</b>
-          <span>Partner Points</span>
-        </div>
-      </div>
-      <div class="rail" id="rail">
-        <div class="rail-track"></div>
-        <div class="rail-fill" id="railFill"></div>
-      </div>
-      <p class="mer-gap">Te faltan <b id="ptsGap">260 puntos</b> para llegar a Grow.</p>
-    </div>
   </section>
 
   <!-- ══ OBJETIVO ══ -->
@@ -968,108 +988,29 @@ button{font-family:inherit;color:inherit;}
     </div>
   </section>
 
-  <!-- ══ JOURNEY ══ -->
-  <section class="sec rv" id="journey">
+  <!-- ══ MOVIMIENTOS ══ -->
+  <section class="sec rv" id="movimientos">
     <div class="sec-head">
-      <h2 class="sec-title"><i>📖</i>Mi Journey</h2>
-      <span class="sec-note" id="journeyCount">—</span>
+      <h2 class="sec-title"><i>💳</i>Mis movimientos</h2>
+      <span class="sec-note" id="movNota">—</span>
     </div>
     <div class="card">
-      <div class="trail" id="trail"></div>
-    </div>
-  </section>
-
-  <!-- ══ MILESTONES ══ -->
-  <section class="sec rv" id="milestones">
-    <div class="sec-head">
-      <h2 class="sec-title"><i>🏆</i>Mis Milestones</h2>
-      <span class="sec-note">Toca uno para ver el detalle</span>
-    </div>
-    <div class="card">
-      <div class="cat-tabs" id="catTabs"></div>
-      <div id="badgeGroups"></div>
-      <div class="badge-tally">
-        <span>Milestones desbloqueados</span>
-        <b id="msCount">— / —</b>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══ PARTNER POINTS ══ -->
-  <section class="sec rv" id="puntos">
-    <div class="sec-head"><h2 class="sec-title"><i>⭐</i>Partner Points</h2></div>
-    <div class="pts-hero">
-      <div>
-        <div class="pts-n num" id="ptsBig">0</div>
-        <div class="pts-l">Partner Points</div>
-      </div>
-      <div class="pts-next">
-        <span id="ptsNextLvl">—</span><br/>
-        <b id="ptsRemain">260</b> puntos restantes
-      </div>
-    </div>
-    <div class="card">
-      <h3 style="font-family:var(--display);font-size:14.5px;font-weight:600;margin-bottom:4px;">¿Cómo gano Partner Points?</h3>
-      <p style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">Los puntos reconocen tu constancia como Partner.</p>
-      <div class="earn" id="earn"></div>
-      <p class="earn-note">
-        Los Partner Points no se obtienen depositando más capital ni asumiendo más riesgo.
-        Reconocen tu permanencia y tu participación en la plataforma.
-      </p>
-    </div>
-  </section>
-
-  <!-- ══ REWARDS ══ -->
-  <section class="sec rv">
-    <div class="sec-head"><h2 class="sec-title"><i>🎁</i>Partner Rewards</h2></div>
-    <div class="card">
-      <p class="rw-intro">Tus Partner Points podrán utilizarse para desbloquear beneficios exclusivos. Estamos preparando el catálogo.</p>
-      <div class="rewards">
-        <div class="reward">
-          <div class="rw-lock">🔒</div>
-          <div class="rw-n">Beneficio exclusivo</div>
-          <div class="rw-p">1,500 pts</div>
+      <div id="movInicial"></div>
+      <div class="mov-block">
+        <div class="mov-head">
+          <span class="mov-title">Aportes adicionales</span>
+          <span class="mov-sum num" id="movExtraSum">—</span>
         </div>
-        <div class="reward">
-          <div class="rw-lock">🔒</div>
-          <div class="rw-n">Experiencia Partner</div>
-          <div class="rw-p">2,500 pts</div>
-        </div>
-        <div class="reward">
-          <div class="rw-lock">🔒</div>
-          <div class="rw-n">Beneficio premium</div>
-          <div class="rw-p">5,000 pts</div>
-        </div>
-        <div class="reward">
-          <div class="rw-lock">🔒</div>
-          <div class="rw-n">Beneficio Legacy</div>
-          <div class="rw-p">10,000 pts</div>
-        </div>
+        <div id="movExtras"></div>
       </div>
-    </div>
-  </section>
-
-  <!-- ══ RETIROS ══ -->
-  <section class="sec rv" id="retiros">
-    <div class="sec-head"><h2 class="sec-title"><i>💰</i>Mis retiros</h2></div>
-    <div class="card">
-      <div class="wd-top">
-        <div>
-          <div class="wd-k">Total retirado</div>
-          <div class="wd-v num" id="wdTotal">$0.00</div>
+      <div class="mov-block">
+        <div class="mov-head">
+          <span class="mov-title">Retiros</span>
+          <span class="mov-sum num" id="movSalidaSum">—</span>
         </div>
-        <div style="text-align:right;">
-          <div class="wd-k">Capital generado</div>
-          <div class="wd-v num pos" id="wdGen">$0.00</div>
-        </div>
+        <div id="movSalidas"></div>
       </div>
-      <div id="wdList"></div>
-      <div class="ledger">
-        <div class="ledger-row"><span>Depósitos</span><b id="ldDep">—</b></div>
-        <div class="ledger-row"><span>Retiros</span><b id="ldWd">—</b></div>
-        <div class="ledger-row"><span>Resultado de gestión</span><b class="pos" id="ldPnl">—</b></div>
-        <div class="ledger-row total"><span>Capital actual</span><b id="ldCap">—</b></div>
-      </div>
+      <div class="ledger" id="movLedger"></div>
     </div>
   </section>
 
@@ -1179,22 +1120,6 @@ button{font-family:inherit;color:inherit;}
   </div>
 </div>
 
-<!-- ══ MODAL · MILESTONE ══ -->
-<div class="veil" id="mMs">
-  <div class="sheet sheet-pos">
-    <button class="sheet-x" data-x>×</button>
-    <div class="ms-sheet">
-      <div class="ms-ico" id="msIco">🚀</div>
-      <div class="ms-tag" id="msTag">Milestone desbloqueado</div>
-      <div class="ms-n" id="msName">—</div>
-      <div class="ms-s" id="msDesc">—</div>
-      <div class="ms-pts" id="msPts" style="display:none;">—</div>
-      <div class="ms-d" id="msDate">—</div>
-      <button class="btn btn-fill btn-wide" id="msGo" style="margin-top:18px;">Continuar journey</button>
-    </div>
-  </div>
-</div>
-
 <!-- ══ MODAL · PERFIL ══ -->
 <div class="veil" id="mPf">
   <div class="sheet sheet-pos">
@@ -1210,22 +1135,12 @@ button{font-family:inherit;color:inherit;}
         </div>
       </div>
       <div class="pf-grid">
-        <div class="pf-cell"><div class="k">Nivel</div><div class="v" id="pfLvl">—</div></div>
-        <div class="pf-cell"><div class="k">Partner Points</div><div class="v num" id="pfPts">—</div></div>
-        <div class="pf-cell"><div class="k">Milestones</div><div class="v num" id="pfMs">—</div></div>
+        <div class="pf-cell"><div class="k">Aportes</div><div class="v" id="pfLvl">—</div></div>
+        <div class="pf-cell"><div class="k">Total aportado</div><div class="v num" id="pfPts">—</div></div>
+        <div class="pf-cell"><div class="k">Total retirado</div><div class="v num" id="pfMs">—</div></div>
         <div class="pf-cell"><div class="k">Tiempo</div><div class="v num" id="pfDias">—</div></div>
       </div>
 
-      <div class="pf-prog">
-        <div class="pf-prog-hd">
-          <h4>🏆 Mi progreso</h4>
-          <span class="num" id="pfXp">—</span>
-        </div>
-        <div class="pf-lvl" id="pfLvlName">—</div>
-        <div class="bar"><div class="bar-fill" id="pfBar"></div></div>
-        <div class="pf-lvl-gap" id="pfGap">—</div>
-        <div class="pf-next-hd">Próximos milestones</div>
-        <div id="pfNext"></div>
       </div>
     </div>
   </div>
@@ -1351,6 +1266,8 @@ function computeStats(rows){
   let eq = 0, base = 0, twr = 1, tramo = 0;
   let aportes = 0, feesAporte = 0, retiros = 0, runP = 0, runF = 0;
   const dailyEq = {}, dailyBase = {}, monthlyPnl = {}, flujos = [];
+  let inicial = null;              // primer depósito
+  const extras = [], salidas = []; // aportes posteriores y retiros
 
   const cerrarTramo = () => {
     if(tramo > 0) twr *= eq / tramo;
@@ -1365,17 +1282,23 @@ function computeStats(rows){
       cerrarTramo();
       aportes += v; eq += v; base += v; tramo = eq;
       flujos.push({f:r.time, dk, tipo:'aporte', monto:v});
+      if(!inicial) inicial = {monto:v, f:r.time, dk, fee:0};
+      else extras.push({monto:v, f:r.time, dk, fee:0});
 
     } else if(isDepositFee(r)){
       const v = Math.abs(r.amount);
       cerrarTramo();
       feesAporte += v; eq -= v; base -= v; tramo = eq;
+      // el fee se asocia al aporte del mismo día
+      if(inicial && inicial.dk === dk) inicial.fee += v;
+      else { const e = extras.find(x => x.dk === dk); if(e) e.fee += v; }
 
     } else if(isWithdrawal(r)){
       const v = Math.abs(r.amount);
       cerrarTramo();
       retiros += v; eq -= v; base -= v; tramo = eq;
       flujos.push({f:r.time, dk, tipo:'retiro', monto:v});
+      salidas.push({monto:v, f:r.time, dk});
 
     } else {
       const mk = mKey(r.time);
@@ -1404,122 +1327,17 @@ function computeStats(rows){
   const es = sd.map(dk => ({dk, eq: dailyEq[dk], base: dailyBase[dk]}));
   const mEq = {}; for(const p of es) mEq[p.dk.slice(0,7)] = p.eq;
 
-  // primer aporte, para etiquetar el arranque
-  const primer = flujos.find(f => f.tipo === 'aporte');
-  const depGross = primer ? primer.monto : 0;
-  const feeIni = feesAporte > 0 && primer
-    ? Math.min(feesAporte, rows.filter(r => isDepositFee(r) && dayKey(r.time) === primer.dk)
-        .reduce((a,r) => a + Math.abs(r.amount), 0))
-    : 0;
-
   return {
     aportes, feesAporte, aportado, retiros, gestion,
     equity, roi, runP, runF,
-    dep: aportado, depGross, depFeeAmt: feeIni,
-    aportesExtra: Math.max(0, flujos.filter(f => f.tipo === 'aporte').length - 1),
+    inicial, extras, salidas,
+    dep: aportado,
+    depGross: inicial ? inicial.monto : 0,
+    depFeeAmt: inicial ? inicial.fee : 0,
+    aportesExtra: extras.length,
     flujos, days, firstDate:fd, lastDate:ld,
     me, posM, best, es, mEq
   };
-}
-
-/* ═══════════════════════════════════════════
-   NIVELES Y PUNTOS — solo permanencia
-   ═══════════════════════════════════════════ */
-const NIVELES = [
-  {n:1, k:'Begin',   min:0},
-  {n:2, k:'Build',   min:700},
-  {n:3, k:'Grow',    min:1950},
-  {n:4, k:'Partner', min:4450},
-  {n:5, k:'Legacy',  min:9450}
-];
-const TITULO = {1:'Nuevo Partner', 2:'Capital Builder', 3:'Growth Partner', 4:'Senior Partner', 5:'Legacy Partner'};
-
-const CATEGORIAS = [
-  {id:'permanencia', ico:'🕐', n:'Permanencia'},
-  {id:'journey',     ico:'🎯', n:'Journey'},
-  {id:'capital',     ico:'💎', n:'Capital'}
-];
-
-/* ── CATÁLOGO ────────────────────────────────
-   Para agregar un milestone basta con sumar una
-   entrada aquí. Nada más en el archivo cambia.
-     cat      permanencia | journey | capital
-     pts      solo permanencia y participación
-     legacy   diseño destacado
-     dias     desbloquea por antigüedad
-     monto    desbloquea al alcanzar ese capital
-     cond(m)  regla propia
-   ──────────────────────────────────────────── */
-const MILESTONES = [
-  // ── Permanencia ──
-  {id:'d30',  cat:'permanencia', ico:'⭐', n:'30 Days',          s:'30 días como Partner',   pts:100,  dias:30},
-  {id:'d90',  cat:'permanencia', ico:'⭐', n:'90 Days',          s:'90 días como Partner',   pts:250,  dias:90},
-  {id:'m6',   cat:'permanencia', ico:'🌱', n:'6 Months',         s:'6 meses como Partner',   pts:500,  dias:182},
-  {id:'m9',   cat:'permanencia', ico:'🌿', n:'9 Months',         s:'9 meses como Partner',   pts:750,  dias:274},
-  {id:'y1',   cat:'permanencia', ico:'⭐', n:'1 Year Partner',   s:'Un año formando parte de MentoryCap Partners', pts:1000, dias:365, legacy:true},
-  {id:'m18',  cat:'permanencia', ico:'🔆', n:'18 Months',        s:'18 meses como Partner',  pts:1500, dias:548},
-  {id:'y2',   cat:'permanencia', ico:'💎', n:'Long-Term Partner',s:'Dos años como Partner',  pts:2000, dias:730, legacy:true},
-  {id:'y3',   cat:'permanencia', ico:'🏆', n:'Legacy Partner',   s:'Tres años como Partner', pts:3000, dias:1095, legacy:true},
-  {id:'y5',   cat:'permanencia', ico:'👑', n:'Founding Partner', s:'Cinco años como Partner', pts:5000, dias:1825, legacy:true},
-
-  // ── Journey ──
-  {id:'first',   cat:'journey', ico:'🚀', n:'First Step',       s:'Tu primer depósito',        pts:0,   cond:m => ({on: !!m.inicio, f: m.inicio})},
-  {id:'perfil',  cat:'journey', ico:'👤', n:'Profile Complete', s:'Perfil completado',         pts:100, cond:m => ({on:true, f:m.inicio})},
-  {id:'onboard', cat:'journey', ico:'✅', n:'Onboarding',       s:'Onboarding completado',     pts:150, cond:m => ({on:true, f:m.inicio})},
-  {id:'goal',    cat:'journey', ico:'🎯', n:'Goal Setter',      s:'Definiste tu primer objetivo', pts:100, cond:m => ({on:m.objetivoPropio, f:m.corte})},
-  {id:'growth',  cat:'journey', ico:'📈', n:'First Growth',     s:'Tu primer período en positivo', pts:0, cond:m => {
-      const p = m.meses.find(([,v]) => v > 0);
-      if(!p) return {on:false};
-      const [y,mm] = p[0].split('-');
-      return {on:true, f:new Date(+y, +mm, 0)};
-    }},
-  {id:'wd1',     cat:'journey', ico:'💰', n:'First Withdrawal', s:'Tu primer retiro',          pts:0,   cond:m => ({on: m.retiros > 0, f: m.corte})},
-
-  // ── Capital · solo registran, no otorgan puntos ──
-  {id:'c1k',   cat:'capital', ico:'🏆', n:'$1K Capital',   s:'Tu capital alcanza $1,000',  pts:0, monto:1000},
-  {id:'c25k',  cat:'capital', ico:'💎', n:'$2.5K Capital', s:'Tu capital alcanza $2,500',  pts:0, monto:2500},
-  {id:'c5k',   cat:'capital', ico:'🔷', n:'$5K Capital',   s:'Tu capital alcanza $5,000',  pts:0, monto:5000},
-  {id:'c10k',  cat:'capital', ico:'🔶', n:'$10K Capital',  s:'Tu capital alcanza $10,000', pts:0, monto:10000},
-  {id:'c25kk', cat:'capital', ico:'👑', n:'$25K Capital',  s:'Tu capital alcanza $25,000', pts:0, monto:25000, legacy:true}
-];
-
-/* Resuelve el catálogo contra los datos del inversor */
-function resolverMilestones(m){
-  return MILESTONES.map(def => {
-    const r = {...def, on:false, f:null, faltan:null, meta:null};
-    if(def.dias != null){
-      const fecha = m.inicio ? new Date(m.inicio.getTime() + def.dias*DIA) : null;
-      r.f = fecha;
-      r.on = !!(fecha && m.corte && fecha <= m.corte);
-      if(!r.on && fecha && m.corte) r.faltan = Math.ceil((fecha - m.corte)/DIA);
-    } else if(def.monto != null){
-      r.on = m.capital >= def.monto;
-      r.f = r.on ? m.corte : null;
-      r.meta = def.monto;
-    } else if(def.cond){
-      const o = def.cond(m);
-      r.on = !!o.on; r.f = o.f || null;
-    }
-    return r;
-  });
-}
-
-function nivelDe(p){
-  let cur = NIVELES[0];
-  for(const l of NIVELES) if(p >= l.min) cur = l;
-  const sig = NIVELES.find(l => l.min > p) || null;
-  return {cur, sig, falta: sig ? sig.min - p : 0};
-}
-
-function textoEspera(dias){
-  if(dias == null) return '';
-  if(dias <= 0) return 'Disponible';
-  if(dias === 1) return 'Falta 1 día';
-  if(dias < 45) return 'Faltan ' + dias + ' días';
-  const meses = Math.round(dias/30.4);
-  if(meses < 12) return 'En ' + meses + ' meses';
-  const anios = (dias/365).toFixed(1).replace('.0','');
-  return 'En ' + anios + (anios === '1' ? ' año' : ' años');
 }
 
 /* ═══════════════════════════════════════════
@@ -1549,6 +1367,9 @@ function construirModelo(st, cli){
     feesAporte: st.feesAporte,
     aportado: st.aportado,
     aportesExtra: st.aportesExtra,
+    inicial: st.inicial,
+    extras: st.extras,
+    salidas: st.salidas,
     flujos: st.flujos,
     capital: st.equity,
     retiros: st.retiros,
@@ -1562,48 +1383,11 @@ function construirModelo(st, cli){
     mesesTotales: st.me.length,
     mejorMes: st.best,
     objetivo: g.valor,
-    objetivoPropio: g.propio,
     serie: st.es.map(p => ({f: new Date(p.dk + 'T00:00:00'), v: p.eq, base: p.base}))
   };
   m.faltan = +(m.objetivo - m.capital).toFixed(2);
   m.progreso = m.objetivo > 0 ? Math.min(100, m.capital / m.objetivo * 100) : 0;
-  recalcular(m);
   return m;
-}
-
-function recalcular(m){
-  m.ms = resolverMilestones(m);
-  m.puntos = m.ms.filter(x => x.on).reduce((a,x) => a + x.pts, 0);
-  return m;
-}
-
-function construirJourney(m){
-  const j = [];
-  if(m.inicio) j.push({f:m.inicio, i:'🚀', t:'Comenzaste tu journey', v:'Capital inicial: <b>'+usd(m.capitalInicial)+'</b>'});
-
-  const primerPos = m.meses.find(([,v]) => v > 0);
-  if(primerPos){
-    const [y,mm] = primerPos[0].split('-');
-    j.push({f:new Date(+y,+mm,0), i:'📈', t:'Primer mes en positivo', v:mLabelLargo(primerPos[0]).replace(/^./,x=>x.toUpperCase())+': <b>'+usdS(primerPos[1])+'</b>'});
-  }
-  if(m.mejorMes && m.mejorMes[0] && m.mejorMes[1] > 0 && (!primerPos || m.mejorMes[0] !== primerPos[0])){
-    const [y,mm] = m.mejorMes[0].split('-');
-    j.push({f:new Date(+y,+mm,0), i:'🏆', t:'Tu mejor mes', v:'<b>'+usdS(m.mejorMes[1])+'</b> en '+mLabelLargo(m.mejorMes[0])});
-  }
-  if(m.corte) j.push({f:m.corte, i:'📊', t:'Dónde estás hoy', v:'Capital: <b>'+usd(m.capital)+'</b>', now:true});
-
-  j.sort((a,b) => a.f - b.f);
-
-  // hacia adelante: los próximos hitos de permanencia
-  const futuros = m.ms
-    .filter(x => !x.on && x.dias != null && x.f)
-    .sort((a,b) => a.f - b.f)
-    .slice(0,3);
-  for(const f of futuros){
-    j.push({f:f.f, i:f.ico, t:f.n, v:textoEspera(f.faltan) + ' · <b>+'+miles(f.pts)+' puntos</b>', soon:true});
-  }
-  j.push({f:null, i:'🎯', t:'Tu objetivo de capital', v:'Alcanzar <b>'+usd0(m.objetivo)+'</b>', next:true});
-  return j;
 }
 
 function construirFeed(m){
@@ -1817,31 +1601,6 @@ window.addEventListener('resize', () => { clearTimeout(redib); redib = setTimeou
 /* ═══════════════════════════════════════════
    RENDER
    ═══════════════════════════════════════════ */
-function pintarMeridiano(){
-  const {cur, sig, falta} = nivelDe(D.puntos);
-  const rail = $('#rail');
-  rail.querySelectorAll('.station').forEach(e => e.remove());
-  NIVELES.forEach((l,i) => {
-    const el = document.createElement('div');
-    el.className = 'station' + (l.n < cur.n ? ' done' : l.n === cur.n ? ' here' : '');
-    el.style.left = (i/(NIVELES.length-1)*100) + '%';
-    el.innerHTML = '<div class="station-dot"></div><div class="station-txt">'+l.k+'</div>';
-    rail.appendChild(el);
-  });
-  const idx = NIVELES.findIndex(l => l.n === cur.n);
-  let frac = idx/(NIVELES.length-1);
-  if(sig) frac += ((D.puntos-cur.min)/(sig.min-cur.min)) * (1/(NIVELES.length-1));
-  setTimeout(() => { $('#railFill').style.width = (frac*100)+'%'; }, 220);
-
-  $('#tierName').textContent = TITULO[cur.n];
-  $('#tierLvl').textContent = 'Nivel ' + pad2(cur.n) + ' · ' + cur.k;
-  $('.mer-gap').innerHTML = sig
-    ? 'Te faltan <b>'+miles(falta)+' puntos</b> para llegar a '+sig.k+'.'
-    : 'Has alcanzado el nivel más alto.';
-  $('#ptsNextLvl').textContent = sig ? 'Nivel '+pad2(sig.n)+' · '+sig.k : 'Nivel máximo';
-  $('#ptsRemain').textContent = sig ? miles(falta) : '0';
-}
-
 function pintarObjetivo(){
   $('#goalNow').textContent = usd(D.capital);
   $('#goalTgt').textContent = usd0(D.objetivo);
@@ -1853,122 +1612,60 @@ function pintarObjetivo(){
   setTimeout(() => { $('#goalBar').style.width = D.progreso+'%'; }, 240);
 }
 
-function pintarJourney(){
-  const J = construirJourney(D);
-  const hechos = J.filter(s => !s.next && !s.soon).length;
-  $('#journeyCount').textContent = hechos + (hechos === 1 ? ' hito alcanzado' : ' hitos alcanzados');
-  $('#trail').innerHTML = J.map(s =>
-    '<div class="stop'+(s.now?' now':'')+(s.next?' next':'')+(s.soon?' soon':'')+'">'+
-      '<div class="stop-d">'+(s.f ? fechaCorta(s.f) : 'Próximo')+'</div>'+
-      '<div class="stop-t"><i>'+s.i+'</i>'+s.t+'</div>'+
-      '<div class="stop-v">'+s.v+'</div>'+
-    '</div>').join('');
-}
+function pintarMovimientos(){
+  const ini = D.inicial;
+  $('#movInicial').innerHTML = ini
+    ? '<div class="mov-first">'+
+        '<div class="mf-k">Depósito inicial</div>'+
+        '<div class="mf-v">'+usd(ini.monto)+'</div>'+
+        '<div class="mf-d">'+fechaCorta(ini.f)+'</div>'+
+        (ini.fee > 0 ? '<div class="mf-fee">Fee de activación −'+usd(ini.fee)+'</div>' : '')+
+      '</div>'
+    : '<div class="mov-none">Sin depósito registrado.</div>';
 
-let catActiva = 'todas';
+  const ex = D.extras || [];
+  const sumEx = ex.reduce((a,x) => a + x.monto, 0);
+  const se = $('#movExtraSum');
+  se.textContent = ex.length ? '+' + usd(sumEx) : '—';
+  se.className = 'mov-sum num' + (ex.length ? ' pos' : '');
+  $('#movExtras').innerHTML = ex.length
+    ? ex.slice().reverse().map(x =>
+        '<div class="mov-row">'+
+          '<div class="mov-ico">↑</div>'+
+          '<div class="mov-b"><div class="mov-t">Aporte adicional</div>'+
+          '<div class="mov-d">'+fechaCorta(x.f)+(x.fee>0?' · fee −'+usd(x.fee):'')+'</div></div>'+
+          '<div class="mov-v pos">+'+usd(x.monto)+'</div>'+
+        '</div>').join('')
+    : '<div class="mov-none">Aún no has hecho aportes adicionales.</div>';
 
-function pintarMilestones(){
-  const MS = D.ms;
-  const abiertos = MS.filter(m => m.on).length;
-  $('#msCount').textContent = abiertos + ' / ' + MS.length;
+  const sa = D.salidas || [];
+  const sumSa = sa.reduce((a,x) => a + x.monto, 0);
+  const ss = $('#movSalidaSum');
+  ss.textContent = sa.length ? '−' + usd(sumSa) : '—';
+  ss.className = 'mov-sum num' + (sa.length ? ' neg' : '');
+  $('#movSalidas').innerHTML = sa.length
+    ? sa.slice().reverse().map(x =>
+        '<div class="mov-row">'+
+          '<div class="mov-ico out">↓</div>'+
+          '<div class="mov-b"><div class="mov-t">Retiro</div>'+
+          '<div class="mov-d">'+fechaCorta(x.f)+'</div></div>'+
+          '<div class="mov-v neg">−'+usd(x.monto)+'</div>'+
+        '</div>').join('')
+    : '<div class="mov-none">Aún no has realizado retiros.</div>';
 
-  // pestañas
-  const tabs = [{id:'todas', ico:'✦', n:'Todos'}].concat(CATEGORIAS);
-  $('#catTabs').innerHTML = tabs.map(t => {
-    const lista = t.id === 'todas' ? MS : MS.filter(m => m.cat === t.id);
-    const n = lista.filter(m => m.on).length;
-    return '<button class="cat-tab'+(catActiva===t.id?' on':'')+'" data-cat="'+t.id+'">'+
-             t.ico+' '+t.n+' <b>'+n+'/'+lista.length+'</b></button>';
-  }).join('');
-  $$('#catTabs .cat-tab').forEach(b => b.addEventListener('click', () => {
-    catActiva = b.dataset.cat; pintarMilestones();
-  }));
+  const partes = [];
+  partes.push(ex.length ? (ex.length+1) + ' aportes' : '1 aporte');
+  if(sa.length) partes.push(sa.length + (sa.length === 1 ? ' retiro' : ' retiros'));
+  $('#movNota').textContent = partes.join(' · ');
 
-  // grupos
-  const cats = catActiva === 'todas' ? CATEGORIAS : CATEGORIAS.filter(x => x.id === catActiva);
-  $('#badgeGroups').innerHTML = cats.map(cat => {
-    const lista = MS.filter(m => m.cat === cat.id);
-    const n = lista.filter(m => m.on).length;
-    return '<div class="cat-group">'+
-      '<div class="cat-head">'+
-        '<span class="cat-name">'+cat.ico+' '+cat.n+'</span>'+
-        '<span class="cat-count">'+n+' de '+lista.length+'</span>'+
-      '</div>'+
-      '<div class="badges">'+ lista.map(m => tarjeta(m)).join('') +'</div>'+
-    '</div>';
-  }).join('');
-
-  $$('#badgeGroups .badge').forEach(b => b.addEventListener('click', () => {
-    const m = D.ms.find(x => x.id === b.dataset.ms);
-    if(m) abrirMilestone(m);
-  }));
-}
-
-function tarjeta(m){
-  const cls = 'badge' + (m.on ? '' : ' locked') + (m.legacy ? ' legacy' : '');
-  let pie = '';
-  if(m.pts > 0) pie += '<div class="badge-pts">+'+miles(m.pts)+' pts</div>';
-  if(!m.on){
-    if(m.faltan != null) pie += '<div class="badge-eta">'+textoEspera(m.faltan)+'</div>';
-    else if(m.meta != null) pie += '<div class="badge-eta">Al alcanzar '+usd0(m.meta)+'</div>';
-  }
-  return '<button class="'+cls+'" data-ms="'+m.id+'">'+
-    '<div class="badge-ico">'+(m.on ? m.ico : '🔒')+'</div>'+
-    '<div class="badge-n">'+m.n+'</div>'+
-    '<div class="badge-s">'+m.s+'</div>'+ pie +
-  '</button>';
-}
-
-function abrirMilestone(m){
-  const ico = $('#msIco');
-  ico.textContent = m.on ? m.ico : '🔒';
-  ico.className = 'ms-ico' + (m.on && m.legacy ? ' legacy-ico' : '') + (m.on ? '' : ' pend');
-  $('#msTag').textContent = m.on ? 'Milestone desbloqueado' : 'Aún por desbloquear';
-  $('#msName').textContent = m.n;
-  $('#msDesc').textContent = m.s;
-
-  const pts = $('#msPts');
-  if(m.pts > 0){ pts.style.display = 'inline-block'; pts.textContent = '+' + miles(m.pts) + ' Partner Points'; }
-  else pts.style.display = 'none';
-
-  let pie;
-  if(m.on) pie = m.f ? 'Desbloqueado el ' + fechaCorta(m.f) : 'Desbloqueado';
-  else if(m.faltan != null) pie = textoEspera(m.faltan) + ' · ' + fechaCorta(m.f);
-  else if(m.meta != null) pie = 'Se registra al alcanzar ' + usd0(m.meta);
-  else pie = 'Pendiente';
-  $('#msDate').textContent = pie;
-  abrir('#mMs');
-}
-
-function pintarPuntos(){
-  const conPuntos = D.ms.filter(m => m.pts > 0)
-    .sort((a,b) => (a.on === b.on) ? a.pts - b.pts : (a.on ? -1 : 1));
-  $('#earn').innerHTML = conPuntos.map(m =>
-    '<div class="earn-row'+(m.on?' got':'')+'">'+
-      '<span class="earn-chk">✓</span>'+
-      '<span class="earn-t">'+m.s+(!m.on && m.faltan != null ? ' <span style="color:var(--faint);font-size:11.5px;">· '+textoEspera(m.faltan)+'</span>' : '')+'</span>'+
-      '<span class="earn-p">+'+miles(m.pts)+'</span>'+
-    '</div>').join('');
-}
-
-function pintarRetiros(){
-  $('#wdList').innerHTML = D.retiros > 0
-    ? '<div class="wd-item"><div><div class="feed-t">💰 Has retirado '+usd(D.retiros)+'</div>'+
-      '<div class="feed-d">Acumulado hasta '+fechaCorta(D.corte)+'</div></div>'+
-      '<div class="feed-v">−'+usd(D.retiros)+'</div></div>'
-    : '<div class="wd-empty">Aún no has realizado retiros.</div>';
-
-  // libro completo: aportes, fees, retiros, gestión, capital
-  const libro = $('#ldDep').closest('.ledger');
   const filas = [];
-  filas.push(['Aportes' + (D.aportesExtra > 0 ? ' ('+(D.aportesExtra+1)+')' : ''), usd(D.aportes), '']);
-  if(D.feesAporte > 0) filas.push(['Fees de activación', '−'+usd(D.feesAporte), 'neg']);
-  if(D.retiros > 0)    filas.push(['Retiros', '−'+usd(D.retiros), 'neg']);
+  filas.push(['Total aportado', usd(D.aportado), '']);
+  if(D.retiros > 0) filas.push(['Total retirado', '−'+usd(D.retiros), 'neg']);
   filas.push(['Resultado de gestión', usdS(D.gestion), D.gestion >= 0 ? 'pos' : 'neg']);
-  libro.innerHTML = filas.map(([k,v,cl]) =>
+  $('#movLedger').innerHTML = filas.map(([k,v,cl]) =>
       '<div class="ledger-row"><span>'+k+'</span><b'+(cl?' class="'+cl+'"':'')+'>'+v+'</b></div>'
     ).join('') +
-    '<div class="ledger-row total"><span>Capital actual</span><b id="ldCap">'+usd(D.capital)+'</b></div>';
+    '<div class="ledger-row total"><span>Capital actual</span><b>'+usd(D.capital)+'</b></div>';
 }
 
 function pintarFeed(){
@@ -1980,46 +1677,25 @@ function pintarFeed(){
       '<div class="feed-d">'+fechaCorta(f.f)+'</div></div>'+
       '<div class="feed-v'+(f.pos?' pos':f.neg?' neg':'')+'">'+f.v+'</div>'+
     '</div>').join('')
-    : '<div class="wd-empty">Sin actividad todavía.</div>';
+    : '<div class="mov-none">Sin actividad todavía.</div>';
 }
 
 function pintarIdentidad(){
   const ini = iniciales(D.nombre);
   const corto = String(D.nombre).trim().split(/\s+/)[0];
-  const {cur} = nivelDe(D.puntos);
   $('#hdrName').textContent = corto;
   $('#hdrAv').textContent = ini;
   $('#menuName').textContent = D.nombre;
-  $('#menuSub').textContent = TITULO[cur.n] + ' · Nivel ' + cur.n;
+  $('#menuSub').textContent = D.inicio
+    ? 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear()
+    : 'Partner';
   $('#helloName').textContent = corto;
   $('#pfAv').textContent = ini;
   $('#pfName').textContent = D.nombre;
-  $('#pfTier').textContent = TITULO[cur.n];
-  $('#pfLvl').textContent = pad2(cur.n) + ' · ' + cur.k;
-  $('#pfPts').textContent = miles(D.puntos);
-  $('#pfMs').textContent = D.ms.filter(m => m.on).length + ' / ' + D.ms.length;
-
-  // Mi progreso
-  const {cur:lv, sig, falta} = nivelDe(D.puntos);
-  $('#pfXp').textContent = miles(D.puntos) + ' XP';
-  $('#pfLvlName').textContent = 'Level ' + pad2(lv.n) + ' — ' + lv.k.toUpperCase();
-  const dentro = sig ? Math.max(0, Math.min(100, (D.puntos - lv.min)/(sig.min - lv.min)*100)) : 100;
-  $('#pfBar').style.width = '0%';
-  setTimeout(() => { $('#pfBar').style.width = dentro + '%'; }, 120);
-  $('#pfGap').innerHTML = sig
-    ? '<b>'+miles(falta)+' puntos</b> para Level '+pad2(sig.n)+' — '+sig.k.toUpperCase()
-    : 'Has alcanzado el nivel más alto.';
-
-  const prox = D.ms.filter(m => !m.on && m.pts > 0)
-    .sort((a,b) => (a.faltan ?? 9e9) - (b.faltan ?? 9e9)).slice(0,4);
-  $('#pfNext').innerHTML = prox.length ? prox.map(m =>
-    '<div class="nx">'+
-      '<div class="nx-ico">🔒</div>'+
-      '<div class="nx-b"><div class="nx-n">'+m.n+'</div>'+
-      '<div class="nx-e">'+(m.faltan != null ? textoEspera(m.faltan) : 'Pendiente')+'</div></div>'+
-      '<div class="nx-p">+'+miles(m.pts)+'</div>'+
-    '</div>').join('')
-    : '<div class="nx"><div class="nx-b"><div class="nx-n">Has desbloqueado todos.</div></div></div>';
+  $('#pfTier').textContent = 'Partner';
+  $('#pfLvl').textContent = D.aportesExtra > 0 ? (D.aportesExtra + 1) + ' aportes' : '1 aporte';
+  $('#pfPts').textContent = usd(D.aportado);
+  $('#pfMs').textContent = D.retiros > 0 ? usd(D.retiros) : usd(0);
   $('#pfDias').textContent = miles(D.dias) + ' días';
   if(D.inicio){
     $('#pfSince').textContent = 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear();
@@ -2049,8 +1725,6 @@ function pintarTodo(){
   contar(amt, D.gestion, usdS);
   contar(pct, D.rendimiento, v => (D.rendimiento >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%');
 
-  contar($('#ptsTop'), D.puntos, miles);
-  contar($('#ptsBig'), D.puntos, miles);
   contar($('#sCap'), D.capital, usd);
   const sben = $('#sBen');
   sben.className = 'v num ' + (D.gestion >= 0 ? 'pos' : 'neg');
@@ -2065,18 +1739,10 @@ function pintarTodo(){
   contar(smej, mejorV, usdS);
   $('#sMejorMes').textContent = D.mejorMes && D.mejorMes[0] ? mLabelLargo(D.mejorMes[0]).replace(/^./, x => x.toUpperCase()) : '—';
 
-  contar($('#wdTotal'), D.retiros, usd);
-  const gen = $('#wdGen');
-  gen.className = 'wd-v num ' + (D.gestion >= 0 ? 'pos' : 'neg');
-  contar(gen, D.gestion, usdS);
   $('#wdAvail').textContent = usd(D.capital);
 
   pintarObjetivo();
-  pintarMeridiano();
-  pintarJourney();
-  pintarMilestones();
-  pintarPuntos();
-  pintarRetiros();
+  pintarMovimientos();
   pintarFeed();
 }
 
@@ -2145,16 +1811,12 @@ $('#goalSave').addEventListener('click', () => {
   if(!v || v <= 0){ aviso('Escribe un monto válido'); return; }
   if(v <= D.capital){ aviso('El objetivo debe superar tu capital actual'); return; }
   try { localStorage.setItem('rcj_goal_'+D.id, String(v)); } catch(e){}
-  const antesPuntos = D.puntos;
   D.objetivo = v;
-  D.objetivoPropio = true;
   D.faltan = +(v - D.capital).toFixed(2);
   D.progreso = Math.min(100, D.capital/v*100);
-  recalcular(D);
-  pintarObjetivo(); pintarJourney(); pintarMilestones(); pintarPuntos(); pintarMeridiano();
-  contar($('#ptsTop'), D.puntos, miles); contar($('#ptsBig'), D.puntos, miles);
+  pintarObjetivo();
   cerrar($('#mGoal'));
-  aviso(D.puntos > antesPuntos ? 'Objetivo guardado · +100 puntos' : 'Objetivo actualizado a ' + usd0(v));
+  aviso('Objetivo actualizado a ' + usd0(v));
 });
 
 /* ── SOLICITUDES DE DEPÓSITO Y RETIRO ────── */
@@ -2339,7 +2001,6 @@ $('#wdGo').addEventListener('click', async () => {
   mostrarOk('retiro', v, ref, enviado);
 });
 
-$('#msGo').addEventListener('click', () => cerrar($('#mMs')));
 $$('[data-sw]').forEach(s => s.addEventListener('click', () => s.classList.toggle('on')));
 
 /* ═══════════════════════════════════════════
