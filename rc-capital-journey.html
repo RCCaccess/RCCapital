@@ -202,6 +202,16 @@ button{font-family:inherit;color:inherit;}
 }
 
 .cap-note{font-size:12.5px;color:var(--muted);margin-top:9px;}
+.cap-sub{
+  font-family:var(--mono);font-size:11.5px;color:var(--muted);
+  margin-top:12px;line-height:1.8;
+}
+.hero-split{
+  margin-top:24px;padding-top:20px;
+  border-top:1px solid var(--line);
+}
+.hero-split .cap-label{margin-bottom:7px;}
+.hero-split .cap-delta{margin-top:0;}
 
 
 /* ── SIGNATURE · MERIDIANO ──────────────────── */
@@ -392,6 +402,7 @@ button{font-family:inherit;color:inherit;}
 }
 
 .feed-ico.b{background:var(--brass-tint);}
+.feed-ico.az{background:var(--blue-tint);}
 
 .feed-b{flex:1;min-width:0;}
 
@@ -898,11 +909,16 @@ to{transform:rotate(360deg);}
     <p class="hello">Hola, <b id="helloName">—</b> 👋</p>
     <div class="cap-label">Capital actual</div>
     <div class="cap-figure num" id="capFig">$0.00</div>
-    <div class="cap-delta">
-      <span class="amt pos" id="capAmt">+$0.00</span>
-      <span class="pct" id="capPct">+0.00%</span>
+    <p class="cap-sub" id="capSub">—</p>
+
+    <div class="hero-split">
+      <div class="cap-label">Resultado de gestión</div>
+      <div class="cap-delta">
+        <span class="amt pos" id="capAmt">+$0.00</span>
+        <span class="pct" id="capPct">+0.00%</span>
+      </div>
+      <p class="cap-note" id="capNote">—</p>
     </div>
-    <p class="cap-note" id="capNote">Rendimiento acumulado</p>
 
   </section>
 
@@ -1392,20 +1408,34 @@ function construirModelo(st, cli){
 
 function construirFeed(m){
   const f = [];
-  const ultimos = m.meses.slice(-4).reverse();
-  for(const [k,v] of ultimos){
+
+  // resultados mensuales
+  for(const [k,v] of m.meses){
     const [y,mm] = k.split('-');
     f.push({
       i: v >= 0 ? '📈' : '📉',
       t: 'Resultado de ' + mLabelLargo(k),
       v: usdS(v),
       f: new Date(+y, +mm, 0),
-      pos: v >= 0,
-      neg: v < 0
+      pos: v >= 0, neg: v < 0
     });
   }
-  if(m.inicio) f.push({i:'🚀', t:'Comenzaste tu journey', v:usd(m.capitalInicial), f:m.inicio, brass:true});
-  return f.slice(0,5);
+
+  // aportes adicionales
+  for(const x of (m.extras || [])){
+    f.push({i:'↑', t:'Aporte adicional', v:'+'+usd(x.monto), f:x.f, pos:true, azul:true});
+  }
+
+  // retiros
+  for(const x of (m.salidas || [])){
+    f.push({i:'↓', t:'Retiro procesado', v:'−'+usd(x.monto), f:x.f, neg:true, brass:true});
+  }
+
+  // depósito inicial
+  if(m.inicial) f.push({i:'🚀', t:'Depósito inicial', v:usd(m.inicial.monto), f:m.inicial.f, azul:true});
+
+  f.sort((a,b) => b.f - a.f);
+  return f.slice(0,6);
 }
 
 /* ═══════════════════════════════════════════
@@ -1672,7 +1702,7 @@ function pintarFeed(){
   const F = construirFeed(D);
   $('#feed').innerHTML = F.length ? F.map(f =>
     '<div class="feed-row">'+
-      '<div class="feed-ico'+(f.brass?' b':'')+'">'+f.i+'</div>'+
+      '<div class="feed-ico'+(f.brass?' b':f.azul?' az':'')+'">'+f.i+'</div>'+
       '<div class="feed-b"><div class="feed-t">'+f.t+'</div>'+
       '<div class="feed-d">'+fechaCorta(f.f)+'</div></div>'+
       '<div class="feed-v'+(f.pos?' pos':f.neg?' neg':'')+'">'+f.v+'</div>'+
@@ -1699,23 +1729,22 @@ function pintarIdentidad(){
   $('#pfDias').textContent = miles(D.dias) + ' días';
   if(D.inicio){
     $('#pfSince').textContent = 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear();
-    const desde = 'desde el ' + D.inicio.getDate() + ' de ' + MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
+    const desde = 'Desde el ' + D.inicio.getDate() + ' de ' + MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
     $('#capNote').textContent = (D.aportesExtra > 0 || D.retiros > 0)
-      ? 'Rendimiento de la gestión ' + desde + ', sin contar tus aportes ni retiros'
-      : 'Rendimiento acumulado ' + desde;
+      ? desde + '. El porcentaje mide solo la gestión, no tus aportes ni retiros.'
+      : desde + '.';
   }
 }
 
 function pintarTodo(){
   pintarIdentidad();
-  // desglose bajo el capital
+  // cómo se compone el capital actual
   const partes = [];
-  partes.push('Aportado: <span class="dv">'+usd(D.aportado)+'</span>'
-    + (D.aportesExtra > 0 ? ' <span style="color:var(--faint);">en '+(D.aportesExtra+1)+' aportes</span>' : ''));
-  if(D.retiros > 0) partes.push('Retirado: <span class="fee">−'+usd(D.retiros)+'</span>');
-  partes.push('<span class="'+(D.gestion>=0?'cap':'fee')+'">Gestión: '+usdS(D.gestion)+'</span>');
-  const hd = document.getElementById('heroDesglose');
-  if(hd) hd.innerHTML = partes.join(' · ');
+  partes.push('Aportado <span class="dv">'+usd(D.aportado)+'</span>'
+    + (D.aportesExtra > 0 ? ' <span style="color:var(--faint);">('+(D.aportesExtra+1)+' aportes)</span>' : ''));
+  if(D.retiros > 0) partes.push('Retirado <span class="fee">−'+usd(D.retiros)+'</span>');
+  partes.push('Gestión <span class="'+(D.gestion>=0?'cap':'fee')+'">'+usdS(D.gestion)+'</span>');
+  $('#capSub').innerHTML = partes.join('  ·  ');
 
   contar($('#capFig'), D.capital, usd);
   const amt = $('#capAmt'), pct = $('#capPct');
