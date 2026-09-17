@@ -1283,7 +1283,7 @@ button{font-family:inherit;color:inherit;}
 const AVISO_EMAIL = 'mentorycap@gmail.com';
 const MIN_DEPOSITO = 50;    // aporte adicional mínimo
 const MIN_RETIRO   = 25;    // retiro mínimo
-const W3F_KEY ='5d5d4a97-33df-4df7-8519-4dd22054d66d';   // ← pega aquí tu access key
+const W3F_KEY = '';   // ← pega aquí tu access key
 
 const SB_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
@@ -1343,35 +1343,83 @@ function parseCSV(text){
 }
 
 function computeStats(rows){
-  const depTx = rows.find(r => isDeposit(r));
-  const depGross = depTx ? Math.abs(depTx.amount) : 0;
-  const depFeeTx = rows.find(r => isDepositFee(r));
-  const depFeeAmt = depFeeTx ? Math.abs(depFeeTx.amount) : 0;
-  const dep = depGross - depFeeAmt;
+  /* Recorre los movimientos en orden y mantiene tres cosas a la vez:
+     - eq    capital real en cada momento
+     - base  capital aportado neto acumulado (aportes − fees − retiros)
+     - twr   rendimiento encadenado, que aísla el resultado de gestión
+             de las entradas y salidas de dinero                       */
+  let eq = 0, base = 0, twr = 1, tramo = 0;
+  let aportes = 0, feesAporte = 0, retiros = 0, runP = 0, runF = 0;
+  const dailyEq = {}, dailyBase = {}, monthlyPnl = {}, flujos = [];
 
-  let runP=0, runF=0, retiros=0;
-  const dailyEq={}, monthlyPnl={};
+  const cerrarTramo = () => {
+    if(tramo > 0) twr *= eq / tramo;
+    tramo = eq;
+  };
+
   for(const r of rows){
-    if(isWithdrawal(r)) retiros += Math.abs(r.amount);
-    if(isDeposit(r) || isDepositFee(r) || isWithdrawal(r)) continue;
-    const mk = mKey(r.time);
-    if(!monthlyPnl[mk]) monthlyPnl[mk] = 0;
-    if(isTrade(r)){ runP += r.amountProfit; monthlyPnl[mk] += r.amountProfit; }
-    if(isFee(r)){ runF += r.amount; monthlyPnl[mk] += r.amount; }
-    dailyEq[dayKey(r.time)] = dep + runP + runF;
+    const dk = dayKey(r.time);
+
+    if(isDeposit(r)){
+      const v = Math.abs(r.amount);
+      cerrarTramo();
+      aportes += v; eq += v; base += v; tramo = eq;
+      flujos.push({f:r.time, dk, tipo:'aporte', monto:v});
+
+    } else if(isDepositFee(r)){
+      const v = Math.abs(r.amount);
+      cerrarTramo();
+      feesAporte += v; eq -= v; base -= v; tramo = eq;
+
+    } else if(isWithdrawal(r)){
+      const v = Math.abs(r.amount);
+      cerrarTramo();
+      retiros += v; eq -= v; base -= v; tramo = eq;
+      flujos.push({f:r.time, dk, tipo:'retiro', monto:v});
+
+    } else {
+      const mk = mKey(r.time);
+      if(!monthlyPnl[mk]) monthlyPnl[mk] = 0;
+      if(isTrade(r)){ runP += r.amountProfit; eq += r.amountProfit; monthlyPnl[mk] += r.amountProfit; }
+      else if(isFee(r)){ runF += r.amount; eq += r.amount; monthlyPnl[mk] += r.amount; }
+    }
+    dailyEq[dk] = eq;
+    dailyBase[dk] = base;
   }
-  const equity = dep + runP + runF;
-  const roi = dep > 0 ? ((equity - dep) / dep * 100) : 0;
-  const me = Object.entries(monthlyPnl).sort(([a],[b]) => a.localeCompare(b));
+  cerrarTramo();
+
+  const aportado = aportes - feesAporte;          // lo que realmente entró a gestión
+  const equity   = eq;                            // capital actual real
+  const gestion  = runP + runF;                   // resultado de la gestión
+  const roi      = twr > 0 ? (twr - 1) * 100 : 0; // rendimiento encadenado
+
+  const me   = Object.entries(monthlyPnl).sort(([a],[b]) => a.localeCompare(b));
   const posM = me.filter(([,v]) => v > 0).length;
   const best = me.reduce((a,b) => b[1] > a[1] ? b : a, ['',0]);
   const fd = rows[0] ? rows[0].time : null;
   const ld = rows[rows.length-1] ? rows[rows.length-1].time : null;
   const days = fd && ld ? Math.round((ld - fd) / DIA) : 0;
+
   const sd = Object.keys(dailyEq).sort();
-  const es = sd.map(dk => ({dk, eq: dailyEq[dk]}));
-  const mEq = {}; for(const {dk,eq} of es) mEq[dk.slice(0,7)] = eq;
-  return {dep, depGross, depFeeAmt, equity, roi, runP, runF, retiros, days, firstDate:fd, lastDate:ld, me, posM, best, es, mEq};
+  const es = sd.map(dk => ({dk, eq: dailyEq[dk], base: dailyBase[dk]}));
+  const mEq = {}; for(const p of es) mEq[p.dk.slice(0,7)] = p.eq;
+
+  // primer aporte, para etiquetar el arranque
+  const primer = flujos.find(f => f.tipo === 'aporte');
+  const depGross = primer ? primer.monto : 0;
+  const feeIni = feesAporte > 0 && primer
+    ? Math.min(feesAporte, rows.filter(r => isDepositFee(r) && dayKey(r.time) === primer.dk)
+        .reduce((a,r) => a + Math.abs(r.amount), 0))
+    : 0;
+
+  return {
+    aportes, feesAporte, aportado, retiros, gestion,
+    equity, roi, runP, runF,
+    dep: aportado, depGross, depFeeAmt: feeIni,
+    aportesExtra: Math.max(0, flujos.filter(f => f.tipo === 'aporte').length - 1),
+    flujos, days, firstDate:fd, lastDate:ld,
+    me, posM, best, es, mEq
+  };
 }
 
 /* ═══════════════════════════════════════════
@@ -1489,7 +1537,7 @@ function objetivoGuardado(id, equity){
 function construirModelo(st, cli){
   const g = objetivoGuardado(cli.id, st.equity);
   const dias = st.firstDate && st.lastDate ? Math.round((st.lastDate - st.firstDate)/DIA) + 1 : 0;
-  const gestion = st.runP + st.runF;
+  const gestion = st.gestion;
 
   const m = {
     id: cli.id,
@@ -1497,6 +1545,11 @@ function construirModelo(st, cli){
     depositos: st.depGross,
     feeActivacion: st.depFeeAmt,
     capitalInicial: st.dep,
+    aportes: st.aportes,
+    feesAporte: st.feesAporte,
+    aportado: st.aportado,
+    aportesExtra: st.aportesExtra,
+    flujos: st.flujos,
     capital: st.equity,
     retiros: st.retiros,
     gestion: gestion,
@@ -1510,7 +1563,7 @@ function construirModelo(st, cli){
     mejorMes: st.best,
     objetivo: g.valor,
     objetivoPropio: g.propio,
-    serie: st.es.map(p => ({f: new Date(p.dk + 'T00:00:00'), v: p.eq}))
+    serie: st.es.map(p => ({f: new Date(p.dk + 'T00:00:00'), v: p.eq, base: p.base}))
   };
   m.faltan = +(m.objetivo - m.capital).toFixed(2);
   m.progreso = m.objetivo > 0 ? Math.min(100, m.capital / m.objetivo * 100) : 0;
@@ -1625,8 +1678,7 @@ function pintar(k){
 
   const P = {l:54,r:14,t:16,b:30};
   const iw = W-P.l-P.r, ih = H-P.t-P.b;
-  const base = D.capitalInicial;
-  const vals = datos.map(p => p.v).concat([base]);
+  const vals = datos.map(p => p.v).concat(datos.map(p => p.base));
   let lo = Math.min(...vals), hi = Math.max(...vals);
   const m = (hi-lo)*.14 || 10; lo -= m; hi += m;
   const span = hi-lo || 1, n = datos.length;
@@ -1651,16 +1703,22 @@ function pintar(k){
   cx.textAlign = 'center';
   for(let i=0;i<n;i+=paso) cx.fillText(MES_CORTO[datos[i].f.getMonth()]+' '+datos[i].f.getDate(), X(i), H-9);
 
-  const yb = Y(base);
-  cx.strokeStyle = 'rgba(35,99,158,.42)'; cx.lineWidth = 1.4; cx.setLineDash([5,4]);
-  cx.beginPath(); cx.moveTo(P.l,yb); cx.lineTo(P.l+iw,yb); cx.stroke(); cx.setLineDash([]);
+  // línea de capital aportado — escalonada, sube con cada aporte
+  cx.strokeStyle = 'rgba(35,99,158,.45)'; cx.lineWidth = 1.5; cx.setLineDash([5,4]);
+  cx.beginPath();
+  for(let i=0;i<n;i++){
+    const x = X(i), y = Y(datos[i].base);
+    if(i === 0) cx.moveTo(x,y);
+    else { cx.lineTo(x, Y(datos[i-1].base)); cx.lineTo(x,y); }
+  }
+  cx.stroke(); cx.setLineDash([]);
   cx.fillStyle = 'rgba(35,99,158,.82)';
   cx.font = '600 9.5px Inter,sans-serif'; cx.textAlign = 'left';
-  cx.fillText('Capital inicial', P.l+5, yb-7);
+  cx.fillText('Capital aportado', P.l+5, Y(datos[0].base)-7);
 
   const kk = k === undefined ? 1 : k;
   const hasta = Math.max(2, Math.floor(n*kk));
-  const sube = datos[n-1].v >= base;
+  const sube = datos[n-1].v >= datos[n-1].base;
   const col = sube ? '#0B8A6B' : '#C8483C';
 
   const g = cx.createLinearGradient(0,P.t,0,P.t+ih);
@@ -1668,7 +1726,8 @@ function pintar(k){
   g.addColorStop(1, sube ? 'rgba(11,138,107,0)'   : 'rgba(200,72,60,0)');
   cx.beginPath();
   for(let i=0;i<hasta;i++){ const x=X(i), y=Y(datos[i].v); i?cx.lineTo(x,y):cx.moveTo(x,y); }
-  cx.lineTo(X(hasta-1), yb); cx.lineTo(X(0), yb); cx.closePath();
+  for(let i=hasta-1;i>=0;i--){ cx.lineTo(X(i), Y(datos[i].base)); }
+  cx.closePath();
   cx.fillStyle = g; cx.fill();
 
   cx.beginPath();
@@ -1676,6 +1735,22 @@ function pintar(k){
   cx.strokeStyle = col; cx.lineWidth = 2.4; cx.lineJoin='round'; cx.lineCap='round'; cx.stroke();
 
   if(kk >= 1){
+    // marcas de aportes y retiros posteriores al inicio
+    const idx = {}; datos.forEach((p,i) => { idx[dayKey(p.f)] = i; });
+    for(const fl of (D.flujos || [])){
+      const i = idx[fl.dk];
+      if(i == null || i === 0) continue;
+      const x = X(i), y = Y(datos[i].v);
+      cx.strokeStyle = fl.tipo === 'aporte' ? 'rgba(35,99,158,.45)' : 'rgba(168,121,44,.5)';
+      cx.lineWidth = 1; cx.setLineDash([3,3]);
+      cx.beginPath(); cx.moveTo(x,P.t); cx.lineTo(x,P.t+ih); cx.stroke(); cx.setLineDash([]);
+      cx.beginPath(); cx.arc(x, y, 3.5, 0, Math.PI*2);
+      cx.fillStyle = fl.tipo === 'aporte' ? '#23639E' : '#A8792C';
+      cx.fill();
+      cx.fillStyle = fl.tipo === 'aporte' ? 'rgba(35,99,158,.9)' : 'rgba(168,121,44,.9)';
+      cx.font = '600 9px Inter,sans-serif'; cx.textAlign = 'center';
+      cx.fillText(fl.tipo === 'aporte' ? '+' + usd0(fl.monto) : '−' + usd0(fl.monto), x, P.t - 4);
+    }
     const x = X(n-1), y = Y(datos[n-1].v);
     cx.beginPath(); cx.arc(x,y,5.5,0,Math.PI*2);
     cx.fillStyle = '#fff'; cx.fill();
@@ -1703,7 +1778,7 @@ function tocar(ev){
   const k = Math.max(0, Math.min(1, (px-P.l)/iw));
   const i = Math.round(k*(datos.length-1));
   const p = datos[i]; if(!p) return;
-  const rend = D.capitalInicial > 0 ? (p.v - D.capitalInicial)/D.capitalInicial*100 : 0;
+  const rend = p.base > 0 ? (p.v - p.base)/p.base*100 : 0;
 
   $('#tipD').textContent = fechaCorta(p.f);
   $('#tipV').textContent = usd(p.v);
@@ -1717,7 +1792,7 @@ function tocar(ev){
   cx.beginPath(); cx.moveTo(x,P.t); cx.lineTo(x,P.t+geo.ih); cx.stroke();
   cx.beginPath(); cx.arc(x,y,5,0,Math.PI*2);
   cx.fillStyle = '#fff'; cx.fill();
-  cx.strokeStyle = p.v >= D.capitalInicial ? '#0B8A6B' : '#C8483C';
+  cx.strokeStyle = p.v >= p.base ? '#0B8A6B' : '#C8483C';
   cx.lineWidth = 2.4; cx.stroke();
 
   tip.classList.add('on');
@@ -1883,23 +1958,17 @@ function pintarRetiros(){
       '<div class="feed-v">−'+usd(D.retiros)+'</div></div>'
     : '<div class="wd-empty">Aún no has realizado retiros.</div>';
 
-  $('#ldDep').textContent = usd(D.depositos);
-  if(D.feeActivacion > 0){
-    const fila = $('#ldDep').closest('.ledger-row');
-    if(fila && !document.getElementById('ldFee')){
-      const nueva = document.createElement('div');
-      nueva.className = 'ledger-row';
-      nueva.innerHTML = '<span>Fee de activación</span><b class="neg" id="ldFee">−'+usd(D.feeActivacion)+'</b>';
-      fila.after(nueva);
-    } else if(document.getElementById('ldFee')){
-      document.getElementById('ldFee').textContent = '−'+usd(D.feeActivacion);
-    }
-  }
-  $('#ldWd').textContent = D.retiros > 0 ? '−'+usd(D.retiros) : usd(0);
-  const pnl = $('#ldPnl');
-  pnl.textContent = usdS(D.gestion);
-  pnl.className = D.gestion >= 0 ? 'pos' : 'neg';
-  $('#ldCap').textContent = usd(D.capital);
+  // libro completo: aportes, fees, retiros, gestión, capital
+  const libro = $('#ldDep').closest('.ledger');
+  const filas = [];
+  filas.push(['Aportes' + (D.aportesExtra > 0 ? ' ('+(D.aportesExtra+1)+')' : ''), usd(D.aportes), '']);
+  if(D.feesAporte > 0) filas.push(['Fees de activación', '−'+usd(D.feesAporte), 'neg']);
+  if(D.retiros > 0)    filas.push(['Retiros', '−'+usd(D.retiros), 'neg']);
+  filas.push(['Resultado de gestión', usdS(D.gestion), D.gestion >= 0 ? 'pos' : 'neg']);
+  libro.innerHTML = filas.map(([k,v,cl]) =>
+      '<div class="ledger-row"><span>'+k+'</span><b'+(cl?' class="'+cl+'"':'')+'>'+v+'</b></div>'
+    ).join('') +
+    '<div class="ledger-row total"><span>Capital actual</span><b id="ldCap">'+usd(D.capital)+'</b></div>';
 }
 
 function pintarFeed(){
@@ -1954,12 +2023,24 @@ function pintarIdentidad(){
   $('#pfDias').textContent = miles(D.dias) + ' días';
   if(D.inicio){
     $('#pfSince').textContent = 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear();
-    $('#capNote').textContent = 'Rendimiento acumulado desde el ' + D.inicio.getDate() + ' de ' + MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
+    const desde = 'desde el ' + D.inicio.getDate() + ' de ' + MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
+    $('#capNote').textContent = (D.aportesExtra > 0 || D.retiros > 0)
+      ? 'Rendimiento de la gestión ' + desde + ', sin contar tus aportes ni retiros'
+      : 'Rendimiento acumulado ' + desde;
   }
 }
 
 function pintarTodo(){
   pintarIdentidad();
+  // desglose bajo el capital
+  const partes = [];
+  partes.push('Aportado: <span class="dv">'+usd(D.aportado)+'</span>'
+    + (D.aportesExtra > 0 ? ' <span style="color:var(--faint);">en '+(D.aportesExtra+1)+' aportes</span>' : ''));
+  if(D.retiros > 0) partes.push('Retirado: <span class="fee">−'+usd(D.retiros)+'</span>');
+  partes.push('<span class="'+(D.gestion>=0?'cap':'fee')+'">Gestión: '+usdS(D.gestion)+'</span>');
+  const hd = document.getElementById('heroDesglose');
+  if(hd) hd.innerHTML = partes.join(' · ');
+
   contar($('#capFig'), D.capital, usd);
   const amt = $('#capAmt'), pct = $('#capPct');
   amt.className = 'amt ' + (D.gestion >= 0 ? 'pos' : 'neg');
