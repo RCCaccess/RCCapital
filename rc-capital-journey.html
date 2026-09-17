@@ -202,6 +202,15 @@ button{font-family:inherit;color:inherit;}
 }
 
 .cap-note{font-size:12.5px;color:var(--muted);margin-top:9px;}
+.inspira{
+  margin-top:22px;padding:14px 18px;
+  background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--blue);
+  border-radius:0 var(--r-m) var(--r-m) 0;
+  font-size:13.5px;line-height:1.6;color:var(--ink);
+  box-shadow:var(--sh-1);
+}
+.inspira b{font-weight:600;}
 .cap-sub{
   font-family:var(--mono);font-size:11.5px;color:var(--muted);
   margin-top:12px;line-height:1.8;
@@ -917,8 +926,10 @@ to{transform:rotate(360deg);}
         <span class="amt pos" id="capAmt">+$0.00</span>
         <span class="pct" id="capPct">+0.00%</span>
       </div>
-      <p class="cap-note" id="capNote">—</p>
+      <p class="cap-note" id="capDesde">—</p>
     </div>
+
+    <p class="inspira" id="inspira">—</p>
 
   </section>
 
@@ -1729,11 +1740,50 @@ function pintarIdentidad(){
   $('#pfDias').textContent = miles(D.dias) + ' días';
   if(D.inicio){
     $('#pfSince').textContent = 'Partner desde ' + MES_LARGO[D.inicio.getMonth()] + ' ' + D.inicio.getFullYear();
-    const desde = 'Desde el ' + D.inicio.getDate() + ' de ' + MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
-    $('#capNote').textContent = (D.aportesExtra > 0 || D.retiros > 0)
-      ? desde + '. El porcentaje mide solo la gestión, no tus aportes ni retiros.'
-      : desde + '.';
+    $('#capDesde').textContent = 'Desde el ' + D.inicio.getDate() + ' de ' +
+      MES_LARGO[D.inicio.getMonth()] + ' de ' + D.inicio.getFullYear();
   }
+}
+
+/* Mensaje de cierre del hero.
+   Se adapta al momento del inversor. Nunca promete
+   rendimientos ni celebra cuando el capital ha bajado. */
+function mensajeInspirador(m){
+  const meses = m.mesesTotales || 0;
+  const pos   = m.gestion >= 0;
+  const nuevo = meses <= 1;
+  const largo = m.dias >= 365;
+
+  let set;
+  if(nuevo){
+    set = [
+      'Acabas de empezar. Desde aquí vas a ver cómo evoluciona tu capital, mes a mes, sin sorpresas.',
+      'Tu capital ya está en gestión. Lo importante ahora es el horizonte, no la primera semana.'
+    ];
+  } else if(pos && largo){
+    set = [
+      'Llevas más de un año construyendo. Esa constancia es justamente lo que hace la diferencia.',
+      'El tiempo es tu mejor aliado. Cada mes que permaneces, tu capital tiene más espacio para trabajar.'
+    ];
+  } else if(pos){
+    set = [
+      'Vas construyendo. Lo que ves aquí es el resultado de haber empezado y haberte quedado.',
+      'Paso a paso. Construir capital tiene más que ver con la constancia que con la prisa.'
+    ];
+  } else if(largo){
+    set = [
+      'Los mercados se mueven en ciclos y este es uno de ellos. Seguimos trabajando tu capital con la misma disciplina de siempre.',
+      'Llevas tiempo aquí y eso cuenta. Si quieres revisar tu estrategia, escríbenos cuando lo necesites.'
+    ];
+  } else {
+    set = [
+      'Este período ha sido cuesta arriba. Invertir se mide en años, no en semanas, y estamos acompañándote en todo el trayecto.',
+      'Los resultados varían mes a mes. Si tienes dudas sobre tu cuenta, escríbenos y lo conversamos con calma.'
+    ];
+  }
+  // rota de forma estable según el día
+  const idx = (new Date().getDate() + meses) % set.length;
+  return set[idx];
 }
 
 function pintarTodo(){
@@ -1745,6 +1795,7 @@ function pintarTodo(){
   if(D.retiros > 0) partes.push('Retirado <span class="fee">−'+usd(D.retiros)+'</span>');
   partes.push('Gestión <span class="'+(D.gestion>=0?'cap':'fee')+'">'+usdS(D.gestion)+'</span>');
   $('#capSub').innerHTML = partes.join('  ·  ');
+  $('#inspira').textContent = mensajeInspirador(D);
 
   contar($('#capFig'), D.capital, usd);
   const amt = $('#capAmt'), pct = $('#capPct');
