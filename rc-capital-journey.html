@@ -1746,44 +1746,22 @@ function pintarIdentidad(){
 }
 
 /* Mensaje de cierre del hero.
-   Se adapta al momento del inversor. Nunca promete
-   rendimientos ni celebra cuando el capital ha bajado. */
-function mensajeInspirador(m){
-  const meses = m.mesesTotales || 0;
-  const pos   = m.gestion >= 0;
-  const nuevo = meses <= 1;
-  const largo = m.dias >= 365;
+   Para cambiarlo, edita este bloque y nada más.
+   Evita prometer rendimientos: habla del trabajo,
+   no del resultado.                              */
+const MENSAJES = {
+  nuevo: 'Bienvenido a RC Capital. Los grandes resultados se construyen con tiempo, disciplina y consistencia. Empezamos a trabajar tu capital desde hoy.',
+  general: [
+    'Los grandes resultados se construyen con tiempo, disciplina y consistencia. Seguimos trabajando para hacer crecer tu capital.',
+    'El tiempo y la disciplina son los que construyen resultados. Seguimos trabajando tu capital con la dedicación de siempre.',
+    'Construir capital es un trabajo de constancia. Seguimos aquí, gestionando con disciplina cada día.'
+  ]
+};
 
-  let set;
-  if(nuevo){
-    set = [
-      'Acabas de empezar. Desde aquí vas a ver cómo evoluciona tu capital, mes a mes, sin sorpresas.',
-      'Tu capital ya está en gestión. Lo importante ahora es el horizonte, no la primera semana.'
-    ];
-  } else if(pos && largo){
-    set = [
-      'Llevas más de un año construyendo. Esa constancia es justamente lo que hace la diferencia.',
-      'El tiempo es tu mejor aliado. Cada mes que permaneces, tu capital tiene más espacio para trabajar.'
-    ];
-  } else if(pos){
-    set = [
-      'Vas construyendo. Lo que ves aquí es el resultado de haber empezado y haberte quedado.',
-      'Paso a paso. Construir capital tiene más que ver con la constancia que con la prisa.'
-    ];
-  } else if(largo){
-    set = [
-      'Los mercados se mueven en ciclos y este es uno de ellos. Seguimos trabajando tu capital con la misma disciplina de siempre.',
-      'Llevas tiempo aquí y eso cuenta. Si quieres revisar tu estrategia, escríbenos cuando lo necesites.'
-    ];
-  } else {
-    set = [
-      'Este período ha sido cuesta arriba. Invertir se mide en años, no en semanas, y estamos acompañándote en todo el trayecto.',
-      'Los resultados varían mes a mes. Si tienes dudas sobre tu cuenta, escríbenos y lo conversamos con calma.'
-    ];
-  }
-  // rota de forma estable según el día
-  const idx = (new Date().getDate() + meses) % set.length;
-  return set[idx];
+function mensajeInspirador(m){
+  if((m.mesesTotales || 0) <= 1) return MENSAJES.nuevo;
+  const s = MENSAJES.general;
+  return s[(new Date().getDate() + (m.mesesTotales || 0)) % s.length];
 }
 
 function pintarTodo(){
@@ -2196,4 +2174,3 @@ $('#gBtn').addEventListener('click', entrar);
 </script>
 </body>
 </html>
-
