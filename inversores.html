@@ -527,7 +527,8 @@ function parseDateAny(s){if(!s)return null;const str=String(s).trim();let d=new 
 const isTrade     = r => /traderesult/i.test(r.reason);
 const isDeposit   = r => /^deposit$/i.test(r.reason);
 const isDepositFee= r => /^depositfee$/i.test(r.reason);
-const isFee       = r => /fee/i.test(r.reason) && !isDepositFee(r);
+const isWithdrawal= r => /withdraw/i.test(r.reason);
+const isFee       = r => /fee/i.test(r.reason) && !isDepositFee(r) && !isWithdrawal(r);
 function parseCSV(text){
   const sep=detectSep(text),lines=text.split(/\r?\n/).filter(l=>l.trim());
   if(lines.length<2)throw new Error('CSV vacío');
@@ -542,10 +543,53 @@ function parseCSV(text){
 }
 
 function computeStats(rows){
-  const depTx=rows.find(r=>isDeposit(r));const depGross=depTx?Math.abs(depTx.amount):0;const depFeeTx=rows.find(r=>isDepositFee(r));const depFeeAmt=depFeeTx?Math.abs(depFeeTx.amount):0;const dep=depGross-depFeeAmt;
-  let runP=0,runF=0;const dailyEq={},monthlyPnl={};
-  for(const r of rows){if(isDeposit(r)||isDepositFee(r))continue;const mk=mKey(r.time);if(!monthlyPnl[mk])monthlyPnl[mk]=0;if(isTrade(r)){runP+=r.amountProfit;monthlyPnl[mk]+=r.amountProfit;}if(isFee(r)){runF+=r.amount;monthlyPnl[mk]+=r.amount;}dailyEq[dayKey(r.time)]=dep+runP+runF;}
-  const equity=dep+runP+runF,roi=dep>0?((equity-dep)/dep*100):0;
+  // Motor con soporte para aportes adicionales, retiros y TWR (time-weighted return).
+  // eq   = capital en gestión (sube con aportes y ganancias, baja con retiros y pérdidas)
+  // base = capital neto aportado por el inversor
+  // twr  = encadena el rendimiento entre flujos, para que aportes/retiros no distorsionen el %
+  let eq=0, base=0, twr=1, tramo=0;
+  let aportes=0, feesAporte=0, retiros=0, runP=0, runF=0;
+  const dailyEq={}, monthlyPnl={}, flujos=[];
+  let inicial=null; const extras=[], salidas=[];
+
+  const cerrarTramo=()=>{ if(tramo>0) twr*=eq/tramo; tramo=eq; };
+
+  for(const r of rows){
+    const dk=dayKey(r.time);
+    if(isDeposit(r)){
+      const v=Math.abs(r.amount);
+      cerrarTramo();
+      aportes+=v; eq+=v; base+=v; tramo=eq;
+      flujos.push({f:r.time,dk,tipo:'aporte',monto:v});
+      if(!inicial) inicial={monto:v,f:r.time,dk,fee:0};
+      else extras.push({monto:v,f:r.time,dk,fee:0});
+    } else if(isDepositFee(r)){
+      const v=Math.abs(r.amount);
+      cerrarTramo();
+      feesAporte+=v; eq-=v; base-=v; tramo=eq;
+      if(inicial&&inicial.dk===dk) inicial.fee+=v;
+      else { const e=extras.find(x=>x.dk===dk); if(e) e.fee+=v; }
+    } else if(isWithdrawal(r)){
+      const v=Math.abs(r.amount);
+      cerrarTramo();
+      retiros+=v; eq-=v; base-=v; tramo=eq;
+      flujos.push({f:r.time,dk,tipo:'retiro',monto:v});
+      salidas.push({monto:v,f:r.time,dk});
+    } else {
+      const mk=mKey(r.time);
+      if(!monthlyPnl[mk]) monthlyPnl[mk]=0;
+      if(isTrade(r)){ runP+=r.amountProfit; eq+=r.amountProfit; monthlyPnl[mk]+=r.amountProfit; }
+      else if(isFee(r)){ runF+=r.amount; eq+=r.amount; monthlyPnl[mk]+=r.amount; }
+    }
+    dailyEq[dk]=eq;
+  }
+  cerrarTramo();
+
+  const dep=aportes-feesAporte;            // capital neto aportado
+  const depGross=inicial?inicial.monto:0;  // depósito inicial bruto
+  const depFeeAmt=inicial?inicial.fee:0;   // activation fee del inicial
+  const equity=eq;                         // capital actual en gestión
+  const roi=twr>0?(twr-1)*100:0;           // rendimiento de la gestión, sin contaminar por flujos
   const me=Object.entries(monthlyPnl).sort(([a],[b])=>a.localeCompare(b));
   const posM=me.filter(([,v])=>v>0).length;
   const best=me.reduce((a,b)=>b[1]>a[1]?b:a,['',0]);
@@ -553,7 +597,9 @@ function computeStats(rows){
   const days=fd&&ld?Math.round((ld-fd)/86400000):0;
   const sd=Object.keys(dailyEq).sort();const es=sd.map(dk=>({dk,eq:dailyEq[dk]}));
   const mEq={};for(const{dk,eq}of es)mEq[dk.slice(0,7)]=eq;
-  return{dep,depGross,depFeeAmt,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq};
+  return{dep,depGross,depFeeAmt,equity,roi,runP,runF,days,firstDate:fd,lastDate:ld,me,posM,best,es,mEq,
+         aportes,feesAporte,aportado:dep,retiros,gestion:runP+runF,
+         inicial,extras,salidas,aportesExtra:extras.length,flujos};
 }
 
 function renderReporte(rep){
@@ -569,14 +615,22 @@ function renderReporte(rep){
   $('heroROI').className='hero-roi '+(stats.roi>=0?'pos':'neg');
   $('heroSub').textContent=stats.days+' días · Rendimiento neto (incluye comisiones)';
   $('heroEq').textContent=fmtUSD(stats.equity);
-  if(stats.depFeeAmt>0){
-    $('heroDep').innerHTML=
-      'Depósito inicial: <span style="color:var(--text);font-weight:600;">'+fmtUSD(stats.depGross)+'</span><br>'+
-      'Activation fee: <span style="color:var(--bad);">-'+fmtUSD(stats.depFeeAmt)+'</span><br>'+
-      '<span style="color:var(--accent);font-weight:700;">Capital a gestionar: '+fmtUSD(stats.dep)+'</span>';
-  } else {
-    $('heroDep').textContent='Depósito inicial: '+fmtUSD(stats.depGross);
-  }
+  (function(){
+    const L=[];
+    L.push('Depósito inicial: <span style="color:var(--text);font-weight:600;">'+fmtUSD(stats.depGross)+'</span>');
+    if(stats.depFeeAmt>0)
+      L.push('Activation fee: <span style="color:var(--bad);">-'+fmtUSD(stats.depFeeAmt)+'</span>');
+    if(stats.aportesExtra>0){
+      const extraBruto=stats.extras.reduce((s,e)=>s+e.monto,0);
+      const extraFee=stats.extras.reduce((s,e)=>s+e.fee,0);
+      L.push('Aportes adicionales ('+stats.aportesExtra+'): <span style="color:var(--good);font-weight:600;">+'+fmtUSD(extraBruto)+'</span>');
+      if(extraFee>0) L.push('Comisión de aportes: <span style="color:var(--bad);">-'+fmtUSD(extraFee)+'</span>');
+    }
+    if(stats.retiros>0)
+      L.push('Retiros ('+stats.salidas.length+'): <span style="color:var(--bad);font-weight:600;">-'+fmtUSD(stats.retiros)+'</span>');
+    L.push('<span style="color:var(--accent);font-weight:700;">Capital neto aportado: '+fmtUSD(stats.aportado)+'</span>');
+    $('heroDep').innerHTML=L.join('<br>');
+  })();
   const netProfit=stats.runP+stats.runF;
   $('kpiProfit').textContent=(netProfit>=0?'+':'')+fmtUSD(netProfit);
   $('kpiProfit').className='kpi-v '+(netProfit>=0?'pos':'neg');
@@ -612,7 +666,7 @@ function drawEquityChart(){
   const depY=pad.t+ih*(1-(deposit-minV)/span);
   ctx.strokeStyle='rgba(14,22,32,.06)';ctx.setLineDash([5,6]);ctx.lineWidth=1.2;
   ctx.beginPath();ctx.moveTo(pad.l,depY);ctx.lineTo(pad.l+iw,depY);ctx.stroke();ctx.setLineDash([]);
-  ctx.fillStyle='rgba(14,22,32,.5)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';ctx.fillText('Depósito',pad.l+6,depY-6);
+  ctx.fillStyle='rgba(14,22,32,.5)';ctx.font='10px JetBrains Mono,monospace';ctx.textAlign='left';ctx.fillText('Capital aportado',pad.l+6,depY-6);
   const lastVal=equity[n-1],isPos=lastVal>=deposit;
   ctx.beginPath();for(let i=0;i<n;i++){const x=pad.l+iw*(i/Math.max(1,n-1)),y=pad.t+ih*(1-(equity[i]-minV)/span);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
   ctx.lineTo(pad.l+iw,depY);ctx.lineTo(pad.l,depY);ctx.closePath();
@@ -779,7 +833,7 @@ function generarPDF(){
         ctx.beginPath(); ctx.moveTo(pp.l,depY); ctx.lineTo(pp.l+iw,depY); ctx.stroke();
         ctx.setLineDash([]);
         ctx.fillStyle='rgba(35,99,158,.8)'; ctx.font='700 12px Inter,Helvetica,sans-serif'; ctx.textAlign='left';
-        ctx.fillText('Depósito', pp.l+7, depY-8);
+        ctx.fillText('Capital aportado', pp.l+7, depY-8);
         var pc = equity[n-1] >= deposit;
         var grd=ctx.createLinearGradient(0,pp.t,0,pp.t+ih);
         if(pc){ grd.addColorStop(0,'rgba(11,138,107,.20)'); grd.addColorStop(1,'rgba(11,138,107,.01)'); }
