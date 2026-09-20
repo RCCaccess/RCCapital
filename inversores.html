@@ -103,9 +103,10 @@ button{font-family:inherit;color:inherit;}
 
 .mark-badge{
   width:34px;height:34px;border-radius:10px;flex-shrink:0;
-  background:linear-gradient(150deg,#1D4B7C,#102A47);
+  background:#0A0D12;
+  border:1px solid rgba(255,255,255,.10);
   display:grid;place-items:center;
-  box-shadow:0 3px 10px rgba(16,42,71,.26);
+  box-shadow:0 3px 10px rgba(0,0,0,.30);
 }
 
 .mark-badge span{
@@ -830,9 +831,10 @@ button{font-family:inherit;color:inherit;}
 
 .gate-badge{
   width:66px;height:66px;border-radius:19px;margin:0 auto 17px;
-  background:linear-gradient(150deg,#1D4B7C,#102A47);
+  background:#0A0D12;
+  border:1px solid rgba(255,255,255,.10);
   display:grid;place-items:center;
-  box-shadow:0 10px 34px rgba(16,42,71,.26);
+  box-shadow:0 10px 34px rgba(0,0,0,.40);
 }
 
 .gate-badge span{font-family:var(--display);font-size:22px;font-weight:700;color:#fff;letter-spacing:-.8px;}
@@ -929,7 +931,7 @@ body{background:radial-gradient(900px 500px at 50% -10%,rgba(36,134,208,.10),tra
 .shell{max-width:820px;}
 .hdr{background:rgba(255,255,255,.90);border-bottom-color:rgba(217,228,239,.9);}
 .hdr-in{max-width:820px;height:68px;}
-.mark-badge{width:38px;height:38px;border-radius:12px;background:linear-gradient(145deg,#1769A8,#0B2B49);box-shadow:0 5px 16px rgba(11,43,73,.22);}
+.mark-badge{width:38px;height:38px;border-radius:12px;background:#0A0D12;border:1px solid rgba(255,255,255,.10);box-shadow:0 5px 16px rgba(0,0,0,.34);}
 .mark-name{font-size:15.5px;}
 .mark-sub{color:#7890A6;}
 .avatar{background:linear-gradient(145deg,#2B92D4,#1769A8);}
@@ -949,7 +951,10 @@ body{background:radial-gradient(900px 500px at 50% -10%,rgba(36,134,208,.10),tra
 .hero-performance{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;position:relative;z-index:1;}
 .hero-performance>div{border:1px solid rgba(255,255,255,.11);background:rgba(255,255,255,.075);border-radius:16px;padding:15px;}
 .hero .cap-delta{margin-top:5px;}
-.hero .cap-delta .amt{color:#61D9AE;font-size:21px;font-weight:600;}
+.hero .cap-delta .amt{font-size:21px;font-weight:600;}
+/* el monto sigue el signo del resultado, igual que el porcentaje */
+.hero .cap-delta .amt.pos{color:#61D9AE;}
+.hero .cap-delta .amt.neg{color:#FF8E86;}
 .hero .cap-delta .pct{color:rgba(255,255,255,.72);margin-left:7px;font-size:12px;}
 .hero .cap-note{color:rgba(255,255,255,.48);font-size:10.5px;margin-top:3px;}
 .hero-mini{display:flex;flex-direction:column;justify-content:center;}
@@ -2269,8 +2274,10 @@ function pintarTodo(){
   contar($('#capFig'), D.capital, usd);
   const amt = $('#capAmt'), pct = $('#capPct');
   amt.className = 'amt ' + (D.gestion >= 0 ? 'pos' : 'neg');
-  pct.style.background = D.gestion >= 0 ? 'var(--green-tint)' : 'var(--red-tint)';
-  pct.style.color = D.gestion >= 0 ? 'var(--green)' : 'var(--red)';
+  // monto y porcentaje comparten el mismo color según el signo del resultado
+  const positivo = D.gestion >= 0;
+  pct.style.background = positivo ? 'rgba(76,211,160,.13)' : 'rgba(255,111,103,.13)';
+  pct.style.color = positivo ? '#61D9AE' : '#FF8E86';
   contar(amt, D.gestion, usdS);
   contar(pct, D.rendimiento, v => (D.rendimiento >= 0 ? '+' : '−') + Math.abs(v).toFixed(2) + '%');
 
