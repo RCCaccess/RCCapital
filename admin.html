@@ -279,7 +279,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   #modalDetalle [style*="text-align:right"]{text-align:left !important;}
 }
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 
 <!-- LOGIN -->
@@ -317,7 +317,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
           <span class="icon">📊</span><span class="nav-label"> Dashboard</span>
         </button>
-        <button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)">
+        <button class="nav-item" data-page="ingresos" onclick="showPage('ingresos',this);loadIngresos()">Solicitudes</button><button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)">
           <span class="icon">👥</span><span class="nav-label"> Clientes</span>
         </button>
         <button class="nav-item" data-page="reportes" onclick="showPage('reportes',this)">
@@ -359,7 +359,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       </div>
 
       <!-- DASHBOARD -->
-      <div class="page active" id="page-dashboard">
+      <div class="page" id="page-ingresos"><h2>Solicitudes de ingreso</h2><button class="btn" onclick="loadIngresos()">Actualizar</button><div id="ingresosList"></div><h2>Depósitos y retiros</h2><div id="movimientosList"></div><h2>Vincular cuenta del broker</h2><select id="bindCliente"></select><input id="bindInvestment" placeholder="InvestmentId"/><button class="btn" onclick="bindBroker()">Guardar vínculo</button></div><div class="page active" id="page-dashboard">
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Panorama general del fondo</div>
 
@@ -524,8 +524,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
                 <input type="email" id="newEmail" placeholder="maria@email.com"/>
               </div>
               <div class="form-field">
-                <label>Contraseña de acceso <button type="button" onclick="autoFillPass()" style="margin-left:8px;font-family:var(--sans);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;border:1px solid rgba(0,194,255,.3);background:rgba(0,194,255,.1);color:var(--accent);cursor:pointer;">⚡ Generar</button></label>
-                <input type="text" id="newPass" placeholder="Auto-generada al crear" readonly style="cursor:default;"/>
+                <label>InvestmentId del broker (opcional)</label><input id="newInvestment" placeholder="Identificador exacto"/>
               </div>
               <div class="form-field" style="justify-content:flex-end;">
                 <button class="btn accent" id="btnAgregarCliente" onclick="agregarCliente()">
@@ -707,11 +706,11 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 
 // ── CONFIG ────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
+const SUPABASE_URL = RC_CONFIG.url;
+const SUPABASE_KEY = RC_CONFIG.anonKey;
 
 // Admin credentials — cambia esto
-const ADMIN_EMAIL = 'admin@rccapital.com';
+
 
 // ── THEME ──
 (function(){
@@ -726,31 +725,10 @@ function toggleAdminTheme(){
   if(pill) pill.classList.toggle('pill-on', t === 'light');
 }
 
-const ADMIN_PASS  = 'RCCapital2026Admin';
+
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-// Auto-login from persistent session
-(function(){
-  try{
-    var sess = localStorage.getItem('rcAdminSession');
-    if(sess){
-      var d = JSON.parse(sess);
-      if(d && d.email === ADMIN_EMAIL){
-        // Valid session — skip login screen
-        document.addEventListener('DOMContentLoaded', function(){
-          currentAdmin = {email: d.email};
-          var ls = document.getElementById('loginScreen');
-          var as = document.getElementById('appScreen');
-          if(ls) ls.style.display='none';
-          if(as) as.style.display='block';
-          loadAll();
-        });
-      }
-    }
-  }catch(e){}
-})();
 
 // ── HELPERS ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -775,31 +753,17 @@ function fmtDate(iso){
 $('adminEmail').addEventListener('keydown', e => e.key==='Enter' && login());
 $('adminPass').addEventListener('keydown',  e => e.key==='Enter' && login());
 
+async function adminAllowed(){
+ const {data,error}=await db.rpc('rc_is_admin'); if(error||!data) throw new Error('Tu cuenta no tiene acceso administrativo.');
+}
 async function login(){
-  const email = $('adminEmail').value.trim();
-  const pass  = $('adminPass').value;
-  const err   = $('loginErr');
-  const btn   = $('loginBtn');
-
-  if(!email || !pass){ err.textContent='Completa todos los campos.'; err.style.display='block'; return; }
-  if(email !== ADMIN_EMAIL || pass !== ADMIN_PASS){
-    err.textContent='Credenciales incorrectas.'; err.style.display='block'; return;
-  }
-  btn.textContent='Entrando...'; btn.disabled=true;
-  sessionStorage.setItem('rcadmin','1');
-  // Save persistent session — survives browser close
-  try{localStorage.setItem('rcAdminSession', JSON.stringify({email:email, ts:Date.now()}));}catch(e){}
-  showApp();
+ const btn=$('loginBtn'), err=$('loginErr'); btn.disabled=true; err.style.display='none';
+ try{ const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPass').value});
+ if(error) throw error; await adminAllowed(); showApp(); }
+ catch(e){await db.auth.signOut(); err.textContent=e.message;err.style.display='block';}
+ finally{btn.disabled=false;btn.textContent='Entrar';$('adminPass').value='';}
 }
-
-function logout(){
-  try{localStorage.removeItem('rcAdminSession');}catch(e){}
-  sessionStorage.removeItem('rcadmin');
-  $('appScreen').style.display='none';
-  $('loginScreen').style.display='flex';
-  $('adminPass').value='';
-}
-
+async function logout(){await db.auth.signOut(); location.reload();}
 function showApp(){
   $('loginScreen').style.display='none';
   $('appScreen').style.display='block';
@@ -828,6 +792,7 @@ function showPage(name, el){
 async function loadAll(){
   await loadClientes();
   await loadReportes();
+  await loadIngresos();
   updateDashboard();
   // Restore Mi Cuenta from localStorage
   if(lastConsolidatedCSV){
@@ -1054,7 +1019,7 @@ function renderROIRanking(portfolio){
     var w = Math.min(100, Math.abs(p.roi)/maxAbs*100);
     return '<div style="display:grid;grid-template-columns:1fr 90px 90px 70px;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid #E8EDF2;">'+
       '<div>'+
-        '<div style="font-size:13px;font-weight:600;color:#0E1620;margin-bottom:5px;">'+p.nombre+'</div>'+
+        '<div style="font-size:13px;font-weight:600;color:#0E1620;margin-bottom:5px;">'+rcEscape(p.nombre)+'</div>'+
         '<div style="height:5px;background:#F1F4F8;border-radius:3px;overflow:hidden;">'+
           '<div style="height:100%;width:'+w+'%;background:'+(isPos?'#0B8A6B':'#C8483C')+';border-radius:3px;"></div>'+
         '</div>'+
@@ -1079,7 +1044,7 @@ function renderRecentActivity(reps){
       '<div style="display:flex;align-items:center;gap:10px;">'+
         '<span style="width:30px;height:30px;border-radius:8px;background:#EBF2F9;display:grid;place-items:center;font-size:13px;">📄</span>'+
         '<div>'+
-          '<div style="font-size:13px;font-weight:500;color:#0E1620;">'+(cl?cl.nombre:'Cliente')+'</div>'+
+          '<div style="font-size:13px;font-weight:500;color:#0E1620;">'+rcEscape(cl?cl.nombre:'Cliente')+'</div>'+
           '<div style="font-size:11px;color:#5A6675;">Reporte '+(r.mes||'')+'</div>'+
         '</div>'+
       '</div>'+
@@ -1116,16 +1081,16 @@ function renderClientesTable(){
 
   const tbody = document.getElementById('clientesTbody');
 
-  clientesCache.forEach((c,idx) => {
+  clientesCache.forEach((raw,idx) => {
+ const c={...raw,nombre:rcEscape(raw.nombre),email:rcEscape(raw.email)};
     const safeId = c.id.replace(/-/g,'');
     const passId = 'pass-'+safeId;
-    const passEscaped = (c.password_hash||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
 
     const tr = document.createElement('tr');
     tr.style.cssText = 'border-bottom:1px solid #E8EDF2;transition:background .1s;cursor:pointer;';
     tr.onmouseenter = ()=> tr.style.background='#F5F8FB';
     tr.onmouseleave = ()=> tr.style.background='';
-    tr.onclick = (e)=>{ if(e.target.closest('button')) return; openDetalle(c.id, c.nombre); };
+    tr.onclick = (e)=>{ if(e.target.closest('button')) return; openDetalle(raw.id, raw.nombre); };
 
     tr.innerHTML =
       // Investor name + email
@@ -1145,21 +1110,12 @@ function renderClientesTable(){
       '<td id="roi-'+safeId+'" style="padding:14px 16px;text-align:right;font-family:var(--mono);font-weight:700;">—</td>' +
       // Fecha inicio
       '<td id="startDate-'+safeId+'" style="padding:14px 16px;font-family:var(--mono);font-size:12px;color:#5A6675;">—</td>' +
-      // Password
-      '<td style="padding:14px 16px;text-align:center;">' +
-        '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
-          '<span id="'+passId+'" data-pass="'+passEscaped+'" data-visible="0" style="font-family:var(--mono);font-size:12px;color:#23639E;letter-spacing:1px;">••••••••</span>' +
-          '<button id="eye-'+safeId+'" data-pass-id="'+passId+'" data-eye-id="eye-'+safeId+'" data-pass-val="'+passEscaped+'" onclick="var e=this;togglePass(e.dataset.passId,e.dataset.eyeId,e.dataset.passVal);" ' +
-            'style="background:#F1F4F8;border:1px solid #D6DDE6;cursor:pointer;color:#5A6675;padding:3px 7px;font-size:13px;border-radius:5px;line-height:1;" title="Ver contraseña">👁</button>' +
-          '<button data-copy-pass="'+passEscaped+'" onclick="navigator.clipboard.writeText(this.dataset.copyPass).then(()=>{this.textContent=\'✓\';this.style.color=\'#0B8A6B\';setTimeout(()=>{this.textContent=\'⧉\';this.style.color=\'#23639E\';},1400);})" ' +
-            'style="background:#EBF2F9;border:1px solid #C5D9EC;cursor:pointer;color:#23639E;padding:3px 7px;font-size:14px;border-radius:5px;line-height:1;" title="Copiar contraseña">⧉</button>' +
-        '</div>' +
-      '</td>' +
+      '<td style="padding:14px;text-align:center;">'+(c.auth_user_id?'Vinculado':'Pendiente')+'</td>' +
       // Actions
       '<td style="padding:14px 8px;text-align:center;">' +
         '<div style="display:flex;gap:4px;justify-content:center;">' +
           '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="openEditPass(this.dataset.cid,this.dataset.cnm)" ' +
-            'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Clave</button>' +
+            'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Acceso</button>' +
           '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="confirmDelete(this.dataset.cid,this.dataset.cnm)" ' +
             'style="padding:5px 10px;border-radius:6px;background:#fff;color:#C8483C;border:1px solid #EDCFCC;font-size:11px;cursor:pointer;">Borrar</button>' +
         '</div>' +
@@ -1197,29 +1153,6 @@ async function loadClientData(cl, safeId){
 
 
 // ── GENERAR CLAVE ALEATORIA ──────────────────────────────────────
-function generatePass(){
-  const chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$!';
-  let p='';for(let i=0;i<10;i++)p+=chars[Math.floor(Math.random()*chars.length)];
-  return p;
-}
-function autoFillPass(){
-  const p=generatePass(); $('newPass').value=p;
-  toast('🔑 Clave generada: '+p);
-}
-
-// ── TOGGLE PASSWORD ──────────────────────────────────────────────
-function togglePass(passId, eyeId, password){
-  const el=$( passId), btn=$(eyeId); if(!el) return;
-  if(el.dataset.visible==='1'){
-    el.textContent='••••••••'; el.dataset.visible='0';
-    el.style.letterSpacing='2px'; btn.style.color='var(--muted)';
-  } else {
-    el.textContent=password||'—'; el.dataset.visible='1';
-    el.style.letterSpacing='normal'; btn.style.color='var(--accent)';
-  }
-}
-
-function copyPass(text){ copyText(text,'✓ Contraseña copiada'); }
 function copyText(text,msg){
   msg=msg||'✓ Copiado';
   if(navigator.clipboard&&navigator.clipboard.writeText){
@@ -1426,31 +1359,12 @@ function renderClientesSelect(){
 
 // ── AGREGAR CLIENTE ──────────────────────────────────────────────
 async function agregarCliente(){
-  const nombre = $('newNombre').value.trim();
-  const email  = $('newEmail').value.trim().toLowerCase();
-  const pass   = $('newPass').value.trim();
-  const btn    = $('btnAgregarCliente');
-
-  if(!nombre||!email||!pass){ toast('Completa todos los campos','bad'); return; }
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ toast('Email inválido','bad'); return; }
-
-  btn.innerHTML='<span class="spinner"></span> Guardando...'; btn.disabled=true;
-
-  const { error } = await db.from('clientes').insert({nombre, email, password_hash: pass});
-  btn.innerHTML='➕ Agregar cliente'; btn.disabled=false;
-
-  if(error){
-    if(error.code==='23505') toast('Este email ya existe','bad');
-    else toast('Error: '+error.message,'bad');
-    return;
-  }
-  $('newNombre').value=''; $('newEmail').value=''; $('newPass').value=generatePass();
-  toast('✅ Cliente '+nombre+' agregado correctamente');
-  await loadClientes();
-  updateDashboard();
+ const btn=$('btnAgregarCliente');btn.disabled=true;
+ try{const {error}=await db.from('clientes').insert({nombre:$('newNombre').value.trim(),email:$('newEmail').value.trim().toLowerCase(),investment_id:$('newInvestment').value.trim()||null});
+ if(error)throw error;toast('Cliente creado. Usa Acceso para invitarlo.');await loadClientes();updateDashboard();}
+ catch(e){toast(e.message,'bad');}finally{btn.disabled=false;}
 }
 
-// ── ELIMINAR CLIENTE ─────────────────────────────────────────────
 function confirmDelete(id, nombre){
   pendingDeleteId = id;
   $('modalMsg').textContent = `¿Seguro que quieres eliminar a "${nombre}"? Se borrarán todos sus reportes.`;
@@ -1469,56 +1383,11 @@ function closeModal(){ $('modalEliminar').style.display='none'; }
 // ── EDITAR CONTRASEÑA ─────────────────────────────────────────────
 let editingClientId = null;
 
-function openEditPass(id, nombre){
-  editingClientId = id;
-  $('editPassMsg').textContent = 'Nueva clave para: ' + nombre;
-  var newKey = generatePass();
-  $('editPassInput').textContent = newKey;
-  $('editPassInput').setAttribute('data-pass', newKey);
-  $('modalEditPass').style.display='flex';
+async function openEditPass(id,nombre){
+ try{await rcAdminAction({action:'invite-client',clienteId:id});toast('Invitación enviada a '+nombre);await loadClientes();}
+ catch(e){toast(e.message,'bad');}
 }
-function regeneratePassPreview(){
-  var newKey = generatePass();
-  $('editPassInput').textContent = newKey;
-  $('editPassInput').setAttribute('data-pass', newKey);
-}
-
-function regeneratePassPreview(){
-  $('editPassInput').textContent = generatePass();
-}
-
-function closeEditPass(){
-  $('modalEditPass').style.display='none';
-  editingClientId = null;
-}
-
-// Close on Enter key
-document.addEventListener('keydown', e => {
-  if(e.key === 'Escape'){ closeModal(); closeEditPass(); }
-});
-
-async function saveNewPass(){
-  const newPass = ($('editPassInput').getAttribute('data-pass') || $('editPassInput').textContent || '').trim();
-  if(!newPass){ toast('Escribe una contraseña','bad'); return; }
-  if(newPass.length < 4){ toast('Mínimo 4 caracteres','bad'); return; }
-
-  const btn = $('editPassConfirmBtn');
-  btn.innerHTML = '<span class="spinner"></span>';
-  btn.disabled = true;
-
-  const { error } = await db.from('clientes')
-    .update({ password_hash: newPass })
-    .eq('id', editingClientId);
-
-  btn.innerHTML = 'Guardar';
-  btn.disabled = false;
-
-  if(error){ toast('Error: ' + error.message, 'bad'); return; }
-
-  toast('✅ Nueva clave: ' + newPass + ' — Envíasela al cliente');
-  closeEditPass();
-  await loadClientes(); // refresh to show new password dots
-}
+function closeEditPass(){} function regeneratePassPreview(){} function saveNewPass(){}
 
 // ── REPORTES TABLE ───────────────────────────────────────────────
 function renderReportesTable(data){
@@ -1529,8 +1398,8 @@ function renderReportesTable(data){
   }
   tbody.innerHTML = data.map(r=>`
     <tr>
-      <td><strong>${r.clientes?.nombre||'—'}</strong><br/><span class="mono">${r.clientes?.email||''}</span></td>
-      <td><span class="badge good">${r.mes||'—'}</span></td>
+      <td><strong>${rcEscape(r.clientes?.nombre||'—')}</strong><br/><span class="mono">${rcEscape(r.clientes?.email||'')}</span></td>
+      <td><span class="badge good">${rcEscape(r.mes||'—')}</span></td>
       <td><span class="mono">${fmtDate(r.created_at)}</span></td>
       <td><span class="mono">${Math.round((r.csv_data?.length||0)/1024)} KB</span></td>
       <td>
@@ -1678,12 +1547,11 @@ async function eliminarReporte(id){
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-if(sessionStorage.getItem('rcadmin')==='1') showApp();
-// Pre-fill password field on load
-window.addEventListener('DOMContentLoaded', () => {
-  const np = $('newPass');
-  if(np) np.value = generatePass();
+document.addEventListener('DOMContentLoaded', async()=>{
+ localStorage.removeItem('rcAdminSession');sessionStorage.removeItem('rcadmin');localStorage.removeItem('rcMiCuentaCSV');
+ const {data}=await db.auth.getSession(); if(data.session){try{await adminAllowed();showApp();}catch(e){await logout();}}
 });
+
 
 // ── BULK + MI CUENTA ────────────────────────────────────────────
 
@@ -1728,38 +1596,17 @@ function handleDrop(e){
 
 // ── SPLIT CONSOLIDATED CSV ────────────────────────────────────────
 function splitConsolidatedCSV(text){
-  var sep=detectSepA(text);
-  var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
-  if(lines.length<2) return [];
-  var header=lines[0];
-  var h=smartSplitA(header,sep).map(function(x){return x.toLowerCase().replace(/\s+/g,'');});
-  var INV_COLS=['investorname','investor','inversor','user','usuario','name','cliente'];
-  var iI=-1;
-  for(var ci=0;ci<INV_COLS.length;ci++){
-    var ix=h.indexOf(INV_COLS[ci]);
-    if(ix>=0){iI=ix;break;}
-  }
-  if(iI<0) return [{investorName:'(todos)',csvText:text,rowCount:lines.length-1}];
-
-  var groups={};
-  for(var i=1;i<lines.length;i++){
-    var cols=smartSplitA(lines[i],sep);
-    if(cols.length<3) continue;
-    var name=(cols[iI]||'').trim().replace(/^"|"$/g,'');
-    if(!name) continue;
-    if(!groups[name]) groups[name]=[];
-    groups[name].push(lines[i]);
-  }
-
-  return Object.keys(groups).map(function(name){
-    return{
-      investorName:name,
-      csvText:header+'\n'+groups[name].join('\n'),
-      rowCount:groups[name].length
-    };
-  });
+ const sep=detectSepA(text), lines=text.split(/\r?\n/).filter(l=>l.trim()); if(lines.length<2)return [];
+ const h=smartSplitA(lines[0],sep).map(x=>x.toLowerCase().replace(/\s+/g,''));
+ const ni=h.indexOf('investorname'),ii=h.indexOf('investmentid');if(ni<0||ii<0)throw new Error('El CSV necesita InvestorName e InvestmentId.');
+ const groups=new Map(); for(const line of lines.slice(1)){
+ const c=smartSplitA(line,sep),id=(c[ii]||'').trim(),name=(c[ni]||'').trim();if(!id||!name)continue;
+ if(!groups.has(id))groups.set(id,{investorName:name,investmentId:id,rows:[]});groups.get(id).rows.push(line);}
+ return [...groups.values()].map(g=>({...g,csvText:lines[0]+'\n'+g.rows.join('\n'),rowCount:g.rows.length}));
 }
-
+function investmentFromCSV(text){const sep=detectSepA(text),ls=text.split(/\r?\n/).filter(x=>x.trim());
+ const h=smartSplitA(ls[0]||'',sep).map(x=>x.toLowerCase());const i=h.indexOf('investmentid');
+ const ids=new Set(ls.slice(1).map(l=>smartSplitA(l,sep)[i]).filter(Boolean));return ids.size===1?[...ids][0].trim():null;}
 function handleBulkFiles(fileList){
   if(!fileList||!fileList.length){ return; }
   bulkFiles=[];
@@ -1811,14 +1658,14 @@ function processAllLoaded(results, curMes){
             return; // don't add to client list
           }
 
-          var match = findClientByInvestor(inv.investorName);
-          if(!match) return; // skip unrecognized investors silently
+          var match = findClientByInvestor(inv.investorName, inv.investmentId);
+          // Unmatched investors remain visible for manual assignment.
 
           bulkFiles.push({
             file:r.file, text:inv.csvText,
-            investor:inv.investorName,
-            clienteId:match.id,
-            clienteName:match.nombre,
+            investor:inv.investorName+' · ID '+inv.investmentId,
+            clienteId:match?match.id:null,
+            clienteName:match?match.nombre:null,
             mes:curMes, status:'pending', rowCount:inv.rowCount
           });
         });
@@ -1826,7 +1673,7 @@ function processAllLoaded(results, curMes){
         // Feed manager data to Mi Cuenta
         if(managerRows.length > 0){
           lastConsolidatedCSV = r.text;
-          try{ localStorage.setItem('rcMiCuentaCSV', r.text); }catch(e){}
+          
           mcProcessCSV(r.text);
           var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
           if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">&#9679;</span>';
@@ -1835,13 +1682,13 @@ function processAllLoaded(results, curMes){
       }catch(ex){ /* skip silently */ }
     } else {
       var inv = extractInvestorFromCSV(r.text);
-      var match = findClientByInvestor(inv);
-      if(!match) return; // skip unrecognized silently
+      var match = findClientByInvestor(inv, investmentFromCSV(r.text));
+      // Unmatched investors remain visible for manual assignment.
       bulkFiles.push({
         file:r.file, text:r.text,
         investor:inv||'(desconocido)',
-        clienteId:match.id,
-        clienteName:match.nombre,
+        clienteId:match?match.id:null,
+        clienteName:match?match.nombre:null,
         mes:curMes, status:'pending', rowCount:0
       });
     }
@@ -1849,25 +1696,11 @@ function processAllLoaded(results, curMes){
   renderBulkList();
 }
 
-function findClientByInvestor(investorName){
-  if(!investorName) return null;
-  function norm(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
-  var normInv=norm(investorName);
-  var wordsInv=normInv.split(' ').filter(function(w){return w.length>2;});
-  var best=null,bestScore=0,bestPct=0;
-  for(var i=0;i<clientesCache.length;i++){
-    var c=clientesCache[i];
-    var normC=norm(c.nombre);
-    if(normC===normInv) return c; // exact match wins immediately
-    var wordsC=normC.split(' ').filter(function(w){return w.length>2;});
-    var matches=wordsC.filter(function(w){return wordsInv.indexOf(w)>=0;}).length;
-    var pct=wordsC.length>0?matches/wordsC.length:0;
-    // Require at least 2 matching words AND more than 50% of client name matched
-    if(matches>=2&&pct>bestPct){bestPct=pct;bestScore=matches;best=c;}
-  }
-  return best;
+function findClientByInvestor(name,investmentId){
+ if(investmentId){const matches=clientesCache.filter(c=>String(c.investment_id||'')===String(investmentId));if(matches.length===1)return matches[0];}
+ const norm=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+ const exact=clientesCache.filter(c=>!c.investment_id&&norm(c.nombre)===norm(name));return exact.length===1?exact[0]:null;
 }
-
 function renderBulkList(){
   var list=$('bulkList'); list.innerHTML='';
   var ready=0,noMatch=0;
@@ -1880,7 +1713,7 @@ function renderBulkList(){
     if(!bf.clienteId&&bf.status==='pending'){icon='⚠️';iconColor='var(--warn)';}
     if(bf.clienteId&&bf.status==='pending'){ready++;}
     if(!bf.clienteId&&bf.status==='pending'){noMatch++;}
-    var opts=clientesCache.map(function(c){return '<option value="'+c.id+'"'+(bf.clienteId===c.id?' selected':'')+'>'+c.nombre+'</option>';}).join('');
+    var opts=clientesCache.map(function(c){return '<option value="'+c.id+'"'+(bf.clienteId===c.id?' selected':'')+'>'+rcEscape(c.nombre)+'</option>';}).join('');
     var statusLine='';
     if(bf.status==='ok') statusLine='<div style="font-size:11px;color:var(--good);">Subido correctamente</div>';
     if(bf.status==='error') statusLine='<div style="font-size:11px;color:var(--bad);">Error al subir</div>';
@@ -1888,8 +1721,8 @@ function renderBulkList(){
     row.innerHTML=
       '<span style="font-size:20px;">'+icon+'</span>'+
       '<div>'+
-        '<div style="font-size:12px;font-weight:600;margin-bottom:2px;">'+bf.file.name+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);">'+bf.investor+'</div>'+
+        '<div style="font-size:12px;font-weight:600;margin-bottom:2px;">'+rcEscape(bf.file.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);font-family:var(--mono);">'+rcEscape(bf.investor)+'</div>'+
         statusLine+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:5px;">'+
@@ -1908,6 +1741,7 @@ function renderBulkList(){
 async function uploadAllBulk(){
   var toUpload=bulkFiles.filter(function(b){return b.clienteId&&b.status==='pending';});
   if(!toUpload.length){toast('Sin archivos listos para subir','bad');return;}
+  const targets=toUpload.map(b=>b.clienteId+'|'+b.mes); if(new Set(targets).size!==targets.length){toast('Hay varias cuentas para un mismo cliente y mes. Revisa el vínculo antes de subir.','bad');return;}
   var btn=$('btnBulkUpload');
   btn.innerHTML='<span class="spinner"></span> Subiendo...'; btn.disabled=true;
   var ok=0,fail=0;
@@ -1942,82 +1776,9 @@ function clearBulk(){
   $('bulkStatus').textContent='';
 }
 
-// ── ADMIN PIN ACCESS ─────────────────────────────────────────────
-const ADMIN_PIN = '0180';
-let adminTapCount = 0, adminTapTimer = null, adminPinEntry = '';
-
-function handleAdminTap(){
-  adminTapCount = (adminTapCount || 0) + 1;
-  clearTimeout(adminTapTimer);
-  adminTapTimer = setTimeout(function(){ adminTapCount = 0; }, 3000);
-  // Visual feedback so the user knows taps are registering
-  var el = document.getElementById('secretLogoAdmin');
-  if(el){
-    el.style.opacity = '0.45';
-    setTimeout(function(){ el.style.opacity = '1'; }, 110);
-  }
-  if(adminTapCount >= 5){
-    adminTapCount = 0;
-    adminPinOpen();
-  }
-}
-
-function adminPinOpen(){
-  var ov = document.getElementById('adminPinOverlay');
-  if(!ov){ console.warn('PIN overlay no encontrado'); return; }
-  adminPinEntry = '';
-  adminUpdateDots();
-  var errEl = document.getElementById('adminPinErr');
-  if(errEl) errEl.textContent = '';
-  ov.style.display = 'flex';
-}
-
-function adminPinClose(){
-  var ov = document.getElementById('adminPinOverlay');
-  if(ov) ov.style.display = 'none';
-  adminPinEntry = '';
-  adminUpdateDots();
-}
-
-function adminPinTap(d){
-  if(adminPinEntry.length >= 4) return;
-  adminPinEntry += d;
-  adminUpdateDots();
-  if(adminPinEntry.length === 4) setTimeout(adminPinCheck, 180);
-}
-
-function adminPinDel(){
-  adminPinEntry = adminPinEntry.slice(0,-1);
-  adminUpdateDots();
-  $('adminPinErr').textContent = '';
-}
-
-function adminUpdateDots(){
-  var dots = document.querySelectorAll('#adminPinDots .pin-dot');
-  dots.forEach(function(d,i){
-    d.className = 'pin-dot';
-    if(i < adminPinEntry.length) d.classList.add('filled');
-  });
-}
-
-function adminPinCheck(){
-  if(adminPinEntry === ADMIN_PIN){
-    document.querySelectorAll('#adminPinDots .pin-dot').forEach(function(d){
-      d.className='pin-dot ok';
-    });
-    setTimeout(function(){ showApp(); adminPinClose(); }, 350);
-  } else {
-    document.querySelectorAll('#adminPinDots .pin-dot').forEach(function(d){
-      d.className='pin-dot err';
-    });
-    $('adminPinErr').textContent = 'PIN incorrecto';
-    setTimeout(function(){
-      adminPinEntry=''; adminUpdateDots();
-      $('adminPinErr').textContent='';
-    }, 900);
-  }
-}
-
+function handleAdminTap(){document.getElementById('adminEmail').focus();}
+function adminPinClose(){document.getElementById('adminPinOverlay').style.display='none';}
+function adminPinTap(){} function adminPinDel(){} function adminPinCheck(){} function adminUpdateDots(){}
 document.addEventListener('keydown', function(e){
   var _dp = document.getElementById('modalDetalle');
   if(e.key === 'Escape' && _dp && _dp.style.display === 'block'){ closeDetalle(); return; }
@@ -2060,12 +1821,7 @@ function toggleSidebar(){
 // ── MI CUENTA (GESTOR) ────────────────────────────────────────────
 var mcData = null;
 var lastConsolidatedCSV = null; // cache of the last full CSV loaded
-// Restore Mi Cuenta CSV from localStorage immediately on load
-try{
-  var _saved = localStorage.getItem('rcMiCuentaCSV');
-  if(_saved && _saved.length > 100) lastConsolidatedCSV = _saved;
-}catch(e){}
-
+// CSV is only kept in memory.
 // Called automatically after bulk upload
 function autoFeedMiCuenta(){
   // In single mode: use first bulkFile's original full text
@@ -2102,7 +1858,7 @@ function autoFeedMiCuenta(){
 
   if(fullText){
     lastConsolidatedCSV = fullText;
-    try{ localStorage.setItem('rcMiCuentaCSV', fullText); }catch(e){}
+    
     mcProcessCSV(fullText);
     var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
     if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
@@ -2127,7 +1883,7 @@ function mcLoadFile(fileList){
     try{
       var text=ev.target.result;
       lastConsolidatedCSV=text;
-      try{ localStorage.setItem('rcMiCuentaCSV', text); }catch(e){}
+      
       mcProcessCSV(text);
       $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
       $('mcFileInput').value='';
@@ -2452,6 +2208,8 @@ function renderDetalle(stats, nombre){
     $('detDep').innerHTML=L.join('<br>');
   })();
 
+
+
   // KPIs
   var netProfit=stats.runP+stats.runF;
   $('detProfit').textContent=(netProfit>=0?'+':'')+fmt(netProfit);
@@ -2660,5 +2418,5 @@ function drawDetChart(stats){
   </div>
 </div>
 
-</body>
+<script src="admin-flow.js"></script></body>
 </html>

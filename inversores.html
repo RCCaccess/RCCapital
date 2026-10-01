@@ -1216,7 +1216,7 @@ body{
   .hero{box-shadow:0 18px 45px rgba(0,0,0,.30);}
 }
 </style>
-</head>
+<script src="config.js"></script></head>
 <body>
 
 <!-- ══ HEADER ══ -->
@@ -1638,6 +1638,7 @@ body{
 
 <div class="snack" id="snack"></div>
 
+<script src="onboarding.js"></script>
 <script>
 /* ═══════════════════════════════════════════
    RC CAPITAL · JOURNEY
@@ -1654,8 +1655,8 @@ const MIN_DEPOSITO = 50;    // aporte adicional mínimo
 const MIN_RETIRO   = 25;    // retiro mínimo
 const W3F_KEY = '';   // ← pega aquí tu access key
 
-const SB_URL = 'https://bhyftbbohsjivhhjstbb.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoeWZ0YmJvaHNqaXZoaGpzdGJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM4NDQ5ODAsImV4cCI6MjA5OTQyMDk4MH0.7OPqfX6ErKkYk9QeWW7oCYRLMIqyZwy0ogJPa67TnpU';
+const SB_URL = RC_CONFIG.url;
+const SB_KEY = RC_CONFIG.anonKey;
 const db = supabase.createClient(SB_URL, SB_KEY);
 
 const $  = s => document.querySelector(s);
@@ -2406,60 +2407,11 @@ function cuerpoSolicitud(tipo, monto, extra, ref){
   return L.join('\n');
 }
 
-async function enviarSolicitud(tipo, monto, extra){
-  const ref = refSolicitud();
-  const asunto = (tipo === 'retiro' ? 'Retiro' : 'Depósito') + ' · ' + D.nombre + ' · ' + usd(monto);
-  const cuerpo = cuerpoSolicitud(tipo, monto, extra, ref);
-  let enviado = false;
-
-  // 1) Correo automático
-  if(W3F_KEY){
-    try{
-      const r = await fetch('https://api.web3forms.com/submit', {
-        method:'POST',
-        headers:{'Content-Type':'application/json', Accept:'application/json'},
-        body: JSON.stringify({
-          access_key: W3F_KEY,
-          subject: asunto,
-          from_name: 'RC Capital · Journey',
-          replyto: cliente ? cliente.email : undefined,
-          Referencia: ref,
-          Tipo: tipo === 'retiro' ? 'Retiro' : 'Depósito',
-          Inversor: D.nombre,
-          Correo: cliente ? cliente.email : '',
-          Monto: usd(monto),
-          Capital_actual: usd(D.capital),
-          Detalle: cuerpo
-        })
-      });
-      const j = await r.json();
-      enviado = !!j.success;
-    }catch(e){ enviado = false; }
-  }
-
-  // 2) Registro en Supabase (si existe la tabla)
-  try{
-    await db.from('solicitudes').insert({
-      cliente_id: D.id,
-      nombre: D.nombre,
-      email: cliente ? cliente.email : null,
-      tipo: tipo,
-      monto: monto,
-      metodo: extra || null,
-      referencia: ref,
-      capital_actual: D.capital,
-      estado: 'pendiente'
-    });
-  }catch(e){ /* la tabla es opcional */ }
-
-  // 3) Respaldo: abrir el correo del inversor
-  if(!enviado){
-    const url = 'mailto:' + AVISO_EMAIL
-      + '?subject=' + encodeURIComponent(asunto)
-      + '&body=' + encodeURIComponent(cuerpo);
-    window.location.href = url;
-  }
-  return {ref, enviado};
+async function enviarSolicitud(tipo,monto,extra){
+ const ref=refSolicitud();
+ const {error}=await db.from('solicitudes').insert({cliente_id:cliente.id,nombre:cliente.nombre,email:cliente.email,tipo,monto,metodo:extra||null,referencia:ref,capital_actual:D.capital,estado:'pendiente'});
+ if(error)throw new Error('No pudimos guardar tu solicitud. Intenta de nuevo.');
+ return {ref,enviado:true};
 }
 
 function mostrarOk(tipo, monto, ref, enviado){
@@ -2505,10 +2457,8 @@ $('#depGo').addEventListener('click', async () => {
   if(v < MIN_DEPOSITO){ aviso('El aporte mínimo es ' + usd(MIN_DEPOSITO)); return; }
   const b = $('#depGo');
   b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  const {ref, enviado} = await enviarSolicitud('deposito', v, null);
-  b.disabled = false; b.textContent = 'Enviar solicitud';
-  cerrar($('#mDep'));
-  mostrarOk('deposito', v, ref, enviado);
+  try{const {ref,enviado}=await enviarSolicitud('deposito',v,null);cerrar($('#mDep'));mostrarOk('deposito',v,ref,enviado);}
+  catch(e){aviso(e.message);}finally{b.disabled=false;b.textContent='Enviar solicitud';}
 });
 
 /* retiro */
@@ -2552,10 +2502,8 @@ $('#wdGo').addEventListener('click', async () => {
   if(v > D.capital){ aviso('Supera tu capital disponible'); return; }
   const b = $('#wdGo');
   b.disabled = true; b.innerHTML = '<span class="spin"></span>';
-  const {ref, enviado} = await enviarSolicitud('retiro', v, null);
-  b.disabled = false; b.textContent = 'Enviar solicitud';
-  cerrar($('#mWd'));
-  mostrarOk('retiro', v, ref, enviado);
+  try{const {ref,enviado}=await enviarSolicitud('retiro',v,null);cerrar($('#mWd'));mostrarOk('retiro',v,ref,enviado);}
+  catch(e){aviso(e.message);}finally{b.disabled=false;b.textContent='Enviar solicitud';}
 });
 
 $$('[data-sw]').forEach(s => s.addEventListener('click', () => s.classList.toggle('on')));
@@ -2575,7 +2523,8 @@ function verApp(){
   $('#gate').style.display = 'none';
   $('#app').style.display = 'block';
 }
-function salir(){
+async function salir(){
+  await db.auth.signOut();
   try { localStorage.removeItem(SESION); } catch(e){}
   cliente = null; S = null; D = null;
   $('#gPass').value = '';
@@ -2585,6 +2534,7 @@ function salir(){
 
 async function cargarReporte(cli){
   cliente = cli;
+  if(!(await rcOnboarding(cli, db)))return;
   const {data, error} = await db.from('reportes')
     .select('csv_data,mes,created_at')
     .eq('cliente_id', cli.id)
@@ -2630,21 +2580,11 @@ async function entrar(){
   btn.disabled = true;
   btn.innerHTML = '<span class="spin"></span>';
   try{
-    const {data, error} = await db.from('clientes')
-      .select('*').eq('email', email).eq('password_hash', pass).maybeSingle();
-    if(error) throw new Error('No pudimos conectar. Revisa tu conexión.');
-    if(!data){ err.textContent = 'Ese correo y contraseña no coinciden.'; return; }
-
-    if($('#gRemember').checked){
-      try{
-        localStorage.setItem(SESION, JSON.stringify({
-          id:data.id, email:data.email, nombre:data.nombre,
-          pass: pass, vence: Date.now() + 30*24*3600*1000
-        }));
-      }catch(e){}
-    } else {
-      try{ localStorage.removeItem(SESION); }catch(e){}
-    }
+    const {data:auth,error:authError}=await db.auth.signInWithPassword({email,password:pass});
+    if(authError)throw new Error('Correo o contraseña incorrectos.');
+    const {data,error}=await db.from('clientes').select('*').eq('auth_user_id',auth.user.id).maybeSingle();
+    if(error||!data)throw new Error('Tu acceso aún no está vinculado. Contacta con RC Capital.');
+    $('#gPass').value='';
     await cargarReporte(data);
   }catch(ex){
     err.textContent = ex.message || 'Algo salió mal. Intenta de nuevo.';
@@ -2656,20 +2596,17 @@ async function entrar(){
 $('#gBtn').addEventListener('click', entrar);
 ['#gEmail','#gPass'].forEach(s => $(s).addEventListener('keydown', e => { if(e.key === 'Enter') entrar(); }));
 
-/* arranque */
+/* arranque: sesión verificada por Supabase */
 (async function(){
-  let ses = null;
-  try { ses = JSON.parse(localStorage.getItem(SESION) || 'null'); } catch(e){}
-  if(ses && ses.id && ses.vence > Date.now()){
-    try{
-      const {data} = await db.from('clientes').select('*').eq('id', ses.id).maybeSingle();
-      if(data){ await cargarReporte(data); return; }
-    }catch(e){}
-    try{ localStorage.removeItem(SESION); }catch(e){}
-  }
-  verGate();
+ localStorage.removeItem(SESION);
+ const {data}=await db.auth.getSession();
+ if(data.session){try{
+  const {data:u,error:ue}=await db.auth.getUser();if(ue)throw ue;
+  const {data:cli,error}=await db.from('clientes').select('*').eq('auth_user_id',u.user.id).maybeSingle();
+  if(error)throw error;if(cli){await cargarReporte(cli);return;}
+ }catch(e){console.error(e);}}
+ verGate();
 })();
-
 </script>
 </body>
 </html>

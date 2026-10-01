@@ -29,14 +29,6 @@
       "purpose": "any"
     }
   ],
-  "screenshots": [
-    {
-      "src": "icons/screenshot.png",
-      "sizes": "390x844",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
   "categories": [
     "finance",
     "business"
