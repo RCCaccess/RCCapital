@@ -1,5 +1,18 @@
 function rcEscape(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-async function rcAdminAction(body){const {data,error}=await db.functions.invoke('rc-admin',{body});if(error)throw new Error('No se completó la acción. Revisa la función rc-admin y el envío de correo.');if(data.error)throw new Error(data.error);return data;}
+async function rcAdminAction(body){
+ const {data,error}=await db.functions.invoke('rc-admin',{body});
+ if(error){
+  let detail='';
+  if(error.context&&typeof error.context.json==='function'){
+   try{const response=typeof error.context.clone==='function'?error.context.clone():error.context;const payload=await response.json();detail=typeof payload.error==='string'?payload.error:typeof payload.message==='string'?payload.message:'';}catch(e){}
+  }
+  const status=error.context?.status;
+  throw new Error(detail||('No se completó la acción'+(status?' (HTTP '+status+')':'')+'. '+(error.message||'Revisa la conexión y la función rc-admin.')));
+ }
+ if(data?.error)throw new Error(data.error);
+ if(!data?.ok)throw new Error('La función no confirmó el envío.');
+ return data;
+}
 async function loadIngresos(){
  const el=$('ingresosList');if(!el)return;el.textContent='Cargando…';
  const {data,error}=await db.from('solicitudes_ingreso').select('*').order('created_at',{ascending:false});
