@@ -52,8 +52,9 @@ async function rcShowResources(db,user,receipt){
   const section=rcNode('section',undefined,box);section.style.cssText='padding:20px 0;border-bottom:1px solid #273044';rcNode('h2',titles[i],section);
   const url=i===4?RC_CONFIG.brokerUrl:RC_CONFIG.videos[['registro','deposito','activacion','retiros'][i]];
   if(!url){rcNode('p','Este recurso estará disponible próximamente.',section);return;}
-  if(i<4){const f=rcNode('iframe',undefined,section);f.src=url;f.title=titles[i];f.allow='fullscreen; picture-in-picture';f.allowFullscreen=true;f.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:8px';}
-  const a=rcNode('a',i===4?'Abrir registro del broker':'Abrir video',section);a.href=url;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+  const frame=rcNode('iframe',undefined,section);frame.src=url;frame.title=titles[i];frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.style.cssText=i===4?'width:100%;height:640px;border:1px solid #53617b;border-radius:8px;background:white':'width:100%;aspect-ratio:16/9;border:0;border-radius:8px';
+  if(i===4)rcNode('p','Si el formulario no carga aquí, usa el enlace para registrarte en el sitio del broker.',section);
+  const a=rcNode('a',i===4?'Abrir registro del broker':'Abrir video',section);a.href=i===4?url:url.replace('/embed/','/watch?v=');a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
   const label=rcNode('label',undefined,section),check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state[field];label.append(document.createTextNode(i===4?' Ya completé mi registro':' Ya revisé este video'));
   const msg=rcNode('p','',section);msg.setAttribute('role','status');
   check.onchange=async()=>{check.disabled=true;const value=check.checked;const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error){check.checked=!value;msg.textContent='No se pudo guardar tu progreso.';}else{state[field]=value;msg.textContent='Progreso guardado.';}check.disabled=false;};
