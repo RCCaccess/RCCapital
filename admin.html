@@ -509,35 +509,12 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
       <div class="page" id="page-clientes">
         <div class="page-title">Clientes</div>
         <div class="page-sub">Gestiona los accesos de tus inversores</div>
-        <div class="card">
-          <div class="card-hd">
-            <h3>Agregar nuevo cliente</h3>
-          </div>
-          <div class="card-bd">
-            <div class="form-grid">
-              <div class="form-field">
-                <label>Nombre completo</label>
-                <input type="text" id="newNombre" placeholder="María González"/>
-              </div>
-              <div class="form-field">
-                <label>Email</label>
-                <input type="email" id="newEmail" placeholder="maria@email.com"/>
-              </div>
-              <div class="form-field">
-                <label>InvestmentId del broker (opcional)</label><input id="newInvestment" placeholder="Identificador exacto"/>
-              </div>
-              <div class="form-field" style="justify-content:flex-end;">
-                <button class="btn accent" id="btnAgregarCliente" onclick="agregarCliente()">
-                  ➕ Agregar cliente
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <p style="color:var(--muted);font-size:13px;line-height:1.6;">Los clientes se crean al aprobar su solicitud en Solicitudes de ingreso. Supabase envía la invitación y el inversor define su contraseña.</p>
+        <button class="btn" onclick="loadClientes()" style="margin-bottom:16px;">Actualizar clientes</button>
         <div class="card">
           <div class="card-hd"><h3>Lista de clientes</h3><span id="clienteCount" class="badge warn">0</span></div>
           <div class="card-bd" style="padding:0;">
-            <div class="tbl-wrap">
+            <div class="tbl-wrap" id="clientesTableWrap">
               <table>
                 <thead>
                   <tr>
@@ -800,14 +777,27 @@ async function loadAll(){
   }
 }
 
+let contractReceipts=new Map(),contractReceiptsError=false,contractMailJobs=new Map();
+let clientsLoading=false;
 async function loadClientes(){
+  if(clientsLoading)return;
+  clientsLoading=true;
+  try{
   const { data, error } = await db.from('clientes').select('*').order('created_at',{ascending:false});
   if(error){ toast('Error cargando clientes','bad'); return; }
   clientesCache = data || [];
+  const {data:receipts,error:receiptError}=await db.from('rc_contract_acceptances')
+    .select('user_id,terms_version,contract_sha256,accepted_at').eq('terms_version',RC_CONFIG.termsVersion);
+  contractReceiptsError=Boolean(receiptError);
+  contractReceipts=new Map((receipts||[]).filter(r=>r.contract_sha256===RC_CONFIG.termsSha256).map(r=>[r.user_id,r]));
+  const {data:jobs}=await db.from('rc_contract_mail_jobs').select('user_id,status,sent_at,attempts').eq('terms_version',RC_CONFIG.termsVersion);
+  contractMailJobs=new Map((jobs||[]).map(j=>[j.user_id,j]));
   renderClientesTable();
   renderClientesSelect();
   $('clienteCount').textContent = clientesCache.length;
+  }finally{clientsLoading=false;}
 }
+setInterval(()=>{if(!document.hidden && $('appScreen').style.display==='block')loadClientes();},60000);
 
 async function loadReportes(){
   const { data, error } = await db.from('reportes')
@@ -1054,8 +1044,17 @@ function renderRecentActivity(reps){
 }
 
 
+function rcContractStatus(c){
+ if(contractReceiptsError)return '<span style="color:var(--muted);">No disponible</span>';
+ const r=contractReceipts.get(c.auth_user_id);
+ if(!r)return '<span class="badge warn">Pendiente</span>';
+ const date=new Date(r.accepted_at).toLocaleString('es-ES',{timeZone:'America/Panama',day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+ const job=contractMailJobs.get(c.auth_user_id);
+ const mail=job?.status==='sent'?'Correo enviado':job?.status==='failed'?(job.attempts>=10?'Correo: revisar envío':'Correo: reintento pendiente'):job?'Correo en cola':'Sin registro de correo';
+ return '<span class="badge good">Aceptado</span><div style="font-size:11px;margin-top:5px;white-space:nowrap;">'+rcEscape(date)+' · Panamá</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">'+mail+'</div>';
+}
 function renderClientesTable(){
-  const container = $('clientesBody') ? $('clientesBody').closest('.tbl-wrap')||$('clientesBody').parentElement : null;
+  const container = $('clientesTableWrap');
   if(!container) return;
 
   if(!clientesCache.length){
@@ -1073,6 +1072,7 @@ function renderClientesTable(){
         <th style="padding:12px 16px;text-align:right;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Rendimiento</th>
         <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Inicio</th>
         <th style="padding:12px 16px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;">Acceso</th>
+        <th style="padding:12px 16px;text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;white-space:nowrap;">Términos y condiciones</th>
         <th style="padding:12px 8px;text-align:center;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5A6675;"></th>
       </tr>
     </thead>
@@ -1084,7 +1084,6 @@ function renderClientesTable(){
   clientesCache.forEach((raw,idx) => {
  const c={...raw,nombre:rcEscape(raw.nombre),email:rcEscape(raw.email)};
     const safeId = c.id.replace(/-/g,'');
-    const passId = 'pass-'+safeId;
 
     const tr = document.createElement('tr');
     tr.style.cssText = 'border-bottom:1px solid #E8EDF2;transition:background .1s;cursor:pointer;';
@@ -1111,10 +1110,11 @@ function renderClientesTable(){
       // Fecha inicio
       '<td id="startDate-'+safeId+'" style="padding:14px 16px;font-family:var(--mono);font-size:12px;color:#5A6675;">—</td>' +
       '<td style="padding:14px;text-align:center;">'+(c.auth_user_id?'Vinculado':'Pendiente')+'</td>' +
+      '<td style="padding:14px 16px;">'+rcContractStatus(raw)+'</td>' +
       // Actions
       '<td style="padding:14px 8px;text-align:center;">' +
         '<div style="display:flex;gap:4px;justify-content:center;">' +
-          '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="openEditPass(this.dataset.cid,this.dataset.cnm)" ' +
+          '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="reenviarAcceso(this.dataset.cid,this.dataset.cnm)" ' +
             'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Acceso</button>' +
           '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="confirmDelete(this.dataset.cid,this.dataset.cnm)" ' +
             'style="padding:5px 10px;border-radius:6px;background:#fff;color:#C8483C;border:1px solid #EDCFCC;font-size:11px;cursor:pointer;">Borrar</button>' +
@@ -1357,14 +1357,6 @@ function renderClientesSelect(){
   });
 }
 
-// ── AGREGAR CLIENTE ──────────────────────────────────────────────
-async function agregarCliente(){
- const btn=$('btnAgregarCliente');btn.disabled=true;
- try{const {error}=await db.from('clientes').insert({nombre:$('newNombre').value.trim(),email:$('newEmail').value.trim().toLowerCase(),investment_id:$('newInvestment').value.trim()||null});
- if(error)throw error;toast('Cliente creado. Usa Acceso para invitarlo.');await loadClientes();updateDashboard();}
- catch(e){toast(e.message,'bad');}finally{btn.disabled=false;}
-}
-
 function confirmDelete(id, nombre){
   pendingDeleteId = id;
   $('modalMsg').textContent = `¿Seguro que quieres eliminar a "${nombre}"? Se borrarán todos sus reportes.`;
@@ -1380,14 +1372,13 @@ function confirmDelete(id, nombre){
 }
 function closeModal(){ $('modalEliminar').style.display='none'; }
 
-// ── EDITAR CONTRASEÑA ─────────────────────────────────────────────
-let editingClientId = null;
+// Reenviar acceso con Supabase Auth.
 
-async function openEditPass(id,nombre){
+async function reenviarAcceso(id,nombre){
  try{await rcAdminAction({action:'invite-client',clienteId:id});toast('Invitación enviada a '+nombre);await loadClientes();}
  catch(e){toast(e.message,'bad');}
 }
-function closeEditPass(){} function regeneratePassPreview(){} function saveNewPass(){}
+
 
 // ── REPORTES TABLE ───────────────────────────────────────────────
 function renderReportesTable(data){
