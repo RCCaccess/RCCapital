@@ -1500,18 +1500,10 @@ async function subirReporte(){
     $('uploadFill').style.width='70%';
     status.textContent='Guardando en base de datos...';
 
-    // Check if report already exists for this client+month
-    const { data: existing } = await db.from('reportes')
-      .select('id').eq('cliente_id',clienteId).eq('mes',mes).single();
-
-    let error;
-    if(existing){
-      // Update existing
-      ({ error } = await db.from('reportes').update({csv_data:text}).eq('id',existing.id));
-    } else {
-      // Insert new
-      ({ error } = await db.from('reportes').insert({cliente_id:clienteId, mes, csv_data:text}));
-    }
+    const {error} = await db.from('reportes').upsert(
+      {cliente_id:clienteId, mes, csv_data:text},
+      {onConflict:'cliente_id,mes'}
+    );
 
     $('uploadFill').style.width='100%';
 
@@ -1726,7 +1718,7 @@ function renderBulkList(){
         statusLine+
       '</div>'+
       '<div style="display:flex;flex-direction:column;gap:5px;">'+
-        '<select '+dis+' onchange="bulkFiles['+idx+'].clienteId=this.value;" '+
+        '<select '+dis+' onchange="bulkFiles['+idx+'].clienteId=this.value;renderBulkList();" '+
           'style="font-family:var(--sans);font-size:11px;padding:6px 8px;background:#F8FAFC;border:1px solid var(--border);border-radius:6px;color:var(--text);min-width:170px;">'+
           '<option value="">— Asignar cliente —</option>'+opts+
         '</select>'+
@@ -1748,21 +1740,17 @@ async function uploadAllBulk(){
   for(var i=0;i<toUpload.length;i++){
     var bf=toUpload[i];
     try{
-      var res=await db.from('reportes').select('id').eq('cliente_id',bf.clienteId).eq('mes',bf.mes).single();
-      var error;
-      if(res.data){
-        var u=await db.from('reportes').update({csv_data:bf.text}).eq('id',res.data.id);
-        error=u.error;
-      } else {
-        var ins=await db.from('reportes').insert({cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text});
-        error=ins.error;
-      }
+      var {error}=await db.from('reportes').upsert(
+        {cliente_id:bf.clienteId,mes:bf.mes,csv_data:bf.text},
+        {onConflict:'cliente_id,mes'}
+      );
       if(error){bf.status='error';fail++;}else{bf.status='ok';ok++;}
     }catch(ex){bf.status='error';fail++;}
     renderBulkList();
   }
   btn.innerHTML='⬆️ Subir todos'; btn.disabled=false;
-  toast('✅ '+ok+' subidos'+(fail>0?' · ❌ '+fail+' errores':'')+' · 💰 Mi Cuenta actualizada');
+  var sinAsignar=bulkFiles.filter(b=>!b.clienteId).length;
+  toast(ok+' reportes guardados'+(fail?' · '+fail+' errores':'')+(sinAsignar?' · '+sinAsignar+' sin asignar (no guardados)':''),fail?'bad':undefined);
   await loadReportes(); updateDashboard(); await loadClientes();
   // Auto-feed Mi Cuenta from the same CSV data
   autoFeedMiCuenta();

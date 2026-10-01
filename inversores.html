@@ -1286,6 +1286,7 @@ body{
         <button class="menu-item" role="menuitem" data-go="perfil"><i>👤</i>Mi perfil</button>
         <button class="menu-item" role="menuitem" data-go="#movimientos"><i>💳</i>Mis movimientos</button>
         <button class="menu-item" role="menuitem" data-go="ajustes"><i>⚙️</i>Configuración</button>
+        <button class="menu-item" role="menuitem" onclick="actualizarEstadoCuenta(true)"><i>↻</i>Actualizar estado de cuenta</button>
         <button class="menu-item" role="menuitem" id="rcResourcesButton"><i>📖</i>Guía y contrato</button>
         <div class="menu-sep"></div>
         <button class="menu-item leave" role="menuitem" data-go="salir"><i>→</i>Cerrar sesión</button>
@@ -2528,22 +2529,50 @@ async function salir(){
   await db.auth.signOut();
   try { localStorage.removeItem(SESION); } catch(e){}
   cliente = null; S = null; D = null;
+  reporteAutorizado=false; reporteCargado=null;
   $('#gPass').value = '';
   document.body.style.overflow = '';
   verGate();
 }
 
-async function cargarReporte(cli){
+let reporteCargado = null;
+let reporteAutorizado = false;
+let reporteActualizando = false;
+let reporteVacio = false;
+async function actualizarEstadoCuenta(manual=false){
+  if(!cliente || !reporteAutorizado || reporteActualizando || document.hidden)return;
+  reporteActualizando=true;
+  try{
+    await cargarReporte(cliente, true);
+    if(manual)alert("Estado de cuenta actualizado.");
+  }catch(e){
+    if(manual)alert(e.message || "No pudimos actualizar tu estado de cuenta. Intenta de nuevo.");
+    else console.error("Actualizar reporte:",e);
+  }finally{reporteActualizando=false;}
+}
+setInterval(()=>actualizarEstadoCuenta(),60000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)actualizarEstadoCuenta();});
+window.addEventListener("online",()=>actualizarEstadoCuenta());
+async function cargarReporte(cli, actualizar=false){
   cliente = cli;
-  if(!(await rcOnboarding(cli, db)))return;
+  if(!actualizar){
+    reporteAutorizado=false;
+    if(!(await rcOnboarding(cli, db)))return;
+    reporteAutorizado=true;
+  }
   const {data, error} = await db.from('reportes')
     .select('csv_data,mes,created_at')
     .eq('cliente_id', cli.id)
     .order('mes', {ascending:false})
     .limit(1);
+  if(cliente !== cli || !reporteAutorizado)return;
   if(error) throw new Error('No pudimos conectar con tus datos');
 
+  if(actualizar && data?.[0]?.csv_data === reporteCargado)return;
+  if(actualizar && reporteVacio && data?.[0]?.csv_data){location.reload();return;}
   if(!data || !data.length || !data[0].csv_data){
+    reporteVacio=true;
+    reporteCargado=null;
     verApp();
     $('#hdrName').textContent = String(cli.nombre).split(/\s+/)[0];
     $('#hdrAv').textContent = iniciales(cli.nombre);
@@ -2560,8 +2589,10 @@ async function cargarReporte(cli){
   if(!rows.length) throw new Error('Tu reporte no tiene movimientos');
   S = computeStats(rows);
   D = construirModelo(S, cli);
+  reporteCargado=data[0].csv_data;
+  reporteVacio=false;
   verApp();
-  try { pintarTodo(); } catch(e){ console.error('pintarTodo:', e); }
+  pintarTodo();
   pintar(1);
   setTimeout(animarGrafico, 320);
   const obs = new IntersectionObserver(en => {
