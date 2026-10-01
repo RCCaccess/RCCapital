@@ -1,34 +1,77 @@
 window.rcNeedsPassword=['invite','recovery'].includes(new URLSearchParams(location.hash.slice(1)).get('type'));
+const rcResourceFields=['video_registro','video_deposito','video_activacion','video_retiros','broker_registered'];
+function rcNode(tag,text,parent){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(parent)parent.append(node);return node;}
+function rcOverlay(title){
+ document.getElementById('rcOnboarding')?.remove();
+ const overlay=rcNode('div');overlay.id='rcOnboarding';overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:#070b13;color:#f3f5f8;overflow:auto;padding:28px 16px;font:16px system-ui;box-sizing:border-box';
+ const box=rcNode('div',undefined,overlay);box.style.cssText='max-width:900px;margin:auto';
+ rcNode('p','RC CAPITAL',box).style.cssText='color:#8b9bb7;letter-spacing:2px';rcNode('h1',title,box);
+ document.body.append(overlay);return {overlay,box};
+}
+function rcButton(text,parent){const b=rcNode('button',text,parent);b.type='button';b.style.cssText='padding:13px 18px;margin:12px 12px 12px 0;border-radius:8px;border:1px solid #53617b;background:#19253d;color:white;cursor:pointer;font:inherit';return b;}
+function rcContract(parent){
+ const frame=rcNode('iframe',undefined,parent);frame.src=RC_CONFIG.termsUrl;frame.title='Contrato de gestión privada de capital';frame.style.cssText='width:100%;height:65vh;min-height:360px;border:1px solid #53617b;border-radius:8px;background:white';
+ const a=rcNode('a','Abrir o descargar el contrato',parent);a.href=RC_CONFIG.termsUrl;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+}
+function rcReceipt(parent,receipt){
+ const box=rcNode('section',undefined,parent);box.style.cssText='padding:18px;border:1px solid #53617b;border-radius:8px;margin:18px 0';
+ rcNode('h3','Aceptación registrada',box);rcNode('p',receipt.full_name,box);
+ rcNode('p',(receipt.document_type==='cedula'?'Cédula: ':'Pasaporte: ')+receipt.document_number,box);
+ rcNode('p','Aceptado el '+new Date(receipt.accepted_at).toLocaleString('es-PA')+' · Versión '+receipt.terms_version,box);
+ rcNode('p','Tus datos de aceptación están guardados y no pueden modificarse.',box);
+}
+async function rcShowContract(cli,db,user){
+ const {box}=rcOverlay('Lee y acepta el contrato para continuar');
+ rcNode('p','Completa tus datos tal como aparecen en tu documento. Revisa que sean correctos: quedarán registrados al aceptar.',box);rcContract(box);
+ const form=rcNode('form',undefined,box);
+ const nameLabel=rcNode('label','Nombre completo',form),name=rcNode('input',undefined,nameLabel);name.name='full_name';name.required=true;name.minLength=3;name.maxLength=150;name.autocomplete='name';name.value=cli.nombre||'';
+ const typeLabel=rcNode('label','Tipo de documento',form),type=rcNode('select',undefined,typeLabel);type.name='document_type';
+ for(const [v,t] of [['cedula','Cédula'],['pasaporte','Pasaporte']]){const o=rcNode('option',t,type);o.value=v;}
+ const idLabel=rcNode('label','Número de cédula o pasaporte',form),id=rcNode('input',undefined,idLabel);id.name='document_number';id.required=true;id.minLength=4;id.maxLength=40;id.autocomplete='off';
+ for(const field of [name,type,id])field.style.cssText='display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;border:1px solid #53617b;border-radius:6px;background:#121d30;color:white;font:inherit';
+ const consentLabel=rcNode('label',undefined,form),consent=rcNode('input',undefined,consentLabel);consent.type='checkbox';consent.required=true;consentLabel.append(document.createTextNode(' He leído y acepto la totalidad del contrato y confirmo que mis datos son correctos.'));
+ const message=rcNode('p','',form);message.setAttribute('role','status');
+ const accept=rcButton('Aceptar contrato y continuar',form);accept.type='submit';
+ rcButton('Cerrar sesión',box).onclick=async()=>{await db.auth.signOut();location.reload();};
+ form.onsubmit=async e=>{e.preventDefault();if(!form.reportValidity())return;accept.disabled=true;message.textContent='Guardando tu aceptación…';
+  const {data,error}=await db.rpc('rc_accept_contract',{p_full_name:name.value.trim(),p_document_type:type.value,p_document_number:id.value.trim(),p_version:RC_CONFIG.termsVersion});
+  if(error){message.textContent='No se pudo registrar la aceptación. Intenta de nuevo o contacta con RC Capital.';accept.disabled=false;return;}
+  if(!data){message.textContent='No se pudo confirmar la aceptación. Intenta de nuevo.';accept.disabled=false;return;}
+  sessionStorage.setItem('rcOpenResources','1');location.reload();
+ };
+}
+async function rcShowResources(db,user,receipt){
+ const {overlay,box}=rcOverlay('Tu guía de inicio');
+ rcNode('p','Consulta estos recursos cuando los necesites. Tu dashboard ya está disponible.',box);
+ rcButton('Volver a mi dashboard',box).onclick=()=>overlay.remove();
+ const {data:row,error}=await db.from('rc_onboarding').select('*').eq('user_id',user.id).maybeSingle();
+ if(error){rcNode('p','No se pudo cargar tu progreso. Cierra esta guía y vuelve a abrirla.',box);return;}
+ const state=row||{};
+ const titles=['Registro en el broker','Realizar un depósito','Activar la gestión','Solicitar retiros','Registro de tu cuenta'];
+ rcResourceFields.forEach((field,i)=>{
+  const section=rcNode('section',undefined,box);section.style.cssText='padding:20px 0;border-bottom:1px solid #273044';rcNode('h2',titles[i],section);
+  const url=i===4?RC_CONFIG.brokerUrl:RC_CONFIG.videos[['registro','deposito','activacion','retiros'][i]];
+  if(!url){rcNode('p','Este recurso estará disponible próximamente.',section);return;}
+  if(i<4){const f=rcNode('iframe',undefined,section);f.src=url;f.title=titles[i];f.allow='fullscreen; picture-in-picture';f.allowFullscreen=true;f.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:8px';}
+  const a=rcNode('a',i===4?'Abrir registro del broker':'Abrir video',section);a.href=url;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+  const label=rcNode('label',undefined,section),check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state[field];label.append(document.createTextNode(i===4?' Ya completé mi registro':' Ya revisé este video'));
+  const msg=rcNode('p','',section);msg.setAttribute('role','status');
+  check.onchange=async()=>{check.disabled=true;const value=check.checked;const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error){check.checked=!value;msg.textContent='No se pudo guardar tu progreso.';}else{state[field]=value;msg.textContent='Progreso guardado.';}check.disabled=false;};
+ });
+ const details=rcNode('details',undefined,box);details.style.marginTop='24px';rcNode('summary','Consultar contrato y aceptación',details);rcReceipt(details,receipt);rcContract(details);
+}
 window.rcOnboarding=async function(cli,db){
  const {data:u,error:ue}=await db.auth.getUser();if(ue||!u.user)throw new Error('Tu sesión venció.');
  const hash=new URLSearchParams(location.hash.slice(1));
  if(window.rcNeedsPassword||['invite','recovery'].includes(hash.get('type'))||sessionStorage.getItem('rcSetPassword')==='1'){
- sessionStorage.setItem('rcSetPassword','1');await rcPassword(db);sessionStorage.removeItem('rcSetPassword');window.rcNeedsPassword=false;history.replaceState(null,'',location.pathname);}
- const {data:row,error}=await db.from('rc_onboarding').select('*').eq('user_id',u.user.id).maybeSingle();if(error)throw new Error('No se pudo cargar tu configuración.');
- if(row?.completed_at&&row.terms_version===RC_CONFIG.termsVersion)return true;
- const state=row||{user_id:u.user.id};
- const overlay=document.createElement('div');overlay.id='rcOnboarding';overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:#070b13;color:#f3f5f8;overflow:auto;padding:32px 20px;font:16px system-ui';
- overlay.innerHTML=`<div style="max-width:680px;margin:auto"><p style="color:#8b9bb7;letter-spacing:2px">RC CAPITAL</p><h1>Bienvenido. Preparemos tu cuenta.</h1><p>Completa estos pasos para acceder a tu panel.</p><progress style="width:100%;height:12px" max="6" value="0"></progress><div id="rcSteps"></div><button id="rcFinish" style="padding:14px;margin-top:24px">Entrar a mi dashboard</button><button id="rcExit" style="padding:14px;margin:12px">Salir</button><p id="rcMsg" role="status"></p></div>`;
- document.body.append(overlay);const steps=overlay.querySelector('#rcSteps');
- const fields=['video_registro','video_deposito','video_activacion','video_retiros','broker_registered'];
- const labels=['Registro en el broker','Realizar un depósito','Activar la gestión','Cómo solicitar un retiro','Ya completé mi registro en el broker'];
- const refresh=()=>{const accepted=!!state.terms_accepted_at&&state.terms_version===RC_CONFIG.termsVersion;overlay.querySelector('progress').value=fields.filter(k=>state[k]).length+Number(accepted);overlay.querySelector('#rcFinish').disabled=!(accepted&&fields.every(k=>state[k]));};
- const persist=async()=>{const {error}=await db.from('rc_onboarding').upsert(state,{onConflict:'user_id'});if(error)throw error;};
- const terms=document.createElement('section');terms.style.cssText='padding:20px 0;border-bottom:1px solid #273044';
- const th=document.createElement('h3');th.textContent='1. Términos y condiciones';terms.append(th);
- if(RC_CONFIG.termsUrl){const a=document.createElement('a');a.href=RC_CONFIG.termsUrl;a.target='_blank';a.rel='noopener';a.textContent='Leer términos del servicio';terms.append(a);
- const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=!!state.terms_accepted_at&&state.terms_version===RC_CONFIG.termsVersion;
- check.onchange=async()=>{check.disabled=true;const prev={...state};state.terms_version=check.checked?RC_CONFIG.termsVersion:null;state.terms_accepted_at=check.checked?new Date().toISOString():null;try{await persist();}catch(e){Object.assign(state,prev);check.checked=!check.checked;overlay.querySelector('#rcMsg').textContent='No se pudo guardar. Intenta de nuevo.';}finally{check.disabled=false;refresh();}};
- label.append(check,document.createTextNode(' He leído y acepto los términos'));label.style.display='block';terms.append(label);
- }else{const p=document.createElement('p');p.textContent='Los términos todavía no están disponibles. Contacta con RC Capital para completar este paso.';terms.append(p);}steps.append(terms);
- fields.forEach((field,i)=>{const section=document.createElement('section');section.style.cssText='padding:20px 0;border-bottom:1px solid #273044';const h=document.createElement('h3');h.textContent=(i+2)+'. '+labels[i];section.append(h);
- const link=i===4?RC_CONFIG.brokerUrl:RC_CONFIG.videos[['registro','deposito','activacion','retiros'][i]];
- if(link){const a=document.createElement('a');a.href=link;a.target='_blank';a.rel='noopener';a.textContent=i===4?'Abrir broker':'Ver video';section.append(a);
- const label=document.createElement('label'),check=document.createElement('input');check.type='checkbox';check.checked=!!state[field];label.style.display='block';label.append(check,document.createTextNode(i===4?' Confirmo mi registro':' Ya revisé este video'));section.append(label);
- check.onchange=async()=>{check.disabled=true;const prev=state[field];state[field]=check.checked;try{await persist();}catch(e){state[field]=prev;check.checked=!!prev;overlay.querySelector('#rcMsg').textContent='No se pudo guardar. Intenta de nuevo.';}finally{check.disabled=false;refresh();}};
- }else{const p=document.createElement('p');p.textContent='Este recurso todavía no está disponible.';section.append(p);}steps.append(section);});
- overlay.querySelector('#rcExit').onclick=async()=>{await db.auth.signOut();location.reload();};
- overlay.querySelector('#rcFinish').onclick=async()=>{const b=overlay.querySelector('#rcFinish');b.disabled=true;state.completed_at=new Date().toISOString();try{await persist();location.reload();}catch(e){state.completed_at=null;overlay.querySelector('#rcMsg').textContent='No se pudo guardar tu progreso.';refresh();}};refresh();return false;
+  sessionStorage.setItem('rcSetPassword','1');await rcPassword(db);sessionStorage.removeItem('rcSetPassword');window.rcNeedsPassword=false;history.replaceState(null,'',location.pathname);
+ }
+ const {data:receipt,error}=await db.from('rc_contract_acceptances').select('*').eq('user_id',u.user.id).eq('terms_version',RC_CONFIG.termsVersion).maybeSingle();
+ if(error)throw new Error('No se pudo verificar tu aceptación del contrato. Contacta con RC Capital.');
+ if(!receipt||receipt.contract_sha256!==RC_CONFIG.termsSha256){await rcShowContract(cli,db,u.user);return false;}
+ const button=document.getElementById('rcResourcesButton');if(button)button.onclick=()=>rcShowResources(db,u.user,receipt);
+ if(sessionStorage.getItem('rcOpenResources')==='1'){sessionStorage.removeItem('rcOpenResources');await rcShowResources(db,u.user,receipt);}
+ return true;
 };
 function rcPassword(db){return new Promise(resolve=>{
  const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;z-index:10000;background:#070b13;color:white;display:grid;place-items:center;font:16px system-ui;padding:24px';
