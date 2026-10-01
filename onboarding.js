@@ -10,9 +10,16 @@ function rcOverlay(title){
 }
 function rcButton(text,parent){const b=rcNode('button',text,parent);b.type='button';b.style.cssText='padding:13px 18px;margin:12px 12px 12px 0;border-radius:8px;border:1px solid #53617b;background:#19253d;color:white;cursor:pointer;font:inherit';return b;}
 function rcContract(parent){
- const frame=rcNode('iframe',undefined,parent);frame.src=RC_CONFIG.termsUrl;frame.title='Contrato de gestión privada de capital';frame.style.cssText='width:100%;height:65vh;min-height:360px;border:1px solid #53617b;border-radius:8px;background:white';
- const a=rcNode('a','Abrir o descargar el contrato',parent);a.href=RC_CONFIG.termsUrl;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+ const host=rcNode('div',undefined,parent);host.style.cssText='border:1px solid #2b3853;border-radius:18px;overflow:hidden;margin:20px 0';
+ const loading=rcNode('p','Cargando el contrato…',host);loading.style.padding='20px';
+ const showPdf=()=>{host.replaceChildren();const frame=rcNode('iframe',undefined,host);frame.src=RC_CONFIG.termsUrl;frame.title='Contrato de gestión privada de capital';frame.style.cssText='width:100%;height:65vh;min-height:360px;border:0;background:white';};
+ if(RC_CONFIG.termsDisplayUrl){fetch(RC_CONFIG.termsDisplayUrl).then(r=>{if(!r.ok)throw new Error('Contrato no disponible');return r.text();}).then(text=>{
+  if(!host.isConnected)return;const parsed=new DOMParser().parseFromString(text,'text/html');const contract=parsed.querySelector('main.contract'),style=parsed.querySelector('style');if(!contract||!style)throw new Error('Contrato incompleto');
+  contract.querySelectorAll('script,iframe,object,embed').forEach(n=>n.remove());host.replaceChildren();const shadow=host.attachShadow({mode:'open'});shadow.append(style.cloneNode(true),contract.cloneNode(true));
+ }).catch(()=>{if(host.isConnected)showPdf();});}else showPdf();
+ const a=rcNode('a','Descargar contrato en PDF',parent);a.href=RC_CONFIG.termsUrl;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
 }
+
 function rcReceipt(parent,receipt){
  const box=rcNode('section',undefined,parent);box.style.cssText='padding:18px;border:1px solid #53617b;border-radius:8px;margin:18px 0';
  rcNode('h3','Aceptación registrada',box);rcNode('p',receipt.full_name,box);
@@ -52,9 +59,16 @@ async function rcShowResources(db,user,receipt){
   const section=rcNode('section',undefined,box);section.style.cssText='padding:20px 0;border-bottom:1px solid #273044';rcNode('h2',titles[i],section);
   const url=i===4?RC_CONFIG.brokerUrl:RC_CONFIG.videos[['registro','deposito','activacion','retiros'][i]];
   if(!url){rcNode('p','Este recurso estará disponible próximamente.',section);return;}
-  const frame=rcNode('iframe',undefined,section);frame.src=url;frame.title=titles[i];frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.style.cssText=i===4?'width:100%;height:640px;border:1px solid #53617b;border-radius:8px;background:white':'width:100%;aspect-ratio:16/9;border:0;border-radius:8px';
-  if(i===4)rcNode('p','Si el formulario no carga aquí, usa el enlace para registrarte en el sitio del broker.',section);
-  const a=rcNode('a',i===4?'Abrir registro del broker':'Abrir video',section);a.href=i===4?url:url.replace('/embed/','/watch?v=');a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+  if(i===4){
+   rcNode('p','Abre el sitio del broker para crear tu cuenta.',section);
+   const referral=rcNode('div',undefined,section);referral.style.cssText='padding:18px;margin:16px 0;border:1px solid #8faeff;border-radius:12px;background:#162541;max-width:100%;box-sizing:border-box';
+   const instruction=rcNode('strong','IMPORTANTE: en el campo «Referido» debes colocar este código:',referral);instruction.style.cssText='display:block;line-height:1.6';
+   const code=rcNode('code','qGBBx3Cz',referral);code.style.cssText='display:block;font-size:clamp(24px,6vw,32px);font-weight:700;letter-spacing:2px;color:#c7d8ff;margin-top:12px;user-select:all;overflow-wrap:anywhere';
+   rcNode('p','Cópialo exactamente, respetando las mayúsculas y minúsculas.',referral);
+  }else{
+   const frame=rcNode('iframe',undefined,section);frame.src=url;frame.title=titles[i];frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:8px';
+  }
+  const a=rcNode('a',i===4?'Crear mi cuenta en el broker ↗':'Abrir video',section);a.href=i===4?url:url.replace('/embed/','/watch?v=');a.target='_blank';a.rel='noopener noreferrer';a.style.cssText=i===4?'display:block;box-sizing:border-box;width:100%;text-align:center;background:#aac2ff;color:#101c30;padding:15px 18px;border-radius:8px;font-weight:700;text-decoration:none;margin:16px 0;line-height:1.5':'display:block;color:#aac2ff;margin:12px 0';
   const label=rcNode('label',undefined,section),check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state[field];label.append(document.createTextNode(i===4?' Ya completé mi registro':' Ya revisé este video'));
   const msg=rcNode('p','',section);msg.setAttribute('role','status');
   check.onchange=async()=>{check.disabled=true;const value=check.checked;const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error){check.checked=!value;msg.textContent='No se pudo guardar tu progreso.';}else{state[field]=value;msg.textContent='Progreso guardado.';}check.disabled=false;};
