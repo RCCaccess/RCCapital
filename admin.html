@@ -279,6 +279,19 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   #modalDetalle [style*="text-align:right"]{text-align:left !important;}
 }
 .rc-notification-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:20px;background:#28bd78;color:#041c11;font-size:11px;font-weight:800;margin-left:auto;box-shadow:0 0 0 2px #132c41;line-height:1}.rc-notification-badge[hidden]{display:none}#rcSolicitudesNav{position:relative}.sidebar.collapsed #rcSolicitudesBadge{position:absolute;top:1px;right:0;min-width:18px;height:18px;font-size:10px}@media(max-width:600px){.rc-notification-badge{min-width:18px;height:18px;font-size:10px;margin-left:2px}}
+
+/* Navegación única y contenido adaptable */
+html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-width:0;max-width:100%;padding-top:0}.page{min-width:0}.card,.card-bd,.tbl-wrap{min-width:0;max-width:100%}.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}.admin-page-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 0;margin-bottom:24px;border-bottom:1px solid #d6dde6;background:transparent}.admin-bar-kicker{font-size:10px;font-weight:700;letter-spacing:1.4px;color:#66768a;margin-bottom:4px}#topBarTitle{font-size:20px;font-weight:750;color:#142438}.admin-menu-button,.admin-menu-close{display:none}#rcAdminMenuBackdrop{display:none}
+@media(max-width:768px){
+ .layout{display:block;min-height:100dvh}.content{width:100%;padding:0 18px 28px;overflow:visible}.admin-page-bar{padding:18px 0;margin-bottom:22px}.admin-menu-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid #c6d3e2;border-radius:12px;background:#173b62;color:#fff;font:600 14px var(--sans);cursor:pointer}.admin-menu-button:focus-visible,.admin-menu-close:focus-visible{outline:3px solid #8fb9ec;outline-offset:3px}
+ .sidebar,.sidebar.collapsed{position:fixed!important;inset:0 auto 0 0;width:min(300px,86vw)!important;height:100dvh!important;padding:28px 18px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:0!important;overflow-x:hidden!important;overflow-y:auto!important;z-index:101;transform:translateX(-105%);visibility:hidden;pointer-events:none;background:linear-gradient(160deg,#214c7b,#102a47)!important;transition:transform .2s,visibility .2s}
+ .sidebar.mobile-open{transform:translateX(0);visibility:visible;pointer-events:auto}.sidebar .sidebar-logo{margin:10px 34px 28px 0!important}.sidebar .sidebar-logo h2{font-size:16px!important}.sidebar .sidebar-logo .tag{display:none!important}.sidebar .sidebar-nav-group{display:flex!important;flex-direction:column!important;overflow:visible!important;gap:8px!important;flex:0!important}.sidebar .nav-item,.sidebar.collapsed .nav-item{width:100%!important;min-height:48px!important;padding:14px!important;justify-content:flex-start!important;font-size:14px!important;margin:0!important}.sidebar .nav-label,.sidebar.collapsed .nav-label{display:block!important}.sidebar .nav-item .icon{font-size:18px!important;width:24px!important}.sidebar .sidebar-bottom,.sidebar.collapsed .sidebar-bottom{display:block!important;margin-top:auto!important;padding-top:30px}.sidebar .logout-btn span,.sidebar.collapsed .logout-btn span{display:block!important}.sidebar .logout-btn{min-height:48px}.sidebar .admin-menu-close{display:flex;position:absolute;top:18px;right:14px;justify-content:center;align-items:center;width:40px;height:40px;border:1px solid #ffffff40;border-radius:10px;background:#ffffff0d;color:#fff;font-size:18px;cursor:pointer}
+ #rcAdminMenuBackdrop:not([hidden]){display:block;position:fixed;inset:0;z-index:100;border:0;background:#08162699;backdrop-filter:blur(3px)}.sidebar #rcSolicitudesBadge{position:static!important;min-width:22px!important;height:22px!important;margin-left:auto!important}.admin-menu-button .rc-notification-badge{box-shadow:none}
+ #dashChartsRow{grid-template-columns:minmax(0,1fr)!important}.stats-row{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px!important}.card-hd{flex-wrap:wrap;gap:10px;padding:16px}.card-bd{padding:16px}.form-grid{grid-template-columns:minmax(0,1fr)!important}.page-title{font-size:23px}.page-sub{font-size:13px}.content input,.content select{max-width:100%;font-size:16px}.content canvas{max-width:100%}.rc-bulk-row{grid-template-columns:24px minmax(0,1fr)!important}.rc-bulk-row>div:last-of-type{grid-column:1/-1}.rc-bulk-row select{width:100%!important;min-width:0!important}.rc-bulk-row>span:last-child{display:none}
+ #page-ingresos{overflow-wrap:anywhere}#bindCliente,#bindInvestment{display:block;width:100%;margin:12px 0;padding:12px;border:1px solid #c6d3e2;border-radius:10px}.admin-login .btn{max-width:100%}
+}
+@media(max-width:360px){.content{padding-left:14px;padding-right:14px}.stats-row{grid-template-columns:minmax(0,1fr)!important}}
+@media(prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
 </style>
 <script src="config.js"></script></head>
 <body>
@@ -306,9 +319,11 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
 <!-- APP -->
 <div id="appScreen">
+  <button id="rcAdminMenuBackdrop" type="button" hidden aria-label="Cerrar menú" onclick="rcSetAdminMenu(false)"></button>
   <div class="layout">
     <!-- SIDEBAR -->
-    <div class="sidebar" id="adminSidebar">
+    <div class="sidebar" id="adminSidebar" role="navigation" aria-label="Navegación administrativa">
+      <button class="admin-menu-close" type="button" onclick="rcSetAdminMenu(false)" aria-label="Cerrar menú">✕</button>
       <div class="sidebar-logo" onclick="handleAdminTap()" style="cursor:pointer;" title="5 clics para PIN">
         <img src="logo.png" style="width:26px;height:26px;object-fit:contain;border-radius:6px;flex-shrink:0;background:rgba(255,255,255,.94);padding:3px;box-shadow:0 2px 8px rgba(0,0,0,.22);" alt="RCC"/>
         <h2>RCCapital</h2>
@@ -340,24 +355,10 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
 
     <!-- CONTENT -->
     <div class="content">
-      <!-- TOP ACTION BAR - visible on all pages -->
-      <div id="topActionBar" style="display:flex;align-items:center;justify-content:space-between;
-        padding:10px 24px;background:#fff;border-bottom:1px solid var(--border);
-        box-shadow:var(--shadow);position:sticky;top:0;z-index:40;gap:12px;flex-wrap:wrap;">
-        <div id="topBarTitle" style="font-size:15px;font-weight:700;color:#0E1620;font-family:var(--sans);letter-spacing:-.3px;">Dashboard</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button onclick="showPage('dashboard',this)" 
-            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">📊 Dashboard</button>
-          <button onclick="showPage('clientes',this)"
-            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">👥 Clientes</button>
-          <button onclick="showPage('reportes',this)"
-            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">📄 Reportes</button>
-          <button onclick="showPage('micuenta',this)"
-            style="padding:9px 18px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:#0E1620;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);box-shadow:0 1px 3px rgba(20,22,27,.08);">💰 Mi Cuenta</button>
-          <button onclick="logout()"
-            style="padding:8px 16px;border-radius:var(--r);border:none;background:var(--btn-grad);box-shadow:var(--btn-shadow);color:#fff;font-size:13px;cursor:pointer;font-family:var(--sans);">Salir</button>
-        </div>
-      </div>
+      <header id="topActionBar" class="admin-page-bar">
+        <div><div class="admin-bar-kicker">RC CAPITAL · ADMIN</div><div id="topBarTitle">Dashboard</div></div>
+        <button id="rcAdminMenuButton" class="admin-menu-button" type="button" aria-controls="adminSidebar" aria-expanded="false" onclick="rcSetAdminMenu(true)"><span aria-hidden="true">☰</span> Menú <span id="rcMenuBadge" class="rc-notification-badge" hidden></span></button>
+      </header>
 
       <!-- DASHBOARD -->
       <div class="page" id="page-ingresos"><h2>Solicitudes de ingreso</h2><button class="btn" onclick="loadIngresos()">Actualizar</button><div id="ingresosList"></div><h2>Depósitos y retiros</h2><div id="movimientosList"></div><h2>Vincular cuenta del broker</h2><select id="bindCliente"></select><input id="bindInvestment" placeholder="InvestmentId"/><button class="btn" onclick="bindBroker()">Guardar vínculo</button></div><div class="page active" id="page-dashboard">
@@ -748,16 +749,32 @@ function showApp(){
   loadAll();
 }
 
+let rcAdminMenuPreviousFocus=null,rcAdminMenuOverflow='';
+function rcSetAdminMenu(open){
+ const sidebar=$('adminSidebar'),toggle=$('rcAdminMenuButton'),backdrop=$('rcAdminMenuBackdrop');
+ if(open){rcAdminMenuPreviousFocus=document.activeElement;rcAdminMenuOverflow=document.body.style.overflow;sidebar.classList.add('mobile-open');backdrop.hidden=false;toggle.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';sidebar.querySelector('.admin-menu-close').focus();}
+ else{const wasOpen=sidebar.classList.contains('mobile-open');sidebar.classList.remove('mobile-open');backdrop.hidden=true;toggle.setAttribute('aria-expanded','false');if(wasOpen){document.body.style.overflow=rcAdminMenuOverflow;rcAdminMenuPreviousFocus?.focus?.();}}
+}
+document.addEventListener('keydown',e=>{
+ const sidebar=$('adminSidebar');if(!sidebar?.classList.contains('mobile-open'))return;
+ if(e.key==='Escape'){e.preventDefault();rcSetAdminMenu(false);}
+ if(e.key==='Tab'){const buttons=[...sidebar.querySelectorAll('button')].filter(x=>!x.disabled&&x.getClientRects().length);const first=buttons[0],last=buttons.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+});
+window.addEventListener('resize',()=>{if(window.innerWidth>768)rcSetAdminMenu(false);});
+
 // ── NAVIGATION ────────────────────────────────────────────────────
 function showPage(name, el){
-  var titles={dashboard:'Dashboard',clientes:'Clientes',reportes:'Reportes',micuenta:'Mi Cuenta'};
+  var titles={dashboard:'Dashboard',ingresos:'Solicitudes',clientes:'Clientes',reportes:'Reportes',micuenta:'Mi Cuenta'};
   var tb=document.getElementById('topBarTitle');
   if(tb) tb.textContent=titles[name]||name;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   $('page-'+name).classList.add('active');
-  if(el) el.classList.add('active');
+  const selected=el||document.querySelector('.nav-item[data-page="'+name+'"]');
+  if(selected) selected.classList.add('active');
+  rcSetAdminMenu(false);
 }
+
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
 // Init theme pill state
@@ -1690,6 +1707,7 @@ function renderBulkList(){
   var ready=0,noMatch=0;
   bulkFiles.forEach(function(bf,idx){
     var row=document.createElement('div');
+    row.className='rc-bulk-row';
     row.style.cssText='display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:10px 14px;border-radius:10px;background:#F1F4F8;border:1px solid var(--border);margin-bottom:6px;';
     var icon='⏳',iconColor='var(--muted)';
     if(bf.status==='ok'){icon='✅';iconColor='var(--good)';}
@@ -2398,5 +2416,5 @@ function drawDetChart(stats){
   </div>
 </div>
 
-<script src="admin-flow.js"></script></body>
+<script src="admin-flow.js?v=20261001-mobile-admin"></script></body>
 </html>

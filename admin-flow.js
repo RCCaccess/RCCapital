@@ -9,7 +9,7 @@ async function updateSolicitudesBadge(){
   if(results.some(r=>r.error)){badge.hidden=false;badge.textContent='!';nav.title='No pudimos actualizar las solicitudes';nav.setAttribute('aria-label','Solicitudes: no se pudo consultar el contador');return;}
   const total=results.reduce((n,r)=>n+(r.count||0),0);badge.textContent=total>99?'99+':String(total);badge.hidden=total===0;
   nav.title=total?total+' solicitudes pendientes':'Sin solicitudes pendientes';nav.setAttribute('aria-label',nav.title);
- }catch(e){nav.title='No pudimos actualizar las solicitudes';}finally{rcBadgeLoading=false;}
+ }catch(e){nav.title='No pudimos actualizar las solicitudes';}finally{const mobileBadge=$('rcMenuBadge');if(mobileBadge){mobileBadge.textContent=badge.textContent;mobileBadge.hidden=badge.hidden;}rcBadgeLoading=false;}
 }
 setInterval(()=>{if(!document.hidden && $('appScreen')?.style.display==='block')updateSolicitudesBadge();},30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden && $('appScreen')?.style.display==='block')updateSolicitudesBadge();});
