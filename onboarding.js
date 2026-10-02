@@ -55,22 +55,22 @@ async function rcShowResources(db,user,receipt){
  const top=rcNode('div',undefined,box);top.className='rc-guide-top';rcText('Tu espacio está listo. Esta guía te acompaña desde el registro hasta la gestión de tu cuenta. Puedes regresar cuando quieras.',top);rcButton('Explorar mi dashboard →',top,true).onclick=()=>rcCloseOverlay(overlay);
  const {data:row,error}=await db.from('rc_onboarding').select('*').eq('user_id',user.id).maybeSingle();if(error){rcText('No pudimos cargar tu progreso. Vuelve a abrir la guía para intentarlo.',box);return;}
  const state=row||{},steps=[
-  {key:'registro',field:'video_registro',title:'Crea tu cuenta',desc:'Conoce cómo registrarte en el broker y completar tus datos para empezar.'},
-  {key:'deposito',field:'video_deposito',title:'Tu primer depósito',desc:'Encuentra las opciones de depósito y los pasos para añadir fondos a tu cuenta.'},
-  {key:'activacion',field:'video_activacion',title:'Activa la gestión',desc:'Aprende cómo vincular tu cuenta con RC Capital y activar la gestión.'},
-  {key:'retiros',field:'video_retiros',title:'Gestiona tus retiros',desc:'Conoce dónde solicitar un retiro y cómo seguir el proceso.'}
+  {key:'registro',duration:'50 s',field:'video_registro',title:'Crea tu cuenta',desc:'Conoce cómo registrarte en el broker y completar tus datos para empezar.'},
+  {key:'deposito',duration:'40 s',field:'video_deposito',title:'Tu primer depósito',desc:'Encuentra las opciones de depósito y los pasos para añadir fondos a tu cuenta.'},
+  {key:'activacion',duration:'35 s',field:'video_activacion',title:'Activa la gestión',desc:'Aprende cómo vincular tu cuenta con RC Capital y activar la gestión.'},
+  {key:'retiros',duration:'35 s',field:'video_retiros',title:'Gestiona tus retiros',desc:'Conoce dónde solicitar un retiro y cómo seguir el proceso.'}
  ];
  const progress=rcNode('div',undefined,box);const track=rcNode('div',undefined,progress);track.className='rc-progress-track';track.setAttribute('role','progressbar');track.setAttribute('aria-label','Videos revisados');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','4');const fill=rcNode('div',undefined,track);fill.className='rc-progress-fill';const progressText=rcNode('p','',progress);progressText.className='rc-muted';
  const layout=rcNode('div',undefined,box);layout.className='rc-video-layout';const tabs=rcNode('div',undefined,layout);tabs.className='rc-video-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Guía de inicio');
  const stage=rcNode('section',undefined,layout);stage.className='rc-card rc-video-stage';stage.id='rcVideoPanel';stage.setAttribute('role','tabpanel');
  let current=0,saving=false;const buttons=[];
- const updateProgress=()=>{const count=steps.filter(s=>state[s.field]).length;fill.style.width=count/4*100+'%';track.setAttribute('aria-valuenow',String(count));progressText.textContent=count+' de 4 videos revisados · Avanza a tu ritmo';buttons.forEach((b,i)=>b.querySelector('small').textContent=state[steps[i].field]?'✓ Revisado':'Paso '+(i+1));};
+ const updateProgress=()=>{const count=steps.filter(s=>state[s.field]).length;fill.style.width=count/4*100+'%';track.setAttribute('aria-valuenow',String(count));progressText.textContent=count+' de 4 videos revisados · Avanza a tu ritmo';buttons.forEach((b,i)=>b.querySelector('small').textContent=state[steps[i].field]?'✓ Revisado':'Paso '+(i+1)+' · '+steps[i].duration);};
  async function saveProgress(field,value,msg){if(saving)return false;saving=true;try{const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error)throw error;state[field]=value;updateProgress();msg.textContent='Tu progreso quedó guardado.';return true;}catch(e){msg.textContent='No se guardó el progreso. Vuelve a intentarlo.';return false;}finally{saving=false;}}
  function select(index,focus=false){
   if(saving)return;stage.querySelector('video')?.pause();current=index;stage.replaceChildren();buttons.forEach((b,i)=>{b.setAttribute('aria-selected',String(i===index));b.tabIndex=i===index?0:-1;});stage.setAttribute('aria-labelledby',buttons[index].id);
-  const step=steps[index];rcNode('p','PASO '+(index+1)+' / 4',stage).className='rc-kicker';rcNode('h2',step.title,stage);rcNode('p',step.desc,stage).className='rc-description';
+  const step=steps[index];rcNode('p','PASO '+(index+1)+' / 4 · '+step.duration,stage).className='rc-kicker';rcNode('h2',step.title,stage);rcNode('p',step.desc,stage).className='rc-description';
   const player=rcNode('div',undefined,stage);player.className='rc-player';const local=RC_CONFIG.localVideos?.[step.key],url=local||RC_CONFIG.videos?.[step.key];
-  if(local){const video=rcNode('video',undefined,player);video.src=local;video.controls=true;video.playsInline=true;video.preload='metadata';video.setAttribute('aria-label',step.title);}
+  if(local){const video=rcNode('video',undefined,player);video.src=local;video.poster=local.replace(/\.mp4$/i,'-poster.png');video.controls=true;video.playsInline=true;video.preload='metadata';video.setAttribute('aria-label',step.title);video.addEventListener('error',()=>{if(!player.isConnected||player.querySelector('.rc-video-error'))return;const notice=rcNode('div',undefined,player);notice.className='rc-video-error';rcNode('p','No pudimos cargar este video. Revisa tu conexión y vuelve a intentarlo.',notice);rcButton('Reintentar',notice).onclick=()=>{notice.remove();video.load();};});}
   else if(url){const frame=rcNode('iframe',undefined,player);frame.src=url;frame.title=step.title;frame.allow='autoplay; encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';}
   else rcText('Este video estará disponible pronto.',player);
   const msg=rcNode('p','',stage);msg.className='rc-status';msg.setAttribute('role','status');
