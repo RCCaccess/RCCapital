@@ -1,7 +1,8 @@
 window.rcNeedsPassword=['invite','recovery'].includes(new URLSearchParams(location.hash.slice(1)).get('type'));
+const rcOwnVideos=Object.freeze({registro:'videos/registro.mp4',deposito:'videos/deposito.mp4',activacion:'videos/activacion.mp4',retiros:'videos/retiros.mp4'});
 const rcResourceFields=['video_registro','video_deposito','video_activacion','video_retiros','broker_registered'];
 function rcNode(tag,text,parent){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(parent)parent.append(node);return node;}
-function rcStyle(){if(document.getElementById('rcOnboardingStyle'))return;const link=rcNode('link');link.id='rcOnboardingStyle';link.rel='stylesheet';link.href='onboarding.css';document.head.append(link);}
+function rcStyle(){if(document.getElementById('rcOnboardingStyle'))return;const link=rcNode('link');link.id='rcOnboardingStyle';link.rel='stylesheet';link.href='onboarding.css?v=20261001-videos2';document.head.append(link);}
 function rcCloseOverlay(overlay){if(!overlay?.isConnected)return;document.body.style.overflow=overlay._previousOverflow;overlay.remove();overlay._previousFocus?.focus?.();}
 function rcOverlay(title){
  rcStyle();rcCloseOverlay(document.getElementById('rcOnboarding'));
@@ -86,10 +87,8 @@ async function rcShowResources(db,user,receipt){
  function select(index,focus=false){
   if(saving)return;stage.querySelector('video')?.pause();current=index;stage.replaceChildren();buttons.forEach((b,i)=>{b.setAttribute('aria-selected',String(i===index));b.tabIndex=i===index?0:-1;});stage.setAttribute('aria-labelledby',buttons[index].id);
   const step=steps[index];rcNode('p','PASO '+(index+1)+' / 4 · '+step.duration,stage).className='rc-kicker';rcNode('h2',step.title,stage);rcNode('p',step.desc,stage).className='rc-description';
-  const player=rcNode('div',undefined,stage);player.className='rc-player';const local=RC_CONFIG.localVideos?.[step.key],url=local||RC_CONFIG.videos?.[step.key];
+  const player=rcNode('div',undefined,stage);player.className='rc-player';const local=rcOwnVideos[step.key];
   if(local){const video=rcNode('video',undefined,player);video.src=local;video.poster=local.replace(/\.mp4$/i,'-poster.png');video.controls=true;video.playsInline=true;video.preload='metadata';video.setAttribute('aria-label',step.title);video.addEventListener('error',()=>{if(!player.isConnected||player.querySelector('.rc-video-error'))return;const notice=rcNode('div',undefined,player);notice.className='rc-video-error';rcNode('p','No pudimos cargar este video. Revisa tu conexión y vuelve a intentarlo.',notice);rcButton('Reintentar',notice).onclick=()=>{notice.remove();video.load();};});}
-  else if(url){const frame=rcNode('iframe',undefined,player);frame.src=url;frame.title=step.title;frame.allow='autoplay; encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';}
-  else rcText('Este video estará disponible pronto.',player);
   const msg=rcNode('p','',stage);msg.className='rc-status';msg.setAttribute('role','status');
   const actions=rcNode('div',undefined,stage);actions.className='rc-actions';const mark=rcButton(state[step.field]?'✓ Video revisado':'Marcar como revisado',actions);mark.onclick=async()=>{mark.disabled=true;await saveProgress(step.field,!state[step.field],msg);mark.textContent=state[step.field]?'✓ Video revisado':'Marcar como revisado';mark.disabled=false;};
   if(index<3)rcButton('Siguiente paso →',actions,true).onclick=()=>select(index+1,true);else rcButton('Entrar a mi dashboard →',actions,true).onclick=()=>rcCloseOverlay(overlay);
