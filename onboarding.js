@@ -1,79 +1,88 @@
 window.rcNeedsPassword=['invite','recovery'].includes(new URLSearchParams(location.hash.slice(1)).get('type'));
 const rcResourceFields=['video_registro','video_deposito','video_activacion','video_retiros','broker_registered'];
 function rcNode(tag,text,parent){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(parent)parent.append(node);return node;}
+function rcStyle(){if(document.getElementById('rcOnboardingStyle'))return;const link=rcNode('link');link.id='rcOnboardingStyle';link.rel='stylesheet';link.href='onboarding.css';document.head.append(link);}
+function rcCloseOverlay(overlay){if(!overlay?.isConnected)return;document.body.style.overflow=overlay._previousOverflow;overlay.remove();overlay._previousFocus?.focus?.();}
 function rcOverlay(title){
- document.getElementById('rcOnboarding')?.remove();
- const overlay=rcNode('div');overlay.id='rcOnboarding';overlay.style.cssText='position:fixed;inset:0;z-index:9999;background:#070b13;color:#f3f5f8;overflow:auto;padding:28px 16px;font:16px system-ui;box-sizing:border-box';
- const box=rcNode('div',undefined,overlay);box.style.cssText='max-width:900px;margin:auto';
- rcNode('p','RC CAPITAL',box).style.cssText='color:#8b9bb7;letter-spacing:2px';rcNode('h1',title,box);
- document.body.append(overlay);return {overlay,box};
+ rcStyle();rcCloseOverlay(document.getElementById('rcOnboarding'));
+ const overlay=rcNode('div');overlay.id='rcOnboarding';overlay.setAttribute('role','dialog');overlay.setAttribute('aria-modal','true');overlay.setAttribute('aria-labelledby','rcOnboardingTitle');overlay._previousOverflow=document.body.style.overflow;overlay._previousFocus=document.activeElement;document.body.style.overflow='hidden';
+ rcNode('div',undefined,overlay).className='rc-background';
+ const box=rcNode('div',undefined,overlay);box.className='rc-shell';
+ rcNode('p','RC CAPITAL / TU PRÓXIMO CAPÍTULO',box).className='rc-kicker';
+ const heading=rcNode('h1',title,box);heading.id='rcOnboardingTitle';heading.className='rc-title';heading.tabIndex=-1;
+ overlay.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const els=[...overlay.querySelectorAll('button:not(:disabled),a[href],input:not(:disabled),select:not(:disabled),summary')].filter(n=>n.getClientRects().length);if(!els.length)return;const first=els[0],last=els.at(-1);if(e.shiftKey&&(document.activeElement===first||document.activeElement===heading)){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}});
+ document.body.append(overlay);heading.focus();return {overlay,box,heading};
 }
-function rcButton(text,parent){const b=rcNode('button',text,parent);b.type='button';b.style.cssText='padding:13px 18px;margin:12px 12px 12px 0;border-radius:8px;border:1px solid #53617b;background:#19253d;color:white;cursor:pointer;font:inherit';return b;}
-function rcContract(parent){
- const host=rcNode('div',undefined,parent);host.style.cssText='border:1px solid #2b3853;border-radius:18px;overflow:hidden;margin:20px 0';
- const loading=rcNode('p','Cargando el contrato…',host);loading.style.padding='20px';
- const showPdf=()=>{host.replaceChildren();const frame=rcNode('iframe',undefined,host);frame.src=RC_CONFIG.termsUrl;frame.title='Contrato de gestión privada de capital';frame.style.cssText='width:100%;height:65vh;min-height:360px;border:0;background:white';};
- if(RC_CONFIG.termsDisplayUrl){fetch(RC_CONFIG.termsDisplayUrl).then(r=>{if(!r.ok)throw new Error('Contrato no disponible');return r.text();}).then(text=>{
-  if(!host.isConnected)return;const parsed=new DOMParser().parseFromString(text,'text/html');const contract=parsed.querySelector('main.contract'),style=parsed.querySelector('style');if(!contract||!style)throw new Error('Contrato incompleto');
-  contract.querySelectorAll('script,iframe,object,embed').forEach(n=>n.remove());host.replaceChildren();const shadow=host.attachShadow({mode:'open'});shadow.append(style.cloneNode(true),contract.cloneNode(true));
- }).catch(()=>{if(host.isConnected)showPdf();});}else showPdf();
- const a=rcNode('a','Descargar contrato en PDF',parent);a.href=RC_CONFIG.termsUrl;a.target='_blank';a.rel='noopener';a.style.cssText='display:block;color:#aac2ff;margin:12px 0';
+function rcButton(text,parent,primary=false){const b=rcNode('button',text,parent);b.type='button';b.className='rc-btn'+(primary?' primary':'');return b;}
+function rcText(text,parent){const p=rcNode('p',text,parent);p.className='rc-intro';return p;}
+async function rcContract(parent){
+ const host=rcNode('div',undefined,parent);host.className='rc-contract-host';rcNode('p','Preparando tu contrato…',host);
+ try{
+  if(!RC_CONFIG.termsDisplayUrl)throw new Error('Contrato no disponible');
+  const response=await fetch(RC_CONFIG.termsDisplayUrl);if(!response.ok)throw new Error('Contrato no disponible');
+  const parsed=new DOMParser().parseFromString(await response.text(),'text/html'),contract=parsed.querySelector('main.contract'),style=parsed.querySelector('style');
+  if(!contract||!style)throw new Error('Contrato incompleto');
+  if(!host.isConnected)return false;
+  contract.querySelectorAll('script,iframe,object,embed').forEach(n=>n.remove());host.replaceChildren();
+  const shadow=host.attachShadow({mode:'open'});shadow.append(style.cloneNode(true),contract.cloneNode(true));return true;
+ }catch(e){if(host.isConnected){host.replaceChildren();rcNode('p','No pudimos cargar el contrato. Recarga la página para revisarlo antes de aceptar.',host);}return false;}
 }
-
 function rcReceipt(parent,receipt){
- const box=rcNode('section',undefined,parent);box.style.cssText='padding:18px;border:1px solid #53617b;border-radius:8px;margin:18px 0';
- rcNode('h3','Aceptación registrada',box);rcNode('p',receipt.full_name,box);
- rcNode('p',(receipt.document_type==='cedula'?'Cédula: ':'Pasaporte: ')+receipt.document_number,box);
- rcNode('p','Aceptado el '+new Date(receipt.accepted_at).toLocaleString('es-PA')+' · Versión '+receipt.terms_version,box);
- rcNode('p','Tus datos de aceptación están guardados y no pueden modificarse.',box);
+ const box=rcNode('section',undefined,parent);box.className='rc-card rc-receipt';rcNode('h3','Tu aceptación está registrada',box);rcNode('p',receipt.full_name,box);rcNode('p',(receipt.document_type==='cedula'?'Cédula: ':'Pasaporte: ')+receipt.document_number,box);
+ rcNode('p','Aceptado el '+new Date(receipt.accepted_at).toLocaleString('es-ES',{timeZone:'America/Panama'})+' · Versión '+receipt.terms_version,box);rcNode('p','Estos datos quedan protegidos y no pueden modificarse.',box);
 }
 async function rcShowContract(cli,db,user){
- const {box}=rcOverlay('Lee y acepta el contrato para continuar');
- rcNode('p','Completa tus datos tal como aparecen en tu documento. Revisa que sean correctos: quedarán registrados al aceptar.',box);rcContract(box);
- const form=rcNode('form',undefined,box);
- const nameLabel=rcNode('label','Nombre completo',form),name=rcNode('input',undefined,nameLabel);name.name='full_name';name.required=true;name.minLength=3;name.maxLength=150;name.autocomplete='name';name.value=cli.nombre||'';
- const typeLabel=rcNode('label','Tipo de documento',form),type=rcNode('select',undefined,typeLabel);type.name='document_type';
- for(const [v,t] of [['cedula','Cédula'],['pasaporte','Pasaporte']]){const o=rcNode('option',t,type);o.value=v;}
- const idLabel=rcNode('label','Número de cédula o pasaporte',form),id=rcNode('input',undefined,idLabel);id.name='document_number';id.required=true;id.minLength=4;id.maxLength=40;id.autocomplete='off';
- for(const field of [name,type,id])field.style.cssText='display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0 18px;border:1px solid #53617b;border-radius:6px;background:#121d30;color:white;font:inherit';
- const consentLabel=rcNode('label',undefined,form),consent=rcNode('input',undefined,consentLabel);consent.type='checkbox';consent.required=true;consentLabel.append(document.createTextNode(' He leído y acepto la totalidad del contrato y confirmo que mis datos son correctos.'));
- const message=rcNode('p','',form);message.setAttribute('role','status');
- const accept=rcButton('Aceptar contrato y continuar',form);accept.type='submit';
- rcButton('Cerrar sesión',box).onclick=async()=>{await db.auth.signOut();location.reload();};
- form.onsubmit=async e=>{e.preventDefault();if(!form.reportValidity())return;accept.disabled=true;message.textContent='Guardando tu aceptación…';
-  const {data,error}=await db.rpc('rc_accept_contract',{p_full_name:name.value.trim(),p_document_type:type.value,p_document_number:id.value.trim(),p_version:RC_CONFIG.termsVersion});
-  if(error){message.textContent='No se pudo registrar la aceptación. Intenta de nuevo o contacta con RC Capital.';accept.disabled=false;return;}
-  if(!data){message.textContent='No se pudo confirmar la aceptación. Intenta de nuevo.';accept.disabled=false;return;}
-  sessionStorage.setItem('rcOpenResources','1');location.reload();
+ const {box}=rcOverlay('Empecemos con claridad.');
+ rcText('Antes de dar el siguiente paso, conoce cómo trabajamos, las condiciones del servicio y los riesgos. Tómate el tiempo que necesites para leerlo.',box);
+ const ready=rcContract(box);
+ const form=rcNode('form',undefined,box);form.className='rc-card';rcNode('h2','Tu identidad, tu aceptación',form);rcText('Escribe tus datos tal como aparecen en tu documento. Al aceptar quedarán registrados junto con la versión del contrato.',form);
+ const fields=rcNode('div',undefined,form);fields.className='rc-form-grid';
+ const nameLabel=rcNode('label','Nombre completo',fields);nameLabel.className='rc-field full';const name=rcNode('input',undefined,nameLabel);name.required=true;name.minLength=3;name.maxLength=150;name.autocomplete='name';name.name='full_name';name.value=cli.nombre||'';
+ const typeLabel=rcNode('label','Tipo de documento',fields);typeLabel.className='rc-field';const type=rcNode('select',undefined,typeLabel);type.name='document_type';for(const [v,t]of[['cedula','Cédula'],['pasaporte','Pasaporte']])rcNode('option',t,type).value=v;
+ const idLabel=rcNode('label','Número de documento',fields);idLabel.className='rc-field';const id=rcNode('input',undefined,idLabel);id.required=true;id.minLength=4;id.maxLength=40;id.autocomplete='off';id.name='document_number';
+ const consentLabel=rcNode('label',undefined,form);consentLabel.className='rc-check';const consent=rcNode('input',undefined,consentLabel);consent.type='checkbox';consent.required=true;rcNode('span','He leído y acepto la totalidad del contrato, comprendo los riesgos y confirmo que mis datos son correctos.',consentLabel);
+ const message=rcNode('p','Cargando el contrato…',form);message.className='rc-status';message.setAttribute('role','status');
+ const actions=rcNode('div',undefined,form);actions.className='rc-actions';const accept=rcButton('Aceptar y comenzar →',actions,true);accept.type='submit';accept.disabled=true;
+ rcButton('Cerrar sesión',actions).onclick=async()=>{await db.auth.signOut();location.reload();};
+ let loaded=false;ready.then(ok=>{loaded=ok;accept.disabled=!ok;message.textContent=ok?'':'Carga el contrato antes de continuar.';});
+ form.onsubmit=async e=>{e.preventDefault();if(!loaded||!form.reportValidity())return;accept.disabled=true;message.textContent='Registrando tu aceptación…';
+  try{const {data,error}=await db.rpc('rc_accept_contract',{p_full_name:name.value.trim(),p_document_type:type.value,p_document_number:id.value.trim(),p_version:RC_CONFIG.termsVersion});if(error||!data)throw new Error('No se pudo registrar');sessionStorage.setItem('rcOpenResources','1');location.reload();}
+  catch(e){message.textContent='No pudimos guardar tu aceptación. Tus datos siguen aquí; vuelve a intentarlo.';message.classList.add('error');accept.disabled=false;}
  };
 }
 async function rcShowResources(db,user,receipt){
- const {overlay,box}=rcOverlay('Tu guía de inicio');
- rcNode('p','Consulta estos recursos cuando los necesites. Tu dashboard ya está disponible.',box);
- rcButton('Volver a mi dashboard',box).onclick=()=>overlay.remove();
- const {data:row,error}=await db.from('rc_onboarding').select('*').eq('user_id',user.id).maybeSingle();
- if(error){rcNode('p','No se pudo cargar tu progreso. Cierra esta guía y vuelve a abrirla.',box);return;}
- const state=row||{};
- const titles=['Registro en el broker','Realizar un depósito','Activar la gestión','Solicitar retiros','Registro de tu cuenta'];
- rcResourceFields.forEach((field,i)=>{
-  const section=rcNode('section',undefined,box);section.style.cssText='padding:20px 0;border-bottom:1px solid #273044';rcNode('h2',titles[i],section);
-  const url=i===4?RC_CONFIG.brokerUrl:RC_CONFIG.videos[['registro','deposito','activacion','retiros'][i]];
-  if(!url){rcNode('p','Este recurso estará disponible próximamente.',section);return;}
-  if(i===4){
-   rcNode('p','Abre el sitio del broker para crear tu cuenta.',section);
-   const referral=rcNode('div',undefined,section);referral.style.cssText='padding:18px;margin:16px 0;border:1px solid #8faeff;border-radius:12px;background:#162541;max-width:100%;box-sizing:border-box';
-   const instruction=rcNode('strong','IMPORTANTE: en el campo «Referido» debes colocar este código:',referral);instruction.style.cssText='display:block;line-height:1.6';
-   const code=rcNode('code','qGBBx3Cz',referral);code.style.cssText='display:block;font-size:clamp(24px,6vw,32px);font-weight:700;letter-spacing:2px;color:#c7d8ff;margin-top:12px;user-select:all;overflow-wrap:anywhere';
-   rcNode('p','Cópialo exactamente, respetando las mayúsculas y minúsculas.',referral);
-  }else{
-   const frame=rcNode('iframe',undefined,section);frame.src=url;frame.title=titles[i];frame.loading='lazy';frame.referrerPolicy='strict-origin-when-cross-origin';frame.allow='encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.style.cssText='width:100%;aspect-ratio:16/9;border:0;border-radius:8px';
-  }
-  const a=rcNode('a',i===4?'Crear mi cuenta en el broker ↗':'Abrir video',section);a.href=i===4?url:url.replace('/embed/','/watch?v=');a.target='_blank';a.rel='noopener noreferrer';a.style.cssText=i===4?'display:block;box-sizing:border-box;width:100%;text-align:center;background:#aac2ff;color:#101c30;padding:15px 18px;border-radius:8px;font-weight:700;text-decoration:none;margin:16px 0;line-height:1.5':'display:block;color:#aac2ff;margin:12px 0';
-  const label=rcNode('label',undefined,section),check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state[field];label.append(document.createTextNode(i===4?' Ya completé mi registro':' Ya revisé este video'));
-  const msg=rcNode('p','',section);msg.setAttribute('role','status');
-  check.onchange=async()=>{check.disabled=true;const value=check.checked;const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error){check.checked=!value;msg.textContent='No se pudo guardar tu progreso.';}else{state[field]=value;msg.textContent='Progreso guardado.';}check.disabled=false;};
- });
- const details=rcNode('details',undefined,box);details.style.marginTop='24px';rcNode('summary','Consultar contrato y aceptación',details);rcReceipt(details,receipt);rcContract(details);
+ const {overlay,box,heading}=rcOverlay('Ya eres parte. Vamos paso a paso.');
+ const top=rcNode('div',undefined,box);top.className='rc-guide-top';rcText('Tu espacio está listo. Esta guía te acompaña desde el registro hasta la gestión de tu cuenta. Puedes regresar cuando quieras.',top);rcButton('Explorar mi dashboard →',top,true).onclick=()=>rcCloseOverlay(overlay);
+ const {data:row,error}=await db.from('rc_onboarding').select('*').eq('user_id',user.id).maybeSingle();if(error){rcText('No pudimos cargar tu progreso. Vuelve a abrir la guía para intentarlo.',box);return;}
+ const state=row||{},steps=[
+  {key:'registro',field:'video_registro',title:'Crea tu cuenta',desc:'Conoce cómo registrarte en el broker y completar tus datos para empezar.'},
+  {key:'deposito',field:'video_deposito',title:'Tu primer depósito',desc:'Encuentra las opciones de depósito y los pasos para añadir fondos a tu cuenta.'},
+  {key:'activacion',field:'video_activacion',title:'Activa la gestión',desc:'Aprende cómo vincular tu cuenta con RC Capital y activar la gestión.'},
+  {key:'retiros',field:'video_retiros',title:'Gestiona tus retiros',desc:'Conoce dónde solicitar un retiro y cómo seguir el proceso.'}
+ ];
+ const progress=rcNode('div',undefined,box);const track=rcNode('div',undefined,progress);track.className='rc-progress-track';track.setAttribute('role','progressbar');track.setAttribute('aria-label','Videos revisados');track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','4');const fill=rcNode('div',undefined,track);fill.className='rc-progress-fill';const progressText=rcNode('p','',progress);progressText.className='rc-muted';
+ const layout=rcNode('div',undefined,box);layout.className='rc-video-layout';const tabs=rcNode('div',undefined,layout);tabs.className='rc-video-tabs';tabs.setAttribute('role','tablist');tabs.setAttribute('aria-label','Guía de inicio');
+ const stage=rcNode('section',undefined,layout);stage.className='rc-card rc-video-stage';stage.id='rcVideoPanel';stage.setAttribute('role','tabpanel');
+ let current=0,saving=false;const buttons=[];
+ const updateProgress=()=>{const count=steps.filter(s=>state[s.field]).length;fill.style.width=count/4*100+'%';track.setAttribute('aria-valuenow',String(count));progressText.textContent=count+' de 4 videos revisados · Avanza a tu ritmo';buttons.forEach((b,i)=>b.querySelector('small').textContent=state[steps[i].field]?'✓ Revisado':'Paso '+(i+1));};
+ async function saveProgress(field,value,msg){if(saving)return false;saving=true;try{const {error}=await db.from('rc_onboarding').update({[field]:value}).eq('user_id',user.id);if(error)throw error;state[field]=value;updateProgress();msg.textContent='Tu progreso quedó guardado.';return true;}catch(e){msg.textContent='No se guardó el progreso. Vuelve a intentarlo.';return false;}finally{saving=false;}}
+ function select(index,focus=false){
+  if(saving)return;stage.querySelector('video')?.pause();current=index;stage.replaceChildren();buttons.forEach((b,i)=>{b.setAttribute('aria-selected',String(i===index));b.tabIndex=i===index?0:-1;});stage.setAttribute('aria-labelledby',buttons[index].id);
+  const step=steps[index];rcNode('p','PASO '+(index+1)+' / 4',stage).className='rc-kicker';rcNode('h2',step.title,stage);rcNode('p',step.desc,stage).className='rc-description';
+  const player=rcNode('div',undefined,stage);player.className='rc-player';const local=RC_CONFIG.localVideos?.[step.key],url=local||RC_CONFIG.videos?.[step.key];
+  if(local){const video=rcNode('video',undefined,player);video.src=local;video.controls=true;video.playsInline=true;video.preload='metadata';video.setAttribute('aria-label',step.title);}
+  else if(url){const frame=rcNode('iframe',undefined,player);frame.src=url;frame.title=step.title;frame.allow='autoplay; encrypted-media; fullscreen; picture-in-picture';frame.allowFullscreen=true;frame.referrerPolicy='strict-origin-when-cross-origin';}
+  else rcText('Este video estará disponible pronto.',player);
+  const msg=rcNode('p','',stage);msg.className='rc-status';msg.setAttribute('role','status');
+  const actions=rcNode('div',undefined,stage);actions.className='rc-actions';const mark=rcButton(state[step.field]?'✓ Video revisado':'Marcar como revisado',actions);mark.onclick=async()=>{mark.disabled=true;await saveProgress(step.field,!state[step.field],msg);mark.textContent=state[step.field]?'✓ Video revisado':'Marcar como revisado';mark.disabled=false;};
+  if(index<3)rcButton('Siguiente paso →',actions,true).onclick=()=>select(index+1,true);else rcButton('Entrar a mi dashboard →',actions,true).onclick=()=>rcCloseOverlay(overlay);
+  if(focus){buttons[index].focus();if(matchMedia('(max-width:760px)').matches)stage.scrollIntoView({block:'start',behavior:'smooth'});}
+ }
+ steps.forEach((step,i)=>{const b=rcButton('',tabs);b.className='rc-video-tab';b.id='rcVideoTab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls','rcVideoPanel');rcNode('span',String(i+1).padStart(2,'0'),b).className='number';const text=rcNode('span',undefined,b);rcNode('strong',step.title,text);rcNode('small','',text);b.onclick=()=>select(i);b.onkeydown=e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?3:(current+(['ArrowLeft','ArrowUp'].includes(e.key)?3:1))%4;select(next,true);}};buttons.push(b);});updateProgress();select(0);
+ const broker=rcNode('section',undefined,box);broker.className='rc-card';rcNode('h2','Tu cuenta, el siguiente paso',broker);rcText('Abre el registro del broker. En el campo «Referido» debes colocar este código:',broker);rcNode('code','qGBBx3Cz',broker).className='rc-broker-code';rcNode('p','Respeta las mayúsculas y minúsculas.',broker).className='rc-muted';
+ const link=rcNode('a','Crear mi cuenta en el broker ↗',broker);link.className='rc-btn primary';link.href=RC_CONFIG.brokerUrl;link.target='_blank';link.rel='noopener noreferrer';const label=rcNode('label',undefined,broker);label.className='rc-check';const check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state.broker_registered;rcNode('span','Ya completé mi registro en el broker',label);const brokerMsg=rcNode('p','',broker);brokerMsg.className='rc-status';brokerMsg.setAttribute('role','status');check.onchange=async()=>{check.disabled=true;const ok=await saveProgress('broker_registered',check.checked,brokerMsg);if(!ok)check.checked=!!state.broker_registered;check.disabled=false;};
+ const details=rcNode('details',undefined,box);details.className='rc-details';rcNode('summary','Mi contrato y constancia de aceptación',details);rcReceipt(details,receipt);rcContract(details);
+ const footer=rcNode('div',undefined,box);footer.className='rc-guide-footer';rcText('Todo en un lugar: tu capital, tus movimientos y tu evolución.',footer);rcButton('Abrir mi dashboard →',footer,true).onclick=()=>rcCloseOverlay(overlay);
 }
 window.rcOnboarding=async function(cli,db){
  const {data:u,error:ue}=await db.auth.getUser();if(ue||!u.user)throw new Error('Tu sesión venció.');
@@ -88,8 +97,13 @@ window.rcOnboarding=async function(cli,db){
  if(sessionStorage.getItem('rcOpenResources')==='1'){sessionStorage.removeItem('rcOpenResources');await rcShowResources(db,u.user,receipt);}
  return true;
 };
+
 function rcPassword(db){return new Promise(resolve=>{
- const box=document.createElement('div');box.style.cssText='position:fixed;inset:0;z-index:10000;background:#070b13;color:white;display:grid;place-items:center;font:16px system-ui;padding:24px';
- box.innerHTML='<form style="width:min(420px,100%)"><h1>Crea tu contraseña</h1><label>Nueva contraseña<input type="password" name="password" required minlength="12" autocomplete="new-password" style="display:block;width:100%;padding:14px;box-sizing:border-box;margin:16px 0"></label><label>Repite tu contraseña<input type="password" name="confirm" required minlength="12" autocomplete="new-password" style="display:block;width:100%;padding:14px;box-sizing:border-box;margin:16px 0"></label><button style="padding:14px">Guardar contraseña</button><p role="status"></p></form>';
- document.body.append(box);box.querySelector('form').onsubmit=async e=>{e.preventDefault();const f=e.target,button=f.querySelector('button'),d=new FormData(f);if(d.get('password')!==d.get('confirm')){f.querySelector('p').textContent='Las contraseñas deben coincidir.';return;}button.disabled=true;const {error}=await db.auth.updateUser({password:d.get('password')});if(error){f.querySelector('p').textContent=error.message;button.disabled=false;}else{box.remove();resolve();}};
+ const {overlay,box,heading}=rcOverlay('Bienvenido a tu nuevo espacio.');
+ const layout=rcNode('div',undefined,box);layout.className='rc-password-layout';const welcome=rcNode('div',undefined,layout);welcome.append(heading);rcText('Nos alegra tenerte aquí. Vamos a preparar tu acceso para que puedas conocer el servicio y seguir tu cuenta con claridad.',welcome);
+ const steps=rcNode('div',undefined,welcome);steps.className='rc-welcome-steps';for(const [n,text]of[['01','Crea tu acceso personal'],['02','Conoce y acepta las condiciones'],['03','Descubre tu guía y tu dashboard']]){const row=rcNode('div',undefined,steps);rcNode('span',n,row);row.append(document.createTextNode(text));}
+ const form=rcNode('form',undefined,layout);form.className='rc-card rc-password-form';rcNode('h2','Un acceso solo para ti',form);rcText('Elige una contraseña de al menos 12 caracteres. Guárdala en un lugar seguro.',form);
+ function passwordField(label,name){const field=rcNode('label',label,form);field.className='rc-field';const wrap=rcNode('div',undefined,field);wrap.className='rc-password-wrap';const input=rcNode('input',undefined,wrap);input.type='password';input.name=name;input.id='rcPassword_'+name;input.required=true;input.minLength=12;input.autocomplete='new-password';const toggle=rcButton('Mostrar',wrap);toggle.className='rc-password-toggle';toggle.setAttribute('aria-controls',input.id);toggle.setAttribute('aria-pressed','false');toggle.setAttribute('aria-label','Mostrar '+label.toLowerCase());toggle.onclick=e=>{e.preventDefault();const show=input.type==='password';input.type=show?'text':'password';toggle.textContent=show?'Ocultar':'Mostrar';toggle.setAttribute('aria-pressed',String(show));toggle.setAttribute('aria-label',(show?'Ocultar ':'Mostrar ')+label.toLowerCase());};return input;}
+ const password=passwordField('Tu contraseña','password'),confirm=passwordField('Confirma tu contraseña','confirm');const submit=rcButton('Crear mi acceso y continuar →',form,true);submit.type='submit';const msg=rcNode('p','',form);msg.className='rc-status';msg.setAttribute('role','status');
+ form.onsubmit=async e=>{e.preventDefault();if(!form.reportValidity())return;if(password.value!==confirm.value){msg.textContent='Las contraseñas no coinciden. Revísalas para continuar.';msg.classList.add('error');confirm.focus();return;}submit.disabled=true;msg.classList.remove('error');msg.textContent='Preparando tu acceso…';try{const {error}=await db.auth.updateUser({password:password.value});if(error)throw error;password.value='';confirm.value='';rcCloseOverlay(overlay);resolve();}catch(e){msg.textContent='No pudimos guardar la contraseña. Revisa tu conexión y vuelve a intentarlo.';msg.classList.add('error');submit.disabled=false;}};
 });}

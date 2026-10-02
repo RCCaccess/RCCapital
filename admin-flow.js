@@ -1,3 +1,18 @@
+let rcBadgeLoading=false;
+async function updateSolicitudesBadge(){
+ const badge=$('rcSolicitudesBadge'),nav=$('rcSolicitudesNav');if(!badge||rcBadgeLoading)return;rcBadgeLoading=true;
+ try{
+  const results=await Promise.all([
+   db.from('solicitudes_ingreso').select('id',{count:'exact',head:true}).eq('estado','pendiente'),
+   db.from('solicitudes').select('id',{count:'exact',head:true}).eq('estado','pendiente')
+  ]);
+  if(results.some(r=>r.error)){badge.hidden=false;badge.textContent='!';nav.title='No pudimos actualizar las solicitudes';nav.setAttribute('aria-label','Solicitudes: no se pudo consultar el contador');return;}
+  const total=results.reduce((n,r)=>n+(r.count||0),0);badge.textContent=total>99?'99+':String(total);badge.hidden=total===0;
+  nav.title=total?total+' solicitudes pendientes':'Sin solicitudes pendientes';nav.setAttribute('aria-label',nav.title);
+ }catch(e){nav.title='No pudimos actualizar las solicitudes';}finally{rcBadgeLoading=false;}
+}
+setInterval(()=>{if(!document.hidden && $('appScreen')?.style.display==='block')updateSolicitudesBadge();},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden && $('appScreen')?.style.display==='block')updateSolicitudesBadge();});
 function rcEscape(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 async function rcAdminAction(body){
  const {data,error}=await db.functions.invoke('rc-admin',{body});
@@ -14,6 +29,7 @@ async function rcAdminAction(body){
  return data;
 }
 async function loadIngresos(){
+ await updateSolicitudesBadge();
  const el=$('ingresosList');if(!el)return;el.textContent='Cargando…';
  const {data,error}=await db.from('solicitudes_ingreso').select('*').order('created_at',{ascending:false});
  if(error){el.textContent='No se pudieron cargar las solicitudes. Instala la migración de Supabase.';return;}

@@ -278,6 +278,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
   #modalDetalle [style*="grid-template-columns:1fr auto"]{grid-template-columns:1fr !important;}
   #modalDetalle [style*="text-align:right"]{text-align:left !important;}
 }
+.rc-notification-badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:20px;background:#28bd78;color:#041c11;font-size:11px;font-weight:800;margin-left:auto;box-shadow:0 0 0 2px #132c41;line-height:1}.rc-notification-badge[hidden]{display:none}#rcSolicitudesNav{position:relative}.sidebar.collapsed #rcSolicitudesBadge{position:absolute;top:1px;right:0;min-width:18px;height:18px;font-size:10px}@media(max-width:600px){.rc-notification-badge{min-width:18px;height:18px;font-size:10px;margin-left:2px}}
 </style>
 <script src="config.js"></script></head>
 <body>
@@ -317,7 +318,7 @@ td .mono{font-family:var(--mono);font-size:11px;color:var(--muted);}
         <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard',this)">
           <span class="icon">📊</span><span class="nav-label"> Dashboard</span>
         </button>
-        <button class="nav-item" data-page="ingresos" onclick="showPage('ingresos',this);loadIngresos()">Solicitudes</button><button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)">
+        <button class="nav-item" data-page="ingresos" id="rcSolicitudesNav" onclick="showPage('ingresos',this);loadIngresos()"><span class="icon" aria-hidden="true">📨</span><span class="nav-label"> Solicitudes</span><span id="rcSolicitudesBadge" class="rc-notification-badge" hidden aria-live="polite"></span></button><button class="nav-item" data-page="clientes" onclick="showPage('clientes',this)">
           <span class="icon">👥</span><span class="nav-label"> Clientes</span>
         </button>
         <button class="nav-item" data-page="reportes" onclick="showPage('reportes',this)">
