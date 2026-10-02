@@ -15,7 +15,21 @@ function rcOverlay(title){
 }
 function rcButton(text,parent,primary=false){const b=rcNode('button',text,parent);b.type='button';b.className='rc-btn'+(primary?' primary':'');return b;}
 function rcText(text,parent){const p=rcNode('p',text,parent);p.className='rc-intro';return p;}
-async function rcContract(parent){
+function rcContractIdentity(host,identity){
+ const root=host?.shadowRoot;if(!root)return;
+ const value=identity||{};
+ const name=root.querySelector('[data-rc-investor-name]');if(name)name.textContent=String(value.full_name||'el inversor identificado en este portal').trim();
+ const type=root.querySelector('[data-rc-document-type]');if(type)type.textContent=value.document_type==='pasaporte'?'pasaporte':value.document_type==='cedula'?'cédula':'documento de identidad';
+ const number=root.querySelector('[data-rc-document-number]');if(number)number.textContent=String(value.document_number||'registrado al aceptar').trim();
+ const title=root.querySelector('[data-rc-stamp-title]'),description=root.querySelector('[data-rc-stamp-description]'),details=root.querySelector('[data-rc-stamp-details]');
+ if(!title||!description||!details)return;
+ details.replaceChildren();details.hidden=!value.accepted_at;
+ if(!value.accepted_at){title.textContent='Pendiente de aceptación';description.textContent='Tu constancia aparecerá aquí cuando aceptes el contrato desde el formulario.';return;}
+ title.textContent='✓ Términos y condiciones aceptados';description.textContent='Aceptación registrada desde la cuenta del inversor. Los datos de esta constancia no pueden modificarse.';
+ const date=new Date(value.accepted_at).toLocaleString('es-ES',{timeZone:'America/Panama',day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false})+' · Panamá (UTC-05:00)';
+ for(const [label,text]of[['Inversor',value.full_name],['Documento',(value.document_type==='pasaporte'?'Pasaporte: ':'Cédula: ')+value.document_number],['Aceptado el',date],['Versión',value.terms_version]]){rcNode('dt',label,details);rcNode('dd',String(text),details);}
+}
+async function rcContract(parent,identity=null){
  const host=rcNode('div',undefined,parent);host.className='rc-contract-host';rcNode('p','Preparando tu contrato…',host);
  try{
   if(!RC_CONFIG.termsDisplayUrl)throw new Error('Contrato no disponible');
@@ -24,7 +38,7 @@ async function rcContract(parent){
   if(!contract||!style)throw new Error('Contrato incompleto');
   if(!host.isConnected)return false;
   contract.querySelectorAll('script,iframe,object,embed').forEach(n=>n.remove());host.replaceChildren();
-  const shadow=host.attachShadow({mode:'open'});shadow.append(style.cloneNode(true),contract.cloneNode(true));return true;
+  const shadow=host.attachShadow({mode:'open'});shadow.append(style.cloneNode(true),contract.cloneNode(true));rcContractIdentity(host,identity);return true;
  }catch(e){if(host.isConnected){host.replaceChildren();rcNode('p','No pudimos cargar el contrato. Recarga la página para revisarlo antes de aceptar.',host);}return false;}
 }
 function rcReceipt(parent,receipt){
@@ -34,12 +48,15 @@ function rcReceipt(parent,receipt){
 async function rcShowContract(cli,db,user){
  const {box}=rcOverlay('Empecemos con claridad.');
  rcText('Antes de dar el siguiente paso, conoce cómo trabajamos, las condiciones del servicio y los riesgos. Tómate el tiempo que necesites para leerlo.',box);
- const ready=rcContract(box);
+ const identity={full_name:cli.nombre||'',document_type:'cedula',document_number:''};
+ const ready=rcContract(box,identity);
  const form=rcNode('form',undefined,box);form.className='rc-card';rcNode('h2','Tu identidad, tu aceptación',form);rcText('Escribe tus datos tal como aparecen en tu documento. Al aceptar quedarán registrados junto con la versión del contrato.',form);
  const fields=rcNode('div',undefined,form);fields.className='rc-form-grid';
  const nameLabel=rcNode('label','Nombre completo',fields);nameLabel.className='rc-field full';const name=rcNode('input',undefined,nameLabel);name.required=true;name.minLength=3;name.maxLength=150;name.autocomplete='name';name.name='full_name';name.value=cli.nombre||'';
  const typeLabel=rcNode('label','Tipo de documento',fields);typeLabel.className='rc-field';const type=rcNode('select',undefined,typeLabel);type.name='document_type';for(const [v,t]of[['cedula','Cédula'],['pasaporte','Pasaporte']])rcNode('option',t,type).value=v;
  const idLabel=rcNode('label','Número de documento',fields);idLabel.className='rc-field';const id=rcNode('input',undefined,idLabel);id.required=true;id.minLength=4;id.maxLength=40;id.autocomplete='off';id.name='document_number';
+ const syncIdentity=()=>{identity.full_name=name.value.trim();identity.document_type=type.value;identity.document_number=id.value.trim();rcContractIdentity(box.querySelector('.rc-contract-host'),identity);};
+ for(const field of [name,type,id])field.addEventListener(field===type?'change':'input',syncIdentity);
  const consentLabel=rcNode('label',undefined,form);consentLabel.className='rc-check';const consent=rcNode('input',undefined,consentLabel);consent.type='checkbox';consent.required=true;rcNode('span','He leído y acepto la totalidad del contrato, comprendo los riesgos y confirmo que mis datos son correctos.',consentLabel);
  const message=rcNode('p','Cargando el contrato…',form);message.className='rc-status';message.setAttribute('role','status');
  const actions=rcNode('div',undefined,form);actions.className='rc-actions';const accept=rcButton('Aceptar y comenzar →',actions,true);accept.type='submit';accept.disabled=true;
@@ -81,7 +98,7 @@ async function rcShowResources(db,user,receipt){
  steps.forEach((step,i)=>{const b=rcButton('',tabs);b.className='rc-video-tab';b.id='rcVideoTab'+i;b.setAttribute('role','tab');b.setAttribute('aria-controls','rcVideoPanel');rcNode('span',String(i+1).padStart(2,'0'),b).className='number';const text=rcNode('span',undefined,b);rcNode('strong',step.title,text);rcNode('small','',text);b.onclick=()=>select(i);b.onkeydown=e=>{if(['ArrowRight','ArrowDown','ArrowLeft','ArrowUp','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?3:(current+(['ArrowLeft','ArrowUp'].includes(e.key)?3:1))%4;select(next,true);}};buttons.push(b);});updateProgress();select(0);
  const broker=rcNode('section',undefined,box);broker.className='rc-card';rcNode('h2','Tu cuenta, el siguiente paso',broker);rcText('Abre el registro del broker. En el campo «Referido» debes colocar este código:',broker);rcNode('code','qGBBx3Cz',broker).className='rc-broker-code';rcNode('p','Respeta las mayúsculas y minúsculas.',broker).className='rc-muted';
  const link=rcNode('a','Crear mi cuenta en el broker ↗',broker);link.className='rc-btn primary';link.href=RC_CONFIG.brokerUrl;link.target='_blank';link.rel='noopener noreferrer';const label=rcNode('label',undefined,broker);label.className='rc-check';const check=rcNode('input',undefined,label);check.type='checkbox';check.checked=!!state.broker_registered;rcNode('span','Ya completé mi registro en el broker',label);const brokerMsg=rcNode('p','',broker);brokerMsg.className='rc-status';brokerMsg.setAttribute('role','status');check.onchange=async()=>{check.disabled=true;const ok=await saveProgress('broker_registered',check.checked,brokerMsg);if(!ok)check.checked=!!state.broker_registered;check.disabled=false;};
- const details=rcNode('details',undefined,box);details.className='rc-details';rcNode('summary','Mi contrato y constancia de aceptación',details);rcReceipt(details,receipt);rcContract(details);
+ const details=rcNode('details',undefined,box);details.className='rc-details';rcNode('summary','Mi contrato y constancia de aceptación',details);rcContract(details,receipt);
  const footer=rcNode('div',undefined,box);footer.className='rc-guide-footer';rcText('Todo en un lugar: tu capital, tus movimientos y tu evolución.',footer);rcButton('Abrir mi dashboard →',footer,true).onclick=()=>rcCloseOverlay(overlay);
 }
 window.rcOnboarding=async function(cli,db){
