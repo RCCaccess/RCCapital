@@ -2071,51 +2071,17 @@ function closeDetalle(){
   document.body.style.overflow='';
 }
 
-async function openDetalle(clienteId, nombre){
-  $('detNombre').textContent = nombre;
-  var requestId=++detRequestId;
-  resetDetalle();
-  var page = $('modalDetalle');
-  page.style.display = 'block';
-  page.scrollTop = 0;
-  document.body.style.overflow = 'hidden';
-
-  // Load latest report from Supabase
-  var res;
-  try{
-    res=await db.from('reportes').select('csv_data,mes,created_at')
-      .eq('cliente_id',clienteId).order('mes',{ascending:false}).limit(1).maybeSingle();
-    if(requestId!==detRequestId)return;
-    if(res.error)throw res.error;
-  }catch(e){
-    if(requestId!==detRequestId)return;
-    $('detPeriodo').textContent='No se pudo cargar el reporte';
-    $('detSub').textContent='Vuelve a abrir esta cuenta para reintentar.';
-    $('detChartStatus').textContent='Datos no disponibles.';
-    return;
-  }
-  if(!res.data||!res.data.csv_data){
-    $('detPeriodo').textContent='Sin reportes disponibles';
-    $('detSub').textContent='Pendiente de cargar reporte';
-    $('detChartStatus').textContent='La evolución aparecerá al cargar un reporte de esta cuenta.';
-    return;
-  }
-
-  var rep = res.data;
-  $('detPeriodo').textContent = 'Período: ' + rep.mes;
-
-  // Parse CSV and compute stats (reusing same logic as index.html)
-  try{
-    var rows = parseCSVdet(rep.csv_data);
-    var stats = computeStatsdet(rows);
-    renderDetalle(stats, nombre);
-  }catch(e){
-    resetDetalle();
-    $('detPeriodo').textContent = 'Error procesando datos: '+e.message;
-    $('detSub').textContent='No se pudo interpretar el reporte.';
-    $('detChartStatus').textContent='Sin datos válidos para graficar.';
-  }
+function openDetalle(clienteId,nombre){
+ closeDetalle();
+ var page=$('modalReplica');
+ $('replicaNombre').textContent=nombre+' · Vista del inversor';
+ $('replicaFrame').src='inversores.html?v=20261003-preview1&admin_client='+encodeURIComponent(clienteId);
+ page.hidden=false;document.body.style.overflow='hidden';
 }
+function closeReplica(){
+ $('modalReplica').hidden=true;$('replicaFrame').src='about:blank';document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('modalReplica').hidden)closeReplica();});
 
 // Lightweight CSV parser for detail modal
 function parseCSVdet(text){
@@ -2449,5 +2415,13 @@ function drawDetChart(stats){
   </div>
 </div>
 
-<script src="admin-flow.js?v=20261001-mobile-admin"></script></body>
+<script src="admin-flow.js?v=20261001-mobile-admin"></script><div id="modalReplica" hidden style="position:fixed;inset:0;z-index:2000;background:#07080b;">
+ <div style="height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;background:#101c2c;color:#f3f5f8;">
+  <button class="btn" onclick="closeReplica()" style="flex-shrink:0;">← Volver</button>
+  <span id="replicaNombre" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+  <span style="margin-left:auto;font-size:11px;flex-shrink:0;">Solo lectura</span>
+ </div>
+ <iframe id="replicaFrame" title="Dashboard del inversor en solo lectura" src="about:blank" style="display:block;width:100%;height:calc(100% - 64px);border:0;" sandbox="allow-scripts allow-same-origin" referrerpolicy="same-origin"></iframe>
+</div>
+</body>
 </html>

@@ -1674,6 +1674,9 @@ const usdS = n => (n < 0 ? '−' : '+') + usd(n);
 const usd0 = n => '$' + Math.round(n).toLocaleString('es-MX');
 const miles = n => Math.round(n).toLocaleString('es-MX');
 
+const rcPreviewClient=new URLSearchParams(location.search).get('admin_client');
+let rcAdminPreview=false;
+let rcGoalRemote=null;
 let cliente = null;   // fila de la tabla clientes
 let S = null;         // stats calculados
 let D = null;         // modelo del journey
@@ -1800,9 +1803,28 @@ function computeStats(rows){
 /* ═══════════════════════════════════════════
    MODELO DEL JOURNEY desde los stats reales
    ═══════════════════════════════════════════ */
+async function rcLoadGoal(cli){
+ rcGoalRemote=null;
+ const {data,error}=await db.from('rc_investor_goals').select('amount').eq('cliente_id',cli.id).maybeSingle();
+ if(error)throw new Error('No se pudo cargar el objetivo. Verifica que la actualización SQL esté instalada.');
+ if(data){rcGoalRemote=Number(data.amount);return;}
+ if(rcAdminPreview)return;
+ let legacy=null;try{legacy=Number(localStorage.getItem('rcj_goal_'+cli.id));}catch(e){}
+ if(legacy>0&&Number.isFinite(legacy)){
+  const {error:saveError}=await db.from('rc_investor_goals').insert({cliente_id:cli.id,amount:legacy});
+  if(saveError)throw new Error('No se pudo sincronizar tu objetivo. Intenta de nuevo.');
+  rcGoalRemote=legacy;
+ }
+}
+function rcReadOnlyUI(){
+ if(!rcAdminPreview)return;
+ ['#goalBtn','#goalSave','#depBtn','#depGo','#wdBtn','#wdGo','#rcResourcesButton'].forEach(sel=>{const el=$(sel);if(el){el.disabled=true;el.title='Vista de solo lectura';el.setAttribute('aria-disabled','true');}});
+ $$('#whoMenu [data-go="salir"],#whoMenu [data-go="ajustes"]').forEach(el=>{el.disabled=true;el.hidden=true;});
+}
 function objetivoGuardado(id, equity){
   let v = null;
-  try { v = parseFloat(localStorage.getItem('rcj_goal_' + id)); } catch(e){}
+  if(rcGoalRemote!==null)v=rcGoalRemote;
+  else if(!rcAdminPreview){try { v = parseFloat(localStorage.getItem('rcj_goal_' + id)); } catch(e){}}
   if(v && v > 0) return {valor:v, propio:true};
   const escalones = [1000, 2500, 5000, 10000, 25000, 50000];
   const auto = escalones.find(x => x > equity) || Math.ceil(equity/10000)*10000 + 10000;
@@ -2364,12 +2386,15 @@ $('#goalBtn').addEventListener('click', () => {
   $('#goalCustom').style.display = 'none';
   abrir('#mGoal');
 });
-$('#goalSave').addEventListener('click', () => {
+$('#goalSave').addEventListener('click', async () => {
+  if(rcAdminPreview)return;
   const sel = $('#goalOpts .opt.on');
   if(!sel){ aviso('Elige un objetivo'); return; }
   const v = sel.dataset.v === 'custom' ? parseFloat($('#goalInput').value) : +sel.dataset.v;
   if(!v || v <= 0){ aviso('Escribe un monto válido'); return; }
   if(v <= D.capital){ aviso('El objetivo debe superar tu capital actual'); return; }
+  const saveBtn=$('#goalSave');saveBtn.disabled=true;
+  try{const {error}=await db.from('rc_investor_goals').upsert({cliente_id:D.id,amount:v},{onConflict:'cliente_id'});if(error)throw error;rcGoalRemote=v;}catch(e){aviso('No se pudo guardar el objetivo. Intenta de nuevo.');return;}finally{saveBtn.disabled=false;}
   try { localStorage.setItem('rcj_goal_'+D.id, String(v)); } catch(e){}
   D.objetivo = v;
   D.faltan = +(v - D.capital).toFixed(2);
@@ -2410,6 +2435,7 @@ function cuerpoSolicitud(tipo, monto, extra, ref){
 }
 
 async function enviarSolicitud(tipo,monto,extra){
+ if(rcAdminPreview)throw new Error('Esta vista es de solo lectura.');
  const ref=refSolicitud();
  const {error}=await db.from('solicitudes').insert({cliente_id:cliente.id,nombre:cliente.nombre,email:cliente.email,tipo,monto,metodo:extra||null,referencia:ref,capital_actual:D.capital,estado:'pendiente'});
  if(error)throw new Error('No pudimos guardar tu solicitud. Intenta de nuevo.');
@@ -2526,6 +2552,7 @@ function verApp(){
   $('#app').style.display = 'block';
 }
 async function salir(){
+ if(rcAdminPreview)return;
   await db.auth.signOut();
   try { localStorage.removeItem(SESION); } catch(e){}
   cliente = null; S = null; D = null;
@@ -2557,7 +2584,7 @@ async function cargarReporte(cli, actualizar=false){
   cliente = cli;
   if(!actualizar){
     reporteAutorizado=false;
-    if(!(await rcOnboarding(cli, db)))return;
+    if(!rcAdminPreview&&!(await rcOnboarding(cli, db)))return;
     reporteAutorizado=true;
   }
   const {data, error} = await db.from('reportes')
@@ -2582,17 +2609,21 @@ async function cargarReporte(cli, actualizar=false){
       '<div class="empty-state"><h3>Tu journey empieza pronto</h3>'+
       '<p>Todavía no hay movimientos cargados en tu cuenta.<br/>En cuanto tu gestor suba el primer reporte, verás aquí la evolución de tu capital.</p></div>';
     document.querySelector('.dock').style.display = 'none';
+    rcReadOnlyUI();
     return;
   }
 
   const rows = parseCSV(data[0].csv_data);
   if(!rows.length) throw new Error('Tu reporte no tiene movimientos');
   S = computeStats(rows);
+  await rcLoadGoal(cli);
+  if(cliente!==cli)return;
   D = construirModelo(S, cli);
   reporteCargado=data[0].csv_data;
   reporteVacio=false;
   verApp();
   pintarTodo();
+  rcReadOnlyUI();
   pintar(1);
   setTimeout(animarGrafico, 320);
   const obs = new IntersectionObserver(en => {
@@ -2602,6 +2633,7 @@ async function cargarReporte(cli, actualizar=false){
 }
 
 async function entrar(){
+  if(rcPreviewClient)return;
   const email = $('#gEmail').value.trim().toLowerCase();
   const pass  = $('#gPass').value;
   const err   = $('#gateErr');
@@ -2630,6 +2662,18 @@ $('#gBtn').addEventListener('click', entrar);
 
 /* arranque: sesión verificada por Supabase */
 (async function(){
+ if(rcPreviewClient){
+  try{
+   const {data:admin,error:adminError}=await db.rpc('rc_is_admin');
+   if(adminError||admin!==true)throw new Error('Esta vista requiere una sesión de administrador.');
+   const {data:cli,error}=await db.from('clientes').select('*').eq('id',rcPreviewClient).single();
+   if(error||!cli)throw new Error('No se pudo cargar este cliente.');
+   rcAdminPreview=true;
+   await cargarReporte(cli);
+   rcReadOnlyUI();
+  }catch(e){verApp();document.querySelector('main.shell').textContent=e.message;document.querySelector('.dock').style.display='none';}
+  return;
+ }
  localStorage.removeItem(SESION);
  const {data}=await db.auth.getSession();
  if(data.session){try{
