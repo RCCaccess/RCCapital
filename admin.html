@@ -450,21 +450,22 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
           </div>
         </div>
 
+        <div style="display:flex;gap:12px;align-items:center;margin:12px 0;"><button class="btn" onclick="mcLoadCloud()">Actualizar desde Supabase</button><span id="mcSyncStatus" role="status" style="font-size:12px;color:var(--muted);"></span></div><p id="mcMethod" style="font-size:13px;line-height:1.6;color:var(--muted);"></p>
         <!-- KPIs gestor -->
         <div id="mcStats" style="display:none;">
           <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
-            <div class="stat-box good"><div class="sl">Total comisiones</div><div class="sv" id="mcTotalFees">—</div></div>
+            <div class="stat-box good"><div class="sl">Comisiones del archivo</div><div class="sv" id="mcTotalFees">—</div></div>
             <div class="stat-box accent"><div class="sl">Performance fees</div><div class="sv" id="mcPerfFees">—</div></div>
             <div class="stat-box"><div class="sl">Management fees</div><div class="sv" id="mcMgmtFees">—</div></div>
             <div class="stat-box" style="border-color:rgba(255,79,106,.2);">
-              <div class="sl">Total retirado</div>
+              <div class="sl">Retiros del gestor (archivo)</div>
               <div class="sv" style="color:var(--bad);" id="mcWithdrawals">—</div>
             </div>
           </div>
           <div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-top:-4px;">
             <div class="stat-box"><div class="sl">Deposit fees</div><div class="sv" id="mcDepFees">—</div></div>
-            <div class="stat-box good"><div class="sl">Balance disponible</div><div class="sv" id="mcBalance">—</div></div>
-            <div class="stat-box"><div class="sl">Meses operados</div><div class="sv" id="mcMeses">—</div></div>
+            <div class="stat-box good"><div class="sl" id="mcBalanceLabel">Saldo de comisiones calculado</div><div class="sv" id="mcBalance">—</div></div>
+            <div class="stat-box"><div class="sl">Meses con comisiones/retiros</div><div class="sv" id="mcMeses">—</div></div>
           </div>
 
           <!-- Chart: comisiones mensuales -->
@@ -773,6 +774,7 @@ function showPage(name, el){
   const selected=el||document.querySelector('.nav-item[data-page="'+name+'"]');
   if(selected) selected.classList.add('active');
   rcSetAdminMenu(false);
+  if(name==='micuenta'){if(lastConsolidatedCSV)mcProcessCSV(lastConsolidatedCSV);mcLoadCloud();}
 }
 
 
@@ -789,10 +791,7 @@ async function loadAll(){
   await loadReportes();
   await loadIngresos();
   updateDashboard();
-  // Restore Mi Cuenta from localStorage
-  if(lastConsolidatedCSV){
-    setTimeout(function(){ mcProcessCSV(lastConsolidatedCSV); }, 100);
-  }
+  await mcLoadCloud();
 }
 
 let contractReceipts=new Map(),contractReceiptsError=false,contractMailJobs=new Map();
@@ -1519,7 +1518,7 @@ async function subirReporte(){
     if(error){ toast('Error guardando: '+error.message,'bad'); return; }
 
     const cliente = clientesCache.find(c=>c.id===clienteId);
-    toast(`✅ Reporte de ${cliente?.nombre||''} subido para ${mes} · 💰 Mi Cuenta actualizada`);
+    toast(`Reporte de ${cliente?.nombre||''} guardado para ${mes}`);
     // Re-process Mi Cuenta if we have cached data
     if(lastConsolidatedCSV) mcProcessCSV(lastConsolidatedCSV);
     fileInput.value='';
@@ -1642,6 +1641,7 @@ var MANAGER_CSV_NAME = 'OSCAR ANTONIO ROJAS CORRO';
 
 function processAllLoaded(results, curMes){
   bulkFiles = [];
+  mcSourceFiles=results.filter(r=>r.text).map(r=>({text:r.text,name:r.file?.name||'consolidado.csv'}));
   var managerRows = []; // collect manager's own CSV rows
 
   results.forEach(function(r){
@@ -1654,7 +1654,7 @@ function processAllLoaded(results, curMes){
           var normMgr  = MANAGER_CSV_NAME.toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
 
           // Check if this is the manager's own account
-          if(normName === normMgr || normName.indexOf(normMgr) >= 0 || normMgr.indexOf(normName) >= 0){
+          if(normName === normMgr){
             managerRows.push(inv.csvText);
             return; // don't add to client list
           }
@@ -1671,14 +1671,6 @@ function processAllLoaded(results, curMes){
           });
         });
 
-        // Feed manager data to Mi Cuenta
-        if(managerRows.length > 0){
-          lastConsolidatedCSV = r.text;
-          
-          mcProcessCSV(r.text);
-          var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
-          if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">&#9679;</span>';
-        }
 
       }catch(ex){ /* skip silently */ }
     } else {
@@ -1763,7 +1755,7 @@ async function uploadAllBulk(){
   toast(ok+' reportes guardados'+(fail?' · '+fail+' errores':'')+(sinAsignar?' · '+sinAsignar+' sin asignar (no guardados)':''),fail?'bad':undefined);
   await loadReportes(); updateDashboard(); await loadClientes();
   // Auto-feed Mi Cuenta from the same CSV data
-  autoFeedMiCuenta();
+  await autoFeedMiCuenta();
 }
 
 function clearBulk(){
@@ -1819,49 +1811,17 @@ function toggleSidebar(){
 // ── MI CUENTA (GESTOR) ────────────────────────────────────────────
 var mcData = null;
 var lastConsolidatedCSV = null; // cache of the last full CSV loaded
-// CSV is only kept in memory.
+// Shared source is stored in Supabase; memory is a display cache.
 // Called automatically after bulk upload
-function autoFeedMiCuenta(){
-  // In single mode: use first bulkFile's original full text
-  // In multi mode: reconstruct by concatenating with shared header
-  var fullText = null;
-
-  if(bulkMode === 'single' && bulkFiles.length > 0){
-    // Get original text - need to re-read, but we stored split texts
-    // Instead, reconstruct: header + all rows from all investors
-    var allTexts = bulkFiles.map(function(bf){ return bf.text; });
-    if(allTexts.length > 0){
-      // Extract header from first
-      var header = allTexts[0].split(/\r?\n/)[0];
-      var rows = [];
-      allTexts.forEach(function(t){
-        var lines = t.split(/\r?\n/);
-        for(var i=1;i<lines.length;i++){
-          if(lines[i].trim()) rows.push(lines[i]);
-        }
-      });
-      fullText = header + '\n' + rows.join('\n');
-    }
-  } else if(bulkMode === 'multi' && bulkFiles.length > 0){
-    var header = bulkFiles[0].text.split(/\r?\n/)[0];
-    var rows = [];
-    bulkFiles.forEach(function(bf){
-      var lines = bf.text.split(/\r?\n/);
-      for(var i=1;i<lines.length;i++){
-        if(lines[i].trim()) rows.push(lines[i]);
-      }
-    });
-    fullText = header + '\n' + rows.join('\n');
-  }
-
-  if(fullText){
-    lastConsolidatedCSV = fullText;
-    
-    mcProcessCSV(fullText);
-    var mcNav = document.querySelector('[data-page="micuenta"] .nav-label');
-    if(mcNav) mcNav.innerHTML = ' Mi Cuenta <span style="color:var(--good);font-size:10px;">●</span>';
-    toast('✅ Reportes actualizados · 💰 Mi Cuenta actualizada');
-  }
+async function autoFeedMiCuenta(){
+ if(!mcSourceFiles.length)return;
+ try{
+  const headers=mcSourceFiles.map(f=>f.text.split(/\r?\n/)[0]);
+  if(!headers.every(h=>h===headers[0]))throw new Error('Los CSV tienen columnas distintas. Carga un consolidado completo en Mi cuenta.');
+  const full=headers[0]+'\n'+mcSourceFiles.map(f=>f.text.split(/\r?\n/).slice(1).filter(l=>l.trim()).join('\n')).join('\n');
+  await mcSaveCloud(full,mcSourceFiles.map(f=>f.name).join(', '));
+  toast('Mi cuenta guardada y sincronizada');
+ }catch(e){toast('Reportes de clientes guardados; Mi cuenta: '+e.message,'bad');}
 }
 
 function mcHandleDrop(e){
@@ -1877,12 +1837,10 @@ function mcLoadFile(fileList){
   if(!file) return;
   $('mcFileStatus').textContent='⏳ Analizando...';
   var reader=new FileReader();
-  reader.onload=function(ev){
+  reader.onload=async function(ev){
     try{
       var text=ev.target.result;
-      lastConsolidatedCSV=text;
-      
-      mcProcessCSV(text);
+      await mcSaveCloud(text,file.name);
       $('mcFileStatus').textContent='✅ '+file.name+' cargado correctamente';
       $('mcFileInput').value='';
     }catch(err){
@@ -1896,46 +1854,10 @@ function mcLoadFile(fileList){
 }
 
 function mcProcessCSV(text){
-  var sep=detectSepA(text);
-  var lines=text.split(/\r?\n/).filter(function(l){return l.trim();});
-  if(lines.length<2) return;
-  var h=smartSplitA(lines[0],sep).map(function(x){return x.toLowerCase().replace(/\s+/g,'');});
-  var iR=-1; ['reason','tipo','type'].forEach(function(n){if(iR<0)iR=h.indexOf(n);});
-  var iA=['amount','monto','importe'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
-  var iT=['time','fecha','date','datetime'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
-  var iInv=['investorname','investor','inversor','name','usuario'].reduce(function(f,n){return f>=0?f:h.indexOf(n);},-1);
-  function normStr(s){ return (s||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim(); }
-  var mgrNorm=normStr(MANAGER_CSV_NAME);
-  var totalPerf=0,totalMgmt=0,totalDep=0,totalWith=0;
-  var monthly={};
-
-  for(var i=1;i<lines.length;i++){
-    var cols=smartSplitA(lines[i],sep);
-    if(cols.length<3) continue;
-    var reason=(iR>=0?(cols[iR]||''):'').toLowerCase().trim();
-    var amount=iA>=0?parseNumA(cols[iA]):0;
-    var time=iT>=0?parseDateA(cols[iT]):null;
-    if(!time) continue;
-    var mk=time.getFullYear()+'-'+String(time.getMonth()+1).padStart(2,'0');
-    if(!monthly[mk]) monthly[mk]={perf:0,mgmt:0,dep:0,with:0};
-
-    if(reason==='performancefee'||reason==='performance fee'){
-      var v=Math.abs(amount); totalPerf+=v; monthly[mk].perf+=v;
-    } else if(reason==='managementfee'||reason==='management fee'){
-      var v=Math.abs(amount); totalMgmt+=v; monthly[mk].mgmt+=v;
-    } else if(reason==='depositfee'||reason==='deposit fee'){
-      var v=Math.abs(amount); totalDep+=v; monthly[mk].dep+=v;
-    } else if(reason==='withdrawal'||reason==='retiro'){
-      // Only count withdrawals that belong to the manager
-      var rowInv=iInv>=0?normStr(cols[iInv]):'';
-      var isMgr=(rowInv===mgrNorm)||(rowInv.length>3&&mgrNorm.indexOf(rowInv)>=0)||(mgrNorm.length>3&&rowInv.indexOf(mgrNorm)>=0);
-      if(isMgr){ var v=Math.abs(amount); totalWith+=v; monthly[mk].with+=v; }
-    }
-  }
-
-  var totalFees=totalPerf+totalMgmt+totalDep;
-  var balance=totalFees-totalWith;
-  var monthKeys=Object.keys(monthly).sort();
+  const result=mcCalculate(text);
+  const {totalPerf,totalMgmt,totalDep,totalWith,monthly,totalFees,balance,monthKeys}=result;
+  $('mcBalanceLabel').textContent=result.actual?'Saldo de comisiones calculado':'Comisiones menos retiros (estimado)';
+  $('mcMethod').textContent=result.actual?'Comisiones abonadas en las filas del gestor menos sus retiros. Este cálculo no incluye otros movimientos ni sustituye el balance del broker.':'Estimación basada en cargos a inversores: el CSV no contiene abonos de comisiones al gestor. No confirma saldo disponible. Retiros del gestor: '+(result.managerFound?'identificados.':'no identificados en este archivo.');
 
   // Update KPIs
   var fmt=function(n){return(isFinite(n)?n:0).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2});};
@@ -2423,5 +2345,5 @@ function drawDetChart(stats){
  </div>
  <iframe id="replicaFrame" title="Dashboard del inversor en solo lectura" src="about:blank" style="display:block;width:100%;height:calc(100% - 64px);border:0;" sandbox="allow-scripts allow-same-origin" referrerpolicy="same-origin"></iframe>
 </div>
-</body>
+<script src="admin-account.js?v=20261003-sync1"></script></body>
 </html>
