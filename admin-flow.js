@@ -41,6 +41,12 @@ function rcRequestCard(r,admission){
  const title=document.createElement('h4');title.textContent=r.nombre||r.cliente_id;header.append(title);
  const badge=document.createElement('span');badge.className='request-status';badge.textContent=r.estado;header.append(badge);card.append(header);
  const info=document.createElement('p');info.textContent=admission?[r.email,r.whatsapp,r.pais].filter(Boolean).join(' · '):[r.tipo,r.email,r.referencia].filter(Boolean).join(' · ');card.append(info);
+ if(r.manual_access){
+  const origin=document.createElement('p');origin.textContent='Acceso autorizado · Invitación manual';card.append(origin);
+  const receipt=contractReceipts.get(r.auth_user_id);
+  const terms=document.createElement('p');terms.textContent=contractReceiptsError?'Contrato: no se pudo consultar su estado':receipt?'Contrato aceptado: '+fmtDate(receipt.accepted_at):'Contrato pendiente de aceptación';card.append(terms);
+  return card;
+ }
  const value=document.createElement('p');value.textContent=(admission?'Capital indicado: ':'Monto solicitado: ')+Number(admission?r.capital_inicial:r.monto).toLocaleString('es-PA',{style:'currency',currency:'USD'});card.append(value);
  const date=document.createElement('p');date.textContent='Recibida: '+fmtDate(r.created_at);card.append(date);
  if(r.estado==='pendiente'){
@@ -62,9 +68,18 @@ function rcRequestCard(r,admission){
  }
  return card;
 }
+function rcApprovedAdmissions(requests,clients){
+ const email=x=>String(x||'').trim().toLowerCase();
+ const approved=requests.filter(r=>r.estado==='aprobada');
+ const extras=clients.filter(c=>c.auth_user_id&&!approved.some(r=>r.invited_user_id===c.auth_user_id||(email(c.email)&&email(r.email)===email(c.email)))).map(c=>({
+  id:'cliente-'+c.id,nombre:c.nombre,email:c.email,estado:'aprobada',manual_access:true,auth_user_id:c.auth_user_id
+ }));
+ return requests.concat(extras);
+}
 function rcRenderRequests(){
- for(const state of ['pendiente','aprobada','rechazada'])$('reqCount-'+state).textContent='('+rcIngresos.concat(rcMovimientos).filter(r=>r.estado===state).length+')';
- for(const [id,rows,admission]of [['ingresosList',rcIngresos,true],['movimientosList',rcMovimientos,false]]){
+ const admissions=rcApprovedAdmissions(rcIngresos,clientesCache);
+ for(const state of ['pendiente','aprobada','rechazada'])$('reqCount-'+state).textContent='('+admissions.concat(rcMovimientos).filter(r=>r.estado===state).length+')';
+ for(const [id,rows,admission]of [['ingresosList',admissions,true],['movimientosList',rcMovimientos,false]]){
   const el=$(id);el.replaceChildren();const filtered=rows.filter(r=>r.estado===rcRequestState);
   if(!filtered.length){const empty=document.createElement('div');empty.className='request-empty';empty.textContent='Sin solicitudes '+({pendiente:'pendientes',aprobada:'aprobadas',rechazada:'rechazadas'}[rcRequestState])+'.';el.append(empty);}
   else filtered.forEach(r=>el.append(rcRequestCard(r,admission)));

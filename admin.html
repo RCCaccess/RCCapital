@@ -359,7 +359,7 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
 
       <!-- DASHBOARD -->
       <div class="page" id="page-ingresos">
- <div class="requests-head"><div><div class="page-title">Solicitudes</div><p class="page-sub">Revisa ingresos y movimientos. El historial se conserva por estado.</p></div><button class="btn" onclick="loadIngresos()">↻ Actualizar</button></div>
+ <div class="requests-head"><div><div class="page-title">Solicitudes</div><p class="page-sub">Revisa ingresos y movimientos. Incluye solicitudes e invitaciones manuales, organizadas por estado.</p></div><button class="btn" onclick="loadIngresos()">↻ Actualizar</button></div>
  <div class="request-tabs" role="tablist" aria-label="Estado de solicitudes">
   <button class="btn active" role="tab" aria-selected="true" data-request-state="pendiente" onclick="rcSetRequestState('pendiente')">Pendientes <span id="reqCount-pendiente"></span></button>
   <button class="btn" role="tab" aria-selected="false" data-request-state="aprobada" onclick="rcSetRequestState('aprobada')">Aprobadas <span id="reqCount-aprobada"></span></button>
@@ -802,6 +802,7 @@ async function loadClientes(){
   contractMailJobs=new Map((jobs||[]).map(j=>[j.user_id,j]));
   renderClientesTable();
   renderClientesSelect();
+  rcRenderRequests();
   $('clienteCount').textContent = clientesCache.length;
   }finally{clientsLoading=false;}
 }
@@ -2329,7 +2330,7 @@ function drawDetChart(stats){
   </div>
 </div>
 
-<script src="admin-flow.js?v=20261003-ui1"></script><div id="modalReplica" hidden style="position:fixed;inset:0;z-index:2000;background:#07080b;">
+<script src="admin-flow.js?v=20261003-approved2"></script><div id="modalReplica" hidden style="position:fixed;inset:0;z-index:2000;background:#07080b;">
  <div style="height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;background:#101c2c;color:#f3f5f8;">
   <button class="btn" onclick="closeReplica()" style="flex-shrink:0;">← Volver</button>
   <span id="replicaNombre" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
