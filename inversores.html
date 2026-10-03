@@ -1659,7 +1659,9 @@ const W3F_KEY = '';   // ← pega aquí tu access key
 
 const SB_URL = RC_CONFIG.url;
 const SB_KEY = RC_CONFIG.anonKey;
-const db = supabase.createClient(SB_URL, SB_KEY);
+const rcPreviewMode=new URLSearchParams(location.search).has('admin_client');
+const rcPreviewStorage={getItem:key=>sessionStorage.getItem(key)||localStorage.getItem(key),setItem:(key,value)=>{(localStorage.getItem('rc-admin-remember')==='1'?localStorage:sessionStorage).setItem(key,value);},removeItem:key=>{sessionStorage.removeItem(key);localStorage.removeItem(key);}};
+const db = supabase.createClient(SB_URL, SB_KEY,rcPreviewMode?{auth:{storageKey:'rc-admin-auth-v1',storage:rcPreviewStorage,persistSession:true,detectSessionInUrl:false}}:{});
 
 const $  = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));

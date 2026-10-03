@@ -28,22 +28,79 @@ async function rcAdminAction(body){
  if(!data?.ok)throw new Error('La función no confirmó el envío.');
  return data;
 }
-async function loadIngresos(){
- await updateSolicitudesBadge();
- const el=$('ingresosList');if(!el)return;el.textContent='Cargando…';
- const {data,error}=await db.from('solicitudes_ingreso').select('*').order('created_at',{ascending:false});
- if(error){el.textContent='No se pudieron cargar las solicitudes. Instala la migración de Supabase.';return;}
- el.replaceChildren();if(!data.length)el.textContent='Todavía no hay solicitudes.';
- for(const r of data){const card=document.createElement('div');card.style.cssText='padding:20px;margin:12px 0;border:1px solid var(--border);border-radius:12px';
- const title=document.createElement('h3');title.textContent=r.nombre;card.append(title);
- const info=document.createElement('p');info.textContent=`${r.email} · ${r.whatsapp} · ${r.pais} · $${r.capital_inicial} · ${r.estado}`;card.append(info);
- if(r.estado==='pendiente')for(const [label,action] of [['Aprobar e invitar','approve'],['Rechazar','reject']]){const b=document.createElement('button');b.className='btn';b.textContent=label;b.onclick=async()=>{card.querySelectorAll('button').forEach(x=>x.disabled=true);try{await rcAdminAction({action,requestId:r.id});toast(action==='approve'?'Invitación enviada':'Solicitud rechazada');await loadIngresos();await loadClientes();}catch(e){toast(e.message,'bad');card.querySelectorAll('button').forEach(x=>x.disabled=false);}};card.append(b);}
- el.append(card);}
- const select=$('bindCliente');select.replaceChildren();for(const c of clientesCache){const op=document.createElement('option');op.value=c.id;op.textContent=c.nombre+' · '+(c.investment_id||'sin ID');select.append(op);}
- const {data:mov,error:me}=await db.from('solicitudes').select('*').order('created_at',{ascending:false});const m=$('movimientosList');m.replaceChildren();
- if(me){m.textContent='No se pudieron cargar los movimientos.';return;}if(!mov.length)m.textContent='Sin solicitudes de movimientos.';
- for(const r of mov){const row=document.createElement('div');row.style.padding='12px';const text=document.createElement('p');text.textContent=`${r.nombre||r.cliente_id} · ${r.tipo} · $${r.monto} · ${r.estado}`;row.append(text);
- if(r.estado==='pendiente')for(const state of ['aprobada','rechazada']){const b=document.createElement('button');b.className='btn';b.textContent=state==='aprobada'?'Marcar aprobada':'Rechazar';b.onclick=async()=>{b.disabled=true;const {error}=await db.from('solicitudes').update({estado:state}).eq('id',r.id).eq('estado','pendiente');if(error)toast(error.message,'bad');else await loadIngresos();b.disabled=false;};row.append(b);}m.append(row);}
+let rcRequestState='pendiente',rcIngresos=[],rcMovimientos=[],rcRequestsLoading=false;
+function rcSetRequestState(state){
+ if(!['pendiente','aprobada','rechazada'].includes(state))return;
+ rcRequestState=state;
+ document.querySelectorAll('[data-request-state]').forEach(b=>{const active=b.dataset.requestState===state;b.classList.toggle('active',active);b.setAttribute('aria-selected',String(active));});
+ rcRenderRequests();
 }
-async function bindBroker(){const id=$('bindInvestment').value.trim();if(!id){toast('Introduce InvestmentId','bad');return;}
- const {error}=await db.from('clientes').update({investment_id:id}).eq('id',$('bindCliente').value);if(error)toast(error.message,'bad');else{toast('Cuenta vinculada');await loadClientes();await loadIngresos();}}
+function rcRequestCard(r,admission){
+ const card=document.createElement('article');card.className='request-card';
+ const header=document.createElement('div');header.className='request-card-header';
+ const title=document.createElement('h4');title.textContent=r.nombre||r.cliente_id;header.append(title);
+ const badge=document.createElement('span');badge.className='request-status';badge.textContent=r.estado;header.append(badge);card.append(header);
+ const info=document.createElement('p');info.textContent=admission?[r.email,r.whatsapp,r.pais].filter(Boolean).join(' · '):[r.tipo,r.email,r.referencia].filter(Boolean).join(' · ');card.append(info);
+ const value=document.createElement('p');value.textContent=(admission?'Capital indicado: ':'Monto solicitado: ')+Number(admission?r.capital_inicial:r.monto).toLocaleString('es-PA',{style:'currency',currency:'USD'});card.append(value);
+ const date=document.createElement('p');date.textContent='Recibida: '+fmtDate(r.created_at);card.append(date);
+ if(r.estado==='pendiente'){
+  const actions=document.createElement('div');actions.className='request-actions';
+  for(const state of ['aprobada','rechazada']){
+   const b=document.createElement('button');b.className='btn';b.textContent=state==='aprobada'?(admission?'Aprobar e invitar':'Marcar aprobada'):'Rechazar';
+   b.onclick=async()=>{
+    actions.querySelectorAll('button').forEach(x=>x.disabled=true);
+    try{
+     if(admission){await rcAdminAction({action:state==='aprobada'?'approve':'reject',requestId:r.id});}
+     else{const {data,error}=await db.from('solicitudes').update({estado:state}).eq('id',r.id).eq('estado','pendiente').select('id');if(error)throw error;if(!data?.length)throw new Error('Esta solicitud ya cambió. Actualiza el listado.');}
+     toast(admission&&state==='aprobada'?'Correo de acceso solicitado':'Estado actualizado');
+     await loadClientes();await loadIngresos();
+    }catch(e){toast(e.message,'bad');actions.querySelectorAll('button').forEach(x=>x.disabled=false);}
+   };
+   actions.append(b);
+  }
+  card.append(actions);
+ }
+ return card;
+}
+function rcRenderRequests(){
+ for(const state of ['pendiente','aprobada','rechazada'])$('reqCount-'+state).textContent='('+rcIngresos.concat(rcMovimientos).filter(r=>r.estado===state).length+')';
+ for(const [id,rows,admission]of [['ingresosList',rcIngresos,true],['movimientosList',rcMovimientos,false]]){
+  const el=$(id);el.replaceChildren();const filtered=rows.filter(r=>r.estado===rcRequestState);
+  if(!filtered.length){const empty=document.createElement('div');empty.className='request-empty';empty.textContent='Sin solicitudes '+({pendiente:'pendientes',aprobada:'aprobadas',rechazada:'rechazadas'}[rcRequestState])+'.';el.append(empty);}
+  else filtered.forEach(r=>el.append(rcRequestCard(r,admission)));
+ }
+}
+function rcSelectBrokerClient(){
+ const cli=clientesCache.find(c=>c.id===$('bindCliente').value);
+ $('bindInvestment').value=cli?.investment_id||'';
+ $('bindCurrent').textContent=cli?(cli.investment_id?'ID actual: '+cli.investment_id+' · Puedes corregirlo y guardar.':'Este inversor todavía no tiene un ID del broker.'):'Selecciona un inversor.';
+}
+async function loadIngresos(){
+ if(rcRequestsLoading)return;rcRequestsLoading=true;
+ try{
+  await updateSolicitudesBadge();
+  const results=await Promise.all([db.from('solicitudes_ingreso').select('*').order('created_at',{ascending:false}),db.from('solicitudes').select('*').order('created_at',{ascending:false})]);
+  if(results.some(r=>r.error))throw new Error('No se pudieron actualizar las solicitudes.');
+  rcIngresos=results[0].data||[];rcMovimientos=results[1].data||[];rcRenderRequests();
+  const select=$('bindCliente'),selected=select.value;select.replaceChildren();
+  const first=document.createElement('option');first.value='';first.textContent='Selecciona un inversor';select.append(first);
+  for(const c of clientesCache){const op=document.createElement('option');op.value=c.id;op.textContent=c.nombre+' · '+(c.investment_id||'sin ID');select.append(op);}
+  select.value=selected;rcSelectBrokerClient();
+ }catch(e){toast(e.message,'bad');}finally{rcRequestsLoading=false;}
+}
+async function bindBroker(){
+ const clientId=$('bindCliente').value,id=$('bindInvestment').value.trim();
+ if(!clientId){toast('Selecciona un inversor','bad');return;}
+ if(!/^\d+$/.test(id)){toast('Introduce el InvestmentId numérico del broker','bad');return;}
+ const cli=clientesCache.find(c=>c.id===clientId);
+ if(clientesCache.some(c=>c.id!==clientId&&c.investment_id===id)){toast('Ese ID ya pertenece a otro cliente','bad');return;}
+ if(String(cli?.investment_id||'')===id){toast('El ID ya está guardado');return;}
+ const b=$('bindSave');b.disabled=true;
+ try{
+  const {data,error}=await db.from('clientes').update({investment_id:id}).eq('id',clientId).select('id');
+  if(error)throw error;if(!data?.length)throw new Error('No se confirmó el cambio del ID.');
+  toast('ID del broker actualizado');await loadClientes();await loadIngresos();
+ }catch(e){toast(e.code==='23505'?'Ese ID ya está vinculado a otro cliente':e.message,'bad');}finally{b.disabled=false;}
+}
+
+function rcEditBroker(clientId){showPage('ingresos');$('bindCliente').value=clientId;rcSelectBrokerClient();$('bindInvestment').focus();$('bindInvestment').scrollIntoView({block:'center',behavior:'smooth'});}

@@ -292,6 +292,7 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
 }
 @media(max-width:360px){.content{padding-left:14px;padding-right:14px}.stats-row{grid-template-columns:minmax(0,1fr)!important}}
 @media(prefers-reduced-motion:reduce){.sidebar{transition:none!important}}
+.requests-head{display:flex;justify-content:space-between;align-items:start;gap:16px;flex-wrap:wrap}.request-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}.request-tabs .active{background:#23639e;color:#fff;border-color:#23639e}.request-section{margin:28px 0}.request-section h3{margin-bottom:14px}.request-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.request-card{padding:20px;border:1px solid var(--border);background:#fff;border-radius:16px;min-width:0;box-shadow:0 2px 8px #10203908}.request-card h4{font-size:16px;margin:0}.request-card-header{display:flex;justify-content:space-between;gap:10px;align-items:start}.request-status{font-size:11px;padding:5px 8px;border-radius:20px;background:#edf2f7;color:#35516e}.request-card p{font-size:13px;line-height:1.6;margin:10px 0;color:var(--muted);overflow-wrap:anywhere}.request-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.request-note{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 0}.bind-grid{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}.bind-grid label{font-size:12px;color:var(--muted)}.bind-grid select,.bind-grid input{width:100%;padding:12px;margin-top:8px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text);font-size:16px;min-width:0}.bind-grid button{min-height:46px}.request-empty{grid-column:1/-1;padding:24px;border:1px dashed var(--border);border-radius:14px;color:var(--muted);font-size:13px}@media(max-width:760px){.request-grid,.bind-grid{grid-template-columns:1fr}.request-card{padding:16px}.bind-grid button{width:100%}}
 </style>
 <script src="config.js"></script></head>
 <body>
@@ -312,6 +313,7 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
       <label>Contraseña</label>
       <input type="password" id="adminPass" placeholder="••••••••" autocomplete="current-password"/>
     </div>
+    <label style="display:flex;align-items:center;gap:10px;margin:16px 0;font-size:13px;cursor:pointer;"><input type="checkbox" id="rememberAdmin" style="width:18px;height:18px;"/> Recordar mi sesión en este dispositivo</label><p style="font-size:11px;color:var(--muted);margin-bottom:16px;">Sin marcar, la sesión se conserva solo en esta pestaña.</p>
     <button class="btn-primary" id="loginBtn" onclick="login()">Entrar al panel</button>
     <div id="loginErr"></div>
   </div>
@@ -344,11 +346,6 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
         </button>
       </div>
       <div class="sidebar-bottom">
-        <div class="theme-row">
-          <span>🌙</span>
-          <button class="th-admin-pill" id="adminThemePill" onclick="toggleAdminTheme()"><div class="pill-knob"></div></button>
-          <span>☀️</span>
-        </div>
         <button class="logout-btn" onclick="logout()"><span>🚪</span><span> Cerrar sesión</span></button>
       </div>
     </div>
@@ -361,7 +358,18 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
       </header>
 
       <!-- DASHBOARD -->
-      <div class="page" id="page-ingresos"><h2>Solicitudes de ingreso</h2><button class="btn" onclick="loadIngresos()">Actualizar</button><div id="ingresosList"></div><h2>Depósitos y retiros</h2><div id="movimientosList"></div><h2>Vincular cuenta del broker</h2><select id="bindCliente"></select><input id="bindInvestment" placeholder="InvestmentId"/><button class="btn" onclick="bindBroker()">Guardar vínculo</button></div><div class="page active" id="page-dashboard">
+      <div class="page" id="page-ingresos">
+ <div class="requests-head"><div><div class="page-title">Solicitudes</div><p class="page-sub">Revisa ingresos y movimientos. El historial se conserva por estado.</p></div><button class="btn" onclick="loadIngresos()">↻ Actualizar</button></div>
+ <div class="request-tabs" role="tablist" aria-label="Estado de solicitudes">
+  <button class="btn active" role="tab" aria-selected="true" data-request-state="pendiente" onclick="rcSetRequestState('pendiente')">Pendientes <span id="reqCount-pendiente"></span></button>
+  <button class="btn" role="tab" aria-selected="false" data-request-state="aprobada" onclick="rcSetRequestState('aprobada')">Aprobadas <span id="reqCount-aprobada"></span></button>
+  <button class="btn" role="tab" aria-selected="false" data-request-state="rechazada" onclick="rcSetRequestState('rechazada')">Rechazadas <span id="reqCount-rechazada"></span></button>
+ </div>
+ <section class="request-section"><h3>Solicitudes de ingreso</h3><div id="ingresosList" class="request-grid" aria-live="polite"></div></section>
+ <section class="request-section"><h3>Depósitos y retiros</h3><p class="request-note">Marcar una solicitud como aprobada registra su estado aquí; no ejecuta el movimiento en el broker.</p><div id="movimientosList" class="request-grid" aria-live="polite"></div></section>
+ <section class="card request-binding"><div class="card-hd"><h3>Cuenta del broker</h3></div><div class="card-bd"><p class="request-note">Vincula o corrige el InvestmentId utilizado para asignar los CSV. Este ID es distinto del usuario de Supabase.</p>
+ <div class="bind-grid"><label>Inversor<select id="bindCliente" onchange="rcSelectBrokerClient()"></select></label><label>InvestmentId<input id="bindInvestment" placeholder="ID del broker" autocomplete="off"/></label><button id="bindSave" class="btn-primary" onclick="bindBroker()">Guardar ID</button></div><p id="bindCurrent" class="request-note" role="status"></p></div></section>
+</div><div class="page active" id="page-dashboard">
         <div class="page-title">Dashboard</div>
         <div class="page-sub">Panorama general del fondo</div>
 
@@ -682,6 +690,7 @@ html,body{width:100%;min-width:0}.layout{width:100%;min-width:0}.content{min-wid
 
 
 
+<script src="admin-session.js?v=20261003-ui1"></script>
 <script>
 
 
@@ -692,23 +701,11 @@ const SUPABASE_KEY = RC_CONFIG.anonKey;
 // Admin credentials — cambia esto
 
 
-// ── THEME ──
-(function(){
-  var t = localStorage.getItem('rcAdminTheme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-})();
-function toggleAdminTheme(){
-  var t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  try{ localStorage.setItem('rcAdminTheme', t); }catch(e){}
-  var pill = document.getElementById('adminThemePill');
-  if(pill) pill.classList.toggle('pill-on', t === 'light');
-}
-
-
+document.documentElement.setAttribute('data-theme','light');
 
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_KEY,{auth:{storageKey:'rc-admin-auth-v1',storage:window.rcAdminAuthStorage,persistSession:true,detectSessionInUrl:false}});
+document.getElementById('rememberAdmin').checked=window.rcRememberAdmin;
 
 // ── HELPERS ───────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -738,6 +735,7 @@ async function adminAllowed(){
 }
 async function login(){
  const btn=$('loginBtn'), err=$('loginErr'); btn.disabled=true; err.style.display='none';
+ rcChooseAdminSession($('rememberAdmin').checked);
  try{ const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value.trim(),password:$('adminPass').value});
  if(error) throw error; await adminAllowed(); showApp(); }
  catch(e){await db.auth.signOut(); err.textContent=e.message;err.style.display='block';}
@@ -779,13 +777,6 @@ function showPage(name, el){
 
 
 // ── LOAD ALL DATA ────────────────────────────────────────────────
-// Init theme pill state
-(function(){
-  var t = localStorage.getItem('rcAdminTheme') || 'dark';
-  var pill = document.getElementById('adminThemePill');
-  if(pill && t === 'light') pill.classList.add('pill-on');
-})();
-
 async function loadAll(){
   await loadClientes();
   await loadReportes();
@@ -1130,11 +1121,12 @@ function renderClientesTable(){
       '<td style="padding:14px 16px;">'+rcContractStatus(raw)+'</td>' +
       // Actions
       '<td style="padding:14px 8px;text-align:center;">' +
-        '<div style="display:flex;gap:4px;justify-content:center;">' +
+        '<div style="display:flex;gap:6px;justify-content:center;flex-wrap:wrap;">' +
           '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="reenviarAcceso(this.dataset.cid,this.dataset.cnm)" ' +
-            'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Acceso</button>' +
+            'style="padding:5px 10px;border-radius:6px;background:linear-gradient(180deg,#2C74B4,#1D5488);color:#fff;border:none;font-size:11px;cursor:pointer;box-shadow:0 2px 8px rgba(35,99,158,.3);">Enviar acceso</button>' +
+          '<button data-cid="'+c.id+'" onclick="rcEditBroker(this.dataset.cid)" style="padding:5px 10px;border-radius:6px;background:#fff;color:#23639e;border:1px solid #cbd8e5;font-size:11px;cursor:pointer;">Editar ID</button>' +
           '<button data-cid="'+c.id+'" data-cnm="'+c.nombre.replace(/"/g,'&quot;')+'" onclick="confirmDelete(this.dataset.cid,this.dataset.cnm)" ' +
-            'style="padding:5px 10px;border-radius:6px;background:#fff;color:#C8483C;border:1px solid #EDCFCC;font-size:11px;cursor:pointer;">Borrar</button>' +
+            'style="padding:5px 10px;border-radius:6px;background:#fff;color:#C8483C;border:1px solid #EDCFCC;font-size:11px;cursor:pointer;">Eliminar cliente</button>' +
         '</div>' +
       '</td>';
 
@@ -2337,7 +2329,7 @@ function drawDetChart(stats){
   </div>
 </div>
 
-<script src="admin-flow.js?v=20261001-mobile-admin"></script><div id="modalReplica" hidden style="position:fixed;inset:0;z-index:2000;background:#07080b;">
+<script src="admin-flow.js?v=20261003-ui1"></script><div id="modalReplica" hidden style="position:fixed;inset:0;z-index:2000;background:#07080b;">
  <div style="height:64px;display:flex;align-items:center;gap:16px;padding:10px 16px;background:#101c2c;color:#f3f5f8;">
   <button class="btn" onclick="closeReplica()" style="flex-shrink:0;">← Volver</button>
   <span id="replicaNombre" style="font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
