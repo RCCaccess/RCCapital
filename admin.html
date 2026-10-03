@@ -2054,26 +2054,50 @@ function mcDrawChart(monthKeys, monthly){
 
 
 // ── CLIENT DETAIL MODAL ───────────────────────────────────────────
+var detRequestId=0;
+function resetDetalle(){
+  ['detROI','detEquity','detProfit','detDias','detBest','detPosM'].forEach(function(id){$(id).textContent='—';$(id).style.color='#5A6675';});
+  $('detPeriodo').textContent='Cargando reporte…';
+  $('detSub').textContent='Cargando…';
+  $('detDep').textContent='';
+  $('detTableBody').innerHTML='';
+  var canvas=$('detChart');canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  canvas.hidden=true;canvas.style.display='none';
+  $('detChartStatus').textContent='Cargando reporte…';$('detChartStatus').hidden=false;
+}
 function closeDetalle(){
+  detRequestId++;
   $('modalDetalle').style.display='none';
   document.body.style.overflow='';
 }
 
 async function openDetalle(clienteId, nombre){
   $('detNombre').textContent = nombre;
-  $('detROI').textContent = '—'; $('detEquity').textContent = '—';
-  $('detSub').textContent = 'Cargando...'; $('detDep').textContent = '';
-  $('detTableBody').innerHTML = '';
+  var requestId=++detRequestId;
+  resetDetalle();
   var page = $('modalDetalle');
   page.style.display = 'block';
   page.scrollTop = 0;
   document.body.style.overflow = 'hidden';
 
   // Load latest report from Supabase
-  var res = await db.from('reportes').select('csv_data,mes,created_at')
-    .eq('cliente_id', clienteId).order('mes',{ascending:false}).limit(1).single();
-  if(!res.data || !res.data.csv_data){
-    $('detPeriodo').textContent = 'Sin reportes disponibles';
+  var res;
+  try{
+    res=await db.from('reportes').select('csv_data,mes,created_at')
+      .eq('cliente_id',clienteId).order('mes',{ascending:false}).limit(1).maybeSingle();
+    if(requestId!==detRequestId)return;
+    if(res.error)throw res.error;
+  }catch(e){
+    if(requestId!==detRequestId)return;
+    $('detPeriodo').textContent='No se pudo cargar el reporte';
+    $('detSub').textContent='Vuelve a abrir esta cuenta para reintentar.';
+    $('detChartStatus').textContent='Datos no disponibles.';
+    return;
+  }
+  if(!res.data||!res.data.csv_data){
+    $('detPeriodo').textContent='Sin reportes disponibles';
+    $('detSub').textContent='Pendiente de cargar reporte';
+    $('detChartStatus').textContent='La evolución aparecerá al cargar un reporte de esta cuenta.';
     return;
   }
 
@@ -2086,7 +2110,10 @@ async function openDetalle(clienteId, nombre){
     var stats = computeStatsdet(rows);
     renderDetalle(stats, nombre);
   }catch(e){
+    resetDetalle();
     $('detPeriodo').textContent = 'Error procesando datos: '+e.message;
+    $('detSub').textContent='No se pudo interpretar el reporte.';
+    $('detChartStatus').textContent='Sin datos válidos para graficar.';
   }
 }
 
@@ -2217,7 +2244,12 @@ function renderDetalle(stats, nombre){
   $('detPosM').textContent=stats.posM+' / '+stats.me.length;
 
   // Draw equity chart
-  if(stats.es.length>1) drawDetChart(stats);
+  if(stats.es.length>1){
+    $('detChart').hidden=false;$('detChart').style.display='block';
+    $('detChartStatus').hidden=true;drawDetChart(stats);
+  }else{
+    $('detChartStatus').textContent='La evolución aparecerá cuando haya datos de más de un día.';
+  }
 
   // Table
   var tbody=$('detTableBody'); tbody.innerHTML='';
@@ -2391,6 +2423,7 @@ function drawDetChart(stats){
     <div style="margin-bottom:20px;">
       <div style="font-size:15px;font-weight:700;letter-spacing:-.2px;color:#0E1620;margin-bottom:12px;">Evolución del Capital</div>
       <div style="background:#fff;border:1px solid #D6DDE6;border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(20,22,27,.07);">
+        <p id="detChartStatus" role="status" style="color:#5A6675;font-size:13px;line-height:1.6;margin:0;" hidden></p>
         <canvas id="detChart" style="display:block;width:100%;height:240px;"></canvas>
       </div>
     </div>
